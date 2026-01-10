@@ -1,0 +1,51 @@
+/* Waiting Page */
+
+.waiting-page {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.waiting-container {
+  text-align: center;
+  color: white;
+}
+
+.pulse {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 0 auto 30px;
+  animation: pulse-animation 2s ease-in-out infinite;
+}
+
+.pulse.active {
+  animation: pulse-animation 2s ease-in-out 0s;
+}
+
+@keyframes pulse-animation {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 30px rgba(255, 255, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+}
+
+.waiting-page h1 {
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.user-info {
+  font-size: 16px;
+  opacity: 0.9;
+}
+
+.connecting-text {
+  margin-top: 20px;
+  font-size: 14px;
+  opacity: 0.8;
+}

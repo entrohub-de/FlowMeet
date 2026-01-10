@@ -1,210 +1,339 @@
 # FlowMeet
-FlowMeet helps you run smooth, human-friendly networking events — without over-hosting.
 
-https://github.com/entrohub-de/FlowMeet.git
+**FlowMeet helps you run smooth, human-friendly networking events — without over-hosting.**
 
-# Networking 活动系统 · 技术设计文档（MVP）
+一个专业的线下 Networking 活动管理系统，通过自动配对、节奏控制和弱网可恢复技术，降低主持人操作成本。
 
-> 面向 AI Coder / 工程实现
->
-> 目标：在 50–200 人线下 networking 活动中，实现自动配对 + 节奏控制 + 弱网可恢复，并将主持人操作成本降到最低。
+🌐 **GitHub**: https://github.com/entrohub-de/FlowMeet.git
 
 ---
 
-## 0. 文档目的
+## 📋 快速开始
 
-本系统用于线下 Networking 活动，通过技术手段分担主持人的组织、配对与节奏控制工作。
+### 系统要求
 
-本技术文档用于：
+- **后端**：Python 3.8+
+- **前端**：Node.js 18+ 和 npm/yarn
+- **数据库**：PostgreSQL 12+（可选，开发用 SQLite）
+- **缓存**：Redis 6+（可选，开发用内存）
 
-* 约束系统架构与状态机
-* 指导 AI Coder / 工程同事实现
-* 明确 MVP 边界（避免功能膨胀）
-
----
-
-## 1. 总体设计原则（必须遵守）
-
-### 1.1 产品原则
-
-* UI 是流程遥控器，不是社交产品
-* 参与者无需学习、无需决策
-* 主持人一屏可控全局
-* 系统驱动流程，用户不做导航决策
-
-### 1.2 技术原则
-
-* 事件驱动（Event-driven）
-* 后端是真相源（Single Source of Truth）
-* 弱网可用、可恢复
-* 允许连接断开，但必须可恢复
-
----
-
-## 2. 系统总体架构（MVP）
+### 项目结构
 
 ```
-Web Client
- ├─ Participant Web（手机）
- ├─ Host Console（Pad / PC）
- └─ Optional Display（大屏）
-
-Backend（单体优先）
- ├─ REST API
- ├─ Realtime Push（SSE / WebSocket）
- ├─ Session Orchestrator（流程引擎）
- ├─ Matching Engine（配对）
- ├─ Presence Service（在线状态）
- └─ Feedback Service
-
-Data Layer
- ├─ PostgreSQL（主数据）
- └─ Redis（临时状态 / 在线 / 计时）
+FlowMeet/
+├── backend/              # FastAPI 后端
+│   ├── src/
+│   │   ├── main.py
+│   │   ├── config.py
+│   │   ├── types/
+│   │   ├── services/
+│   │   └── routes/
+│   ├── requirements.txt
+│   └── .env.example
+├── frontend/             # React 前端
+│   ├── src/
+│   ├── package.json
+│   └── vite.config.js
+└── README.md
 ```
 
 ---
 
-## 3. 通信模型
+## 🚀 启动指南
 
-### 3.1 是否必须长连接
+### 1️⃣ 后端启动
 
-* 不强制 WebSocket
-* 必须支持服务端主动推送
+#### 第一步：安装依赖
 
-### 3.2 推荐方案（MVP）
-
-* SSE（Server-Sent Events）作为主推送通道
-* REST 用于 check-in、feedback、状态兜底
-
----
-
-## 4. 状态机设计
-
-### 4.1 参与者 UI 状态机
-
-```
-CHECKIN → WAITING → MATCHED → ENDING → FEEDBACK → WAITING
+```bash
+cd backend
+pip install -r requirements.txt
 ```
 
-特殊状态：
+#### 第二步：配置环境
 
+```bash
+# 复制配置模板
+cp .env.example .env
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+
+# 编辑 .env 文件
+# 重要配置项：
+# - DATABASE_URL: PostgreSQL 连接（开发可用 SQLite）
+# - REDIS_URL: Redis 连接
+# - HOST: 服务器地址（默认 0.0.0.0）
+# - PORT: 服务器端口（默认 8000）
 ```
-ANY → PAUSED → 回到原状态
+
+**最小化配置示例**（开发环境）：
+
+```bash
+# .env
+DATABASE_URL=sqlite:///./flowmeet.db
+REDIS_URL=memory://
+HOST=0.0.0.0
+PORT=8000
+DEBUG=True
 ```
 
-### 4.2 后端下发字段
+#### 第三步：启动服务器
 
-* ui_state
-* round_id
-* match_partner
-* ends_at（绝对时间戳）
+```bash
+# 开发模式
+python -m src.main
 
----
+# 或使用 uvicorn 直接运行
+uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+```
 
-## 5. 倒计时设计
-
-* 后端不推秒级倒计时
-* 只下发 ends_at
-* 客户端本地计算
-
----
-
-## 6. Realtime 事件协议
-
-### 后端 → 客户端
-
-* EVENT_STATUS_CHANGED
-* ROUND_STARTED
-* MATCH_ASSIGNED
-* ROUND_ENDING_SOON
-* ROUND_ENDED
-* RECOVER_STATE
-
-### 客户端 → 后端
-
-* CHECKIN_SUBMIT
-* FEEDBACK_SUBMIT
+✅ **服务器启动成功**：
+- API 文档：http://localhost:8000/docs
+- 健康检查：http://localhost:8000/health
 
 ---
 
-## 7. 耗电与性能约束
+### 2️⃣ 前端启动
 
-禁止：
+#### 第一步：安装依赖
 
-* 每秒推送
-* 高频心跳
-* 大 payload
+```bash
+cd frontend
+npm install
+```
 
-推荐：
+#### 第二步：启动开发服务器
 
-* 仅状态变化推送
-* 心跳 ≥ 15s
-* visibilitychange 控制刷新
+```bash
+npm run dev
+```
 
----
+✅ **前端启动成功**：
+- 本地开发：http://localhost:3000
+- 自动代理到后端 API：`/api/*` → `http://localhost:8000/api/*`
 
-## 8. Matching Engine（v1）
+#### 第三步：打包生产
 
-硬约束：
-
-* 本轮不重复
-* 最近 N 轮尽量不重复
-* 尽量避免奇数落单
-
-实现要求：
-
-* 贪心即可
-* < 1s 完成
+```bash
+npm run build      # 生成 dist 目录
+npm run preview    # 预览生产版本
+```
 
 ---
 
-## 9. Presence
+## 🏗️ 完整启动示例
 
-* Redis 记录 last_seen
-* 超过 30s 视为 offline
+### 方案 A：分别启动（推荐开发）
+
+**终端 1 - 后端**
+```bash
+cd backend
+pip install -r requirements.txt
+cp .env.example .env
+python -m src.main
+# 输出: INFO:     Uvicorn running on http://0.0.0.0:8000
+```
+
+**终端 2 - 前端**
+```bash
+cd frontend
+npm install
+npm run dev
+# 输出: VITE v5.0.8  ready in 500 ms
+#       ➜  Local:   http://localhost:3000/
+```
+
+### 方案 B：Docker Compose（推荐生产）
+
+```yaml
+# docker-compose.yml（待实现）
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: flowmeet
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/flowmeet
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+```
 
 ---
 
-## 10. 主持人权限
+## 📖 使用说明
 
-* start / end round
-* pause / resume
-* force repair
+### 参与者流程（手机端）
 
-约束：
+1. **签到**：输入名字，系统生成参与者 ID
+2. **等待**：等待主持人开始轮次和配对
+3. **对话**：与配对的参与者进行 2 分钟对话
+4. **反馈**：提交对话反馈（1-5 星评分）
+5. **循环**：回到等待，进入下一轮
 
-* 所有操作写 HostAction
-* 仅 Orchestrator 可改状态
+### 主持人流程（Pad/PC）
 
----
-
-## 11. 部署建议
-
-* Frontend：CDN
-* Backend：容器服务
-* DB：托管 PostgreSQL
-* Cache：托管 Redis
-
----
-
-## 12. 明确不做
-
-* 私聊 / 聊天
-* 用户选人
-* 复杂资料页
-* 社交关系图
+1. **打开控制台**：访问 `http://localhost:3000?role=host`
+2. **监控参与者**：实时查看在线和签到人数
+3. **开始轮次**：设置时长（默认 120s），点击"开始轮次"
+   - 系统自动配对参与者
+   - 参与者收到配对信息
+4. **轮次控制**：
+   - **暂停**：冻结倒计时
+   - **恢复**：继续计时
+   - **结束**：参与者进入反馈
+5. **观察数据**：参与人数、在线状态、配对信息
 
 ---
 
-## 13. 成功标准
+## 🔧 API 端点速查
 
-* 主持人一次操作，全场同步
-* 掉线可恢复
-* 网络抖动不影响轮次
+### 参与者 API
+
+| 方法 | 端点 | 说明 |
+|------|------|------|
+| POST | `/api/participant/checkin` | 签到 |
+| GET | `/api/participant/state/{id}` | 获取状态 |
+| POST | `/api/participant/feedback` | 提交反馈 |
+| POST | `/api/participant/heartbeat` | 心跳 |
+
+### 主持人 API
+
+| 方法 | 端点 | 说明 |
+|------|------|------|
+| POST | `/api/host/round/start` | 开始轮次 |
+| POST | `/api/host/round/end` | 结束轮次 |
+| POST | `/api/host/round/pause` | 暂停轮次 |
+| POST | `/api/host/round/resume` | 恢复轮次 |
+| GET | `/api/host/event/{id}/status` | 事件状态 |
+| GET | `/api/host/event/{id}/participants` | 参与者列表 |
+
+### 实时 API
+
+| 方法 | 端点 | 说明 |
+|------|------|------|
+| GET | `/api/realtime/events/{client_id}` | SSE 事件流 |
 
 ---
 
-## 14. 技术总结
+## 🛠️ 故障排查
 
-这是一个事件驱动的流程控制系统，不是社交 App。
-优先级：状态机正确 > 可恢复实时 > 简单可靠 > 再谈优化。
+### 后端问题
+
+**问题**：`ModuleNotFoundError: No module named 'src'`
+```bash
+# 解决：在项目根目录运行或检查 Python 路径
+cd backend
+python -m src.main
+```
+
+**问题**：`Redis connection refused`
+```bash
+# 解决：启动 Redis（开发用内存存储替代）
+# Windows: redis-server
+# 或修改 .env: REDIS_URL=memory://
+```
+
+**问题**：`PostgreSQL connection error`
+```bash
+# 解决：使用 SQLite 替代（开发环境）
+# .env: DATABASE_URL=sqlite:///./flowmeet.db
+```
+
+### 前端问题
+
+**问题**：`Port 3000 already in use`
+```bash
+# 解决：改用其他端口
+npm run dev -- --port 3001
+```
+
+**问题**：`API 连接失败`
+```bash
+# 检查：后端是否正常运行
+curl http://localhost:8000/health
+# 应返回: {"status":"healthy","service":"FlowMeet API"}
+```
+
+---
+
+## 📚 技术文档
+
+- [后端架构文档](./backend/README.md) - 服务、状态机、API 设计
+- [前端架构文档](./frontend/README.md) - 组件、Hooks、状态管理
+- [技术设计文档](./README-Tech.md) - MVP 约束和系统设计
+
+---
+
+## ✨ 核心特性
+
+✅ **状态机驱动**：严格的参与者状态流转  
+✅ **自动配对**：贪心算法 + 历史记忆  
+✅ **实时推送**：SSE 轻量级推送（无 WebSocket）  
+✅ **弱网可恢复**：心跳检测 + 状态快照  
+✅ **主持人友好**：一屏全局控制  
+✅ **客户端倒计时**：避免服务端秒级推送  
+
+---
+
+## 🎯 开发路线图
+
+### ✅ MVP（已实现）
+- [x] 状态机设计
+- [x] 基础 API 框架
+- [x] 前端页面流程
+- [x] SSE 实时通信
+- [x] 配对引擎
+- [x] 在线状态管理
+
+### 📋 下一阶段
+- [ ] 数据库模型（SQLAlchemy ORM）
+- [ ] 身份认证（JWT）
+- [ ] 完整的错误处理
+- [ ] 单元和集成测试
+- [ ] Docker 容器化
+- [ ] 性能优化
+- [ ] WebSocket 支持（可选）
+
+---
+
+## 📝 许可证
+
+MIT License
+
+---
+
+## 🤝 贡献
+
+欢迎提交 Issue 和 Pull Request！
+
+---
+
+## 💬 问题反馈
+
+遇到问题？请查看：
+1. [后端 README](./backend/README.md#后续实现)
+2. [前端 README](./frontend/README.md#后续实现)
+3. [技术设计文档](./README-Tech.md)

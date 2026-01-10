@@ -1,0 +1,157 @@
+/* Host Console */
+
+.host-console {
+  background-color: var(--bg-color);
+  min-height: 100vh;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.console-header {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+
+.console-header h1 {
+  font-size: 24px;
+  margin-bottom: 5px;
+}
+
+.event-id {
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* Stats Section */
+
+.stats-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+/* Control Section */
+
+.control-section {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+}
+
+.control-section h2 {
+  margin-bottom: 16px;
+  font-size: 16px;
+}
+
+.duration-control {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.duration-control label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.duration-control input {
+  width: 80px;
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+
+.duration-control .button {
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+.active-round-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.round-status {
+  font-size: 14px;
+}
+
+.button-group {
+  display: flex;
+  gap: 8px;
+}
+
+.button-group .button {
+  flex: 1;
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+/* Participants Section */
+
+.participants-section {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.participants-section h2 {
+  margin-bottom: 16px;
+  font-size: 16px;
+}
+
+.participants-list table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.participants-list th {
+  background-color: var(--bg-color);
+  padding: 12px;
+  text-align: left;
+  font-weight: 500;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.participants-list td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.empty-message {
+  text-align: center;
+  color: #94a3b8;
+  padding: 20px;
+}

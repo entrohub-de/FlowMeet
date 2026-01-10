@@ -1,0 +1,95 @@
+/* Matched Page */
+
+.matched-page {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.matched-container {
+  background: white;
+  border-radius: 12px;
+  padding: 40px;
+  max-width: 500px;
+  box-shadow: var(--shadow-lg);
+}
+
+.countdown-section {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.countdown {
+  font-size: 48px;
+  font-weight: bold;
+  color: var(--primary-color);
+  font-family: 'Courier New', monospace;
+  line-height: 1.2;
+}
+
+.countdown.warning {
+  color: var(--danger-color);
+  animation: countdown-warning 0.5s ease-in-out infinite;
+}
+
+@keyframes countdown-warning {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.countdown-text {
+  font-size: 14px;
+  color: #64748b;
+  margin-top: 10px;
+}
+
+.match-info h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: var(--text-color);
+}
+
+.partner-label {
+  text-align: center;
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 15px;
+}
+
+.partner-card {
+  background: var(--bg-color);
+  border-radius: 8px;
+  padding: 30px;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.partner-avatar {
+  font-size: 48px;
+  margin-bottom: 15px;
+}
+
+.partner-name {
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.tips {
+  background: #fef3c7;
+  border-left: 4px solid #fbbf24;
+  padding: 15px;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #92400e;
+}
+
+.tips p {
+  margin-bottom: 8px;
+}
+
+.tips p:last-child {
+  margin-bottom: 0;
+}
