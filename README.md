@@ -152,21 +152,25 @@ supabase db reset
 
 ## 部署
 
-### 前端部署
+### 云端部署
 
-推荐使用 Vercel 部署 Next.js 应用：
+推荐部署方案:
+- **前端**: Vercel (Next.js 官方推荐平台)
+- **后端/数据库**: Supabase 云服务
+
+**快速开始**:
+- 📖 [快速部署指南 (15 分钟)](QUICKSTART-DEPLOY.md) - 快速上手,立即部署
+- 📚 [完整部署文档](DEPLOYMENT.md) - 详细配置,生产优化
 
 ```bash
-# 安装 Vercel CLI
-npm i -g vercel
+# 一键部署命令
+cd supabase
+supabase link --project-ref YOUR_PROJECT_ID
+supabase db push
 
-# 部署
-vercel
+cd ../frontend
+vercel --prod
 ```
-
-### 数据库部署
-
-推荐使用 Supabase 云服务或其他托管 PostgreSQL 服务。
 
 ## 设计原则
 

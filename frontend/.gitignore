@@ -17,9 +17,13 @@ dist/
 # Misc
 .DS_Store
 *.pem
+
+# Environment variables
 .env
 .env.local
 .env.*.local
+.env.production.local
+.vercel
 
 # Debug
 npm-debug.log*
