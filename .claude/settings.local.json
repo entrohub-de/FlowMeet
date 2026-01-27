@@ -2,7 +2,12 @@
   "permissions": {
     "allow": [
       "Bash(dir:*)",
-      "Bash(psql:*)"
+      "Bash(psql:*)",
+      "Bash(start http://127.0.0.1:54324)",
+      "Bash(supabase db diff:*)",
+      "Bash(supabase db reset:*)",
+      "Bash(supabase migration repair:*)",
+      "Bash(supabase migration:*)"
     ]
   }
 }
