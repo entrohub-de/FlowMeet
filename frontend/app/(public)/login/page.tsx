@@ -12,8 +12,36 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [useMagicLink, setUseMagicLink] = useState(false);
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleMagicLinkSignIn = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    try {
+      const { error: signInError } = await supabase.auth.signInWithOtp({
+        email: email.trim(),
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (signInError) {
+        setError(signInError.message || 'Unable to send magic link.');
+        return;
+      }
+
+      setMagicLinkSent(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to send magic link.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordSignIn = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
     setLoading(true);
@@ -82,47 +110,113 @@ export default function LoginPage() {
     }
   };
 
+  const handleSubmit = useMagicLink ? handleMagicLinkSignIn : handlePasswordSignIn;
+
   return (
     <div className={styles.container}>
       <div className={styles.card}>
         <h1 className={styles.title}>Sign in</h1>
         <p className={styles.subtitle}>Welcome back to FlowMeet.</p>
 
-        <form className={styles.form} onSubmit={handleSubmit}>
-          <label className={styles.label} htmlFor="email">
-            Email
-          </label>
-          <input
-            id="email"
-            className={styles.input}
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="you@example.com"
-            required
-            disabled={loading}
-          />
+        {magicLinkSent ? (
+          <div className={styles.success}>
+            <p>Check your email for the magic link!</p>
+            <p style={{ fontSize: '14px', marginTop: '8px' }}>
+              Click the link in the email to sign in.
+            </p>
+            <button
+              className={styles.button}
+              onClick={() => {
+                setMagicLinkSent(false);
+                setEmail('');
+              }}
+              style={{ marginTop: '16px' }}
+            >
+              Send another link
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className={styles.authToggle} style={{ marginBottom: '20px' }}>
+              <button
+                type="button"
+                className={!useMagicLink ? styles.toggleActive : styles.toggleInactive}
+                onClick={() => setUseMagicLink(false)}
+                style={{
+                  padding: '8px 16px',
+                  border: 'none',
+                  background: !useMagicLink ? '#007bff' : '#e0e0e0',
+                  color: !useMagicLink ? 'white' : '#666',
+                  borderRadius: '4px 0 0 4px',
+                  cursor: 'pointer',
+                }}
+              >
+                Password
+              </button>
+              <button
+                type="button"
+                className={useMagicLink ? styles.toggleActive : styles.toggleInactive}
+                onClick={() => setUseMagicLink(true)}
+                style={{
+                  padding: '8px 16px',
+                  border: 'none',
+                  background: useMagicLink ? '#007bff' : '#e0e0e0',
+                  color: useMagicLink ? 'white' : '#666',
+                  borderRadius: '0 4px 4px 0',
+                  cursor: 'pointer',
+                }}
+              >
+                Magic Link
+              </button>
+            </div>
 
-          <label className={styles.label} htmlFor="password">
-            Password
-          </label>
-          <input
-            id="password"
-            className={styles.input}
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="Your password"
-            required
-            disabled={loading}
-          />
+            <form className={styles.form} onSubmit={handleSubmit}>
+              <label className={styles.label} htmlFor="email">
+                Email
+              </label>
+              <input
+                id="email"
+                className={styles.input}
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="you@example.com"
+                required
+                disabled={loading}
+              />
 
-          {error && <p className={styles.error}>{error}</p>}
+              {!useMagicLink && (
+                <>
+                  <label className={styles.label} htmlFor="password">
+                    Password
+                  </label>
+                  <input
+                    id="password"
+                    className={styles.input}
+                    type="password"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    placeholder="Your password"
+                    required
+                    disabled={loading}
+                  />
+                </>
+              )}
 
-          <button className={styles.button} type="submit" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign in'}
-          </button>
-        </form>
+              {error && <p className={styles.error}>{error}</p>}
+
+              <button className={styles.button} type="submit" disabled={loading}>
+                {loading
+                  ? useMagicLink
+                    ? 'Sending magic link...'
+                    : 'Signing in...'
+                  : useMagicLink
+                  ? 'Send magic link'
+                  : 'Sign in'}
+              </button>
+            </form>
+          </>
+        )}
 
         <p className={styles.footer}>
           New to FlowMeet? <Link href="/auth/signup">Create an account</Link>
