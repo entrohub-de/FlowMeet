@@ -4,9 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/clean-build.js",
     "build": "next build",
+    "postbuild": "node scripts/postbuild-onedrive.js",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "clean": "node scripts/clean-build.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.38.0",
