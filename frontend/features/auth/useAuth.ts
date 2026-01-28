@@ -13,7 +13,6 @@ interface User {
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     // 检查当前登录用户
@@ -44,5 +43,5 @@ export function useAuth() {
     return () => subscription?.unsubscribe();
   }, []);
 
-  return { user, isLoading, error };
+  return { user, isLoading };
 }

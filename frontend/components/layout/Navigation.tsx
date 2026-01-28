@@ -73,7 +73,7 @@ export default function Navigation({ items }: NavigationProps) {
                     </svg>
                   </button>
 
-                  {isOpen && (
+                  {isOpen && item.children && (
                     <div className="absolute left-0 top-full mt-1 bg-white border border-border rounded-lg shadow-lg py-2 z-50 w-56">
                       {item.children.map((child) => {
                         const isChildActive = isItemActive(child);
