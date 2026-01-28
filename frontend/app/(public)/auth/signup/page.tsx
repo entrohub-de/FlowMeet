@@ -4,7 +4,6 @@ import { useState, FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import styles from './signup.module.css';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -87,14 +86,16 @@ export default function SignupPage() {
   const handleSubmit = useMagicLink ? handleMagicLinkSignUp : handlePasswordSignUp;
 
   return (
-    <div className={styles.container}>
-      <div className={styles.card}>
-        <h1 className={styles.title}>Create your account</h1>
-        <p className={styles.subtitle}>Start hosting and joining FlowMeet events.</p>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+      <div className="w-full max-w-md bg-card border border-border rounded-lg p-6 sm:p-8 space-y-6">
+        <div className="space-y-2">
+          <h1 className="text-2xl sm:text-3xl font-semibold text-foreground">Create your account</h1>
+          <p className="text-sm text-muted-foreground">Start hosting and joining FlowMeet events.</p>
+        </div>
 
         {success ? (
-          <div className={styles.success}>
-            <p>
+          <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg">
+            <p className="text-sm text-foreground">
               {useMagicLink
                 ? 'Check your email for the magic link to complete signup!'
                 : 'Check your inbox to verify your email.'}
@@ -102,60 +103,56 @@ export default function SignupPage() {
           </div>
         ) : (
           <>
-            <div className={styles.authToggle} style={{ marginBottom: '20px' }}>
+            <div className="flex rounded-lg overflow-hidden border border-border">
               <button
                 type="button"
                 onClick={() => setUseMagicLink(false)}
-                style={{
-                  padding: '8px 16px',
-                  border: 'none',
-                  background: !useMagicLink ? '#007bff' : '#e0e0e0',
-                  color: !useMagicLink ? 'white' : '#666',
-                  borderRadius: '4px 0 0 4px',
-                  cursor: 'pointer',
-                }}
+                className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
+                  !useMagicLink
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-background text-muted-foreground hover:bg-secondary'
+                }`}
               >
                 Password
               </button>
               <button
                 type="button"
                 onClick={() => setUseMagicLink(true)}
-                style={{
-                  padding: '8px 16px',
-                  border: 'none',
-                  background: useMagicLink ? '#007bff' : '#e0e0e0',
-                  color: useMagicLink ? 'white' : '#666',
-                  borderRadius: '0 4px 4px 0',
-                  cursor: 'pointer',
-                }}
+                className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
+                  useMagicLink
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-background text-muted-foreground hover:bg-secondary'
+                }`}
               >
                 Magic Link
               </button>
             </div>
 
-            <form className={styles.form} onSubmit={handleSubmit}>
-              <label className={styles.label} htmlFor="email">
-                Email
-              </label>
-              <input
-                id="email"
-                className={styles.input}
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="you@example.com"
-                required
-                disabled={loading}
-              />
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground" htmlFor="email">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  className="w-full px-3 py-2 bg-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="you@example.com"
+                  required
+                  disabled={loading}
+                />
+              </div>
 
               {!useMagicLink && (
-                <>
-                  <label className={styles.label} htmlFor="password">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground" htmlFor="password">
                     Password
                   </label>
                   <input
                     id="password"
-                    className={styles.input}
+                    className="w-full px-3 py-2 bg-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
                     type="password"
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
@@ -163,12 +160,20 @@ export default function SignupPage() {
                     required
                     disabled={loading}
                   />
-                </>
+                </div>
               )}
 
-              {error && <p className={styles.error}>{error}</p>}
+              {error && (
+                <p className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+                  {error}
+                </p>
+              )}
 
-              <button className={styles.button} type="submit" disabled={loading}>
+              <button
+                className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                type="submit"
+                disabled={loading}
+              >
                 {loading
                   ? useMagicLink
                     ? 'Sending magic link...'
@@ -181,8 +186,11 @@ export default function SignupPage() {
           </>
         )}
 
-        <p className={styles.footer}>
-          Already have an account? <Link href="/login">Sign in</Link>
+        <p className="text-sm text-center text-muted-foreground">
+          Already have an account?{' '}
+          <Link href="/login" className="text-primary hover:underline font-medium">
+            Sign in
+          </Link>
         </p>
       </div>
     </div>

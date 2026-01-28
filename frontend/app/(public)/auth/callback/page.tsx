@@ -62,7 +62,7 @@ function AuthCallbackContent() {
               console.error('Upsert error:', upsertError);
             }
 
-            router.push('/app');
+            router.push('/user');
             return;
           }
 
@@ -73,7 +73,7 @@ function AuthCallbackContent() {
           if (normalizedRole === 'host') {
             router.push('/host');
           } else {
-            router.push('/app');
+            router.push('/user');
           }
         } else {
           setError('Invalid authentication link.');

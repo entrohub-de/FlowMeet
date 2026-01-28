@@ -4,7 +4,6 @@ import { useState, FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import styles from './login.module.css';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -90,7 +89,7 @@ export default function LoginPage() {
           return;
         }
 
-        router.push('/app');
+        router.push('/user');
         return;
       }
 
@@ -102,7 +101,7 @@ export default function LoginPage() {
         return;
       }
 
-      router.push('/app');
+      router.push('/user');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to sign in.');
     } finally {
@@ -113,86 +112,81 @@ export default function LoginPage() {
   const handleSubmit = useMagicLink ? handleMagicLinkSignIn : handlePasswordSignIn;
 
   return (
-    <div className={styles.container}>
-      <div className={styles.card}>
-        <h1 className={styles.title}>Sign in</h1>
-        <p className={styles.subtitle}>Welcome back to FlowMeet.</p>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+      <div className="w-full max-w-md bg-card border border-border rounded-lg p-6 sm:p-8 space-y-6">
+        <div className="space-y-2">
+          <h1 className="text-2xl sm:text-3xl font-semibold text-foreground">Sign in</h1>
+          <p className="text-sm text-muted-foreground">Welcome back to FlowMeet.</p>
+        </div>
 
         {magicLinkSent ? (
-          <div className={styles.success}>
-            <p>Check your email for the magic link!</p>
-            <p style={{ fontSize: '14px', marginTop: '8px' }}>
+          <div className="space-y-4 p-4 bg-primary/10 border border-primary/20 rounded-lg">
+            <p className="text-sm text-foreground font-medium">Check your email for the magic link!</p>
+            <p className="text-sm text-muted-foreground">
               Click the link in the email to sign in.
             </p>
             <button
-              className={styles.button}
+              className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
               onClick={() => {
                 setMagicLinkSent(false);
                 setEmail('');
               }}
-              style={{ marginTop: '16px' }}
             >
               Send another link
             </button>
           </div>
         ) : (
           <>
-            <div className={styles.authToggle} style={{ marginBottom: '20px' }}>
+            <div className="flex rounded-lg overflow-hidden border border-border">
               <button
                 type="button"
-                className={!useMagicLink ? styles.toggleActive : styles.toggleInactive}
                 onClick={() => setUseMagicLink(false)}
-                style={{
-                  padding: '8px 16px',
-                  border: 'none',
-                  background: !useMagicLink ? '#007bff' : '#e0e0e0',
-                  color: !useMagicLink ? 'white' : '#666',
-                  borderRadius: '4px 0 0 4px',
-                  cursor: 'pointer',
-                }}
+                className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
+                  !useMagicLink
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-background text-muted-foreground hover:bg-secondary'
+                }`}
               >
                 Password
               </button>
               <button
                 type="button"
-                className={useMagicLink ? styles.toggleActive : styles.toggleInactive}
                 onClick={() => setUseMagicLink(true)}
-                style={{
-                  padding: '8px 16px',
-                  border: 'none',
-                  background: useMagicLink ? '#007bff' : '#e0e0e0',
-                  color: useMagicLink ? 'white' : '#666',
-                  borderRadius: '0 4px 4px 0',
-                  cursor: 'pointer',
-                }}
+                className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
+                  useMagicLink
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-background text-muted-foreground hover:bg-secondary'
+                }`}
               >
                 Magic Link
               </button>
             </div>
 
-            <form className={styles.form} onSubmit={handleSubmit}>
-              <label className={styles.label} htmlFor="email">
-                Email
-              </label>
-              <input
-                id="email"
-                className={styles.input}
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="you@example.com"
-                required
-                disabled={loading}
-              />
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground" htmlFor="email">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  className="w-full px-3 py-2 bg-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="you@example.com"
+                  required
+                  disabled={loading}
+                />
+              </div>
 
               {!useMagicLink && (
-                <>
-                  <label className={styles.label} htmlFor="password">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground" htmlFor="password">
                     Password
                   </label>
                   <input
                     id="password"
-                    className={styles.input}
+                    className="w-full px-3 py-2 bg-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
                     type="password"
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
@@ -200,12 +194,20 @@ export default function LoginPage() {
                     required
                     disabled={loading}
                   />
-                </>
+                </div>
               )}
 
-              {error && <p className={styles.error}>{error}</p>}
+              {error && (
+                <p className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+                  {error}
+                </p>
+              )}
 
-              <button className={styles.button} type="submit" disabled={loading}>
+              <button
+                className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                type="submit"
+                disabled={loading}
+              >
                 {loading
                   ? useMagicLink
                     ? 'Sending magic link...'
@@ -218,8 +220,11 @@ export default function LoginPage() {
           </>
         )}
 
-        <p className={styles.footer}>
-          New to FlowMeet? <Link href="/auth/signup">Create an account</Link>
+        <p className="text-sm text-center text-muted-foreground">
+          New to FlowMeet?{' '}
+          <Link href="/auth/signup" className="text-primary hover:underline font-medium">
+            Create an account
+          </Link>
         </p>
       </div>
     </div>
