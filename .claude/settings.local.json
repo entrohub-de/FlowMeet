@@ -10,7 +10,22 @@
       "Bash(supabase migration:*)",
       "Bash(npm run build:*)",
       "Bash(ls:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nFix Vercel deployment 404 error\n\n- Add missing \\(public\\) route group layout.tsx for Next.js App Router\n- Remove conflicting auth/callback/route.ts \\(kept page.tsx only\\)\n- Wrap useSearchParams in Suspense boundary in callback page\n- Simplify vercel.json configuration \\(remove invalid env syntax\\)\n\nThis fixes the 404 Not Found error on Vercel deployment.\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(supabase link:*)",
+      "Bash(supabase db remote:*)",
+      "Bash(supabase db dump:*)",
+      "Bash(findstr:*)",
+      "Bash(npm run dev:*)",
+      "Bash(if exist .next rmdir /s /q .next)",
+      "Bash(taskkill:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tailwindcss:*)",
+      "Bash(node node_modules/tailwindcss/lib/cli.js:*)",
+      "Bash(powershell -Command \"Remove-Item ''components/Navigation.module.css'', ''app/\\(user\\)/app/page.module.css'', ''app/\\(host\\)/host/page.module.css'' -ErrorAction SilentlyContinue\")",
+      "Bash(powershell -Command \"Get-Process -Name node -ErrorAction SilentlyContinue | Stop-Process -Force\")",
+      "Bash(git commit:*)",
+      "Bash(git rm:*)"
     ]
   }
 }
