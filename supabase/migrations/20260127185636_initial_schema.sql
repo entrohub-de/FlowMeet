@@ -1,3 +1,5 @@
+-- 注意：此文件已被后续迁移修改，表名已添加领域前缀
+-- 请参考 20260129000000_rename_tables_with_domain_prefix.sql 了解最新表结构
 
   create table "public"."area" (
     "area_id" uuid not null default gen_random_uuid(),

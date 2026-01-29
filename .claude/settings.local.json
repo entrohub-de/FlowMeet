@@ -25,7 +25,13 @@
       "Bash(powershell -Command \"Remove-Item ''components/Navigation.module.css'', ''app/\\(user\\)/app/page.module.css'', ''app/\\(host\\)/host/page.module.css'' -ErrorAction SilentlyContinue\")",
       "Bash(powershell -Command \"Get-Process -Name node -ErrorAction SilentlyContinue | Stop-Process -Force\")",
       "Bash(git commit:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(supabase stop:*)",
+      "Bash(supabase start:*)",
+      "Bash(docker rm:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker system prune:*)",
+      "Bash(docker volume ls:*)"
     ]
   }
 }

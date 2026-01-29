@@ -6,7 +6,7 @@ import type { Event } from '@/types/domain';
  */
 export async function getEvents(): Promise<Event[]> {
   const { data, error } = await supabase
-    .from('events')
+    .from('evt_events')
     .select('*');
   
   if (error) throw error;
@@ -18,7 +18,7 @@ export async function getEvents(): Promise<Event[]> {
  */
 export async function getEvent(eventId: string): Promise<Event | null> {
   const { data, error } = await supabase
-    .from('events')
+    .from('evt_events')
     .select('*')
     .eq('id', eventId)
     .single();
@@ -32,7 +32,7 @@ export async function getEvent(eventId: string): Promise<Event | null> {
  */
 export async function createEvent(event: Omit<Event, 'id' | 'createdAt' | 'updatedAt'>): Promise<Event> {
   const { data, error } = await supabase
-    .from('events')
+    .from('evt_events')
     .insert([event])
     .select()
     .single();
