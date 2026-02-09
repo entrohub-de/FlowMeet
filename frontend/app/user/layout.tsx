@@ -1,4 +1,5 @@
 ﻿import Navigation from '@/components/layout/Navigation';
+import ProfileAvatar from '@/components/layout/ProfileAvatar';
 
 export default function UserLayout({
   children,
@@ -28,7 +29,7 @@ export default function UserLayout({
 
   return (
     <div>
-      <Navigation items={navItems} />
+      <Navigation items={navItems} rightSlot={<ProfileAvatar />} />
       {children}
     </div>
   );

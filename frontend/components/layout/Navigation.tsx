@@ -14,9 +14,10 @@ interface NavItem {
 
 interface NavigationProps {
   items: NavItem[];
+  rightSlot?: React.ReactNode;
 }
 
-export default function Navigation({ items }: NavigationProps) {
+export default function Navigation({ items, rightSlot }: NavigationProps) {
   const pathname = usePathname();
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({});
 
@@ -41,6 +42,7 @@ export default function Navigation({ items }: NavigationProps) {
     <nav className="sticky top-0 bg-background border-b border-border z-50">
       <div className="px-4 py-3 overflow-visible">
         <div className="flex items-center gap-2 overflow-visible flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap flex-1">
           {items.map((item) => {
             const isActive = isItemActive(item);
             const hasChildren = item.children && item.children.length > 0;
@@ -117,6 +119,8 @@ export default function Navigation({ items }: NavigationProps) {
               </Link>
             );
           })}
+          </div>
+          {rightSlot}
         </div>
       </div>
     </nav>
