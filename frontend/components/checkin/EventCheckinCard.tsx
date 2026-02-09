@@ -16,10 +16,6 @@ export function EventCheckinCard({ event, isCheckedIn }: EventCheckinCardProps) 
     <div className="border rounded-lg p-6 bg-white shadow-sm hover:shadow-md transition-shadow">
       <h2 className="text-xl font-semibold mb-4">{event.name}</h2>
 
-      {event.description && (
-        <p className="text-gray-600 text-sm mb-4">{event.description}</p>
-      )}
-
       {/* 签到状态 */}
       <div className="mb-4 pb-4 border-b">
         <div className="flex items-center justify-between">
