@@ -45,7 +45,12 @@
       "Bash(del /f nul)",
       "Bash(python3 -c \"import os; os.remove\\(r''\\\\\\\\?\\\\c:\\\\Users\\\\fangn\\\\OneDrive\\\\Dokumente\\\\code\\\\flowmeet-org\\\\nul''\\)\")",
       "Bash(python -c:*)",
-      "Bash(git clean:*)"
+      "Bash(git clean:*)",
+      "Bash(npx supabase status:*)",
+      "Bash(npx supabase link:*)",
+      "Bash(npx supabase db push:*)",
+      "Bash(supabase db execute:*)",
+      "Bash(docker exec:*)"
     ]
   }
 }

@@ -10,6 +10,8 @@ export interface Event {
   start_time: string;
   end_time: string;
   created_at: string;
+  checkin_code?: string | null;
+  checkin_qr_enabled?: boolean;
   venue?: Venue;
 }
 
