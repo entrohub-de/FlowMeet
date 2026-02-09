@@ -1,0 +1,84 @@
+{
+  "common": {
+    "appName": "FlowMeet",
+    "loading": "加载中...",
+    "error": "出错了",
+    "back": "返回"
+  },
+  "nav": {
+    "host": {
+      "eventManagement": "活动管理",
+      "eventLive": "活动现场",
+      "venueManagement": "场地管理",
+      "workflowSettings": "流程设置"
+    },
+    "user": {
+      "eventSignup": "活动报名",
+      "eventLive": "活动现场"
+    }
+  },
+  "user": {
+    "center": "用户中心",
+    "centerHint": "请从上方菜单选择要访问的页面。",
+    "signup": "活动报名",
+    "signupPage": "活动报名页面",
+    "checkin": "活动签到",
+    "checkinPage": "活动签到页面",
+    "expectations": "活动期待",
+    "expectationsPage": "活动期待页面",
+    "venue": "场地信息",
+    "venuePage": "场地信息页面",
+    "topics": "话题生成",
+    "topicsPage": "话题生成页面",
+    "summary": "活动总结",
+    "summaryPage": "活动总结页面",
+    "groups": "小组信息",
+    "groupsPage": "小组信息页面",
+    "rating": "活动评分",
+    "ratingPage": "活动评分页面"
+  },
+  "host": {
+    "eventManagement": "活动管理",
+    "eventManagementDesc": "创建和管理你的活动"
+  },
+  "profile": {
+    "title": "个人资料",
+    "language": "语言",
+    "logout": "退出登录"
+  },
+  "home": {
+    "headline": "发现你的下一场 FlowMeet",
+    "subheadline": "一站式创建活动、报名参会与实时互动，让流程更清晰、体验更顺畅。",
+    "createAccount": "创建账号",
+    "login": "登录"
+  },
+  "auth": {
+    "signIn": "登录",
+    "signUp": "注册",
+    "welcomeBack": "欢迎回到 FlowMeet。",
+    "createAccount": "创建你的账号",
+    "createAccountDesc": "开始主持和参加 FlowMeet 活动。",
+    "password": "密码",
+    "magicLink": "Magic Link",
+    "email": "邮箱",
+    "emailPlaceholder": "you@example.com",
+    "passwordPlaceholder": "请输入密码",
+    "createPasswordPlaceholder": "创建密码",
+    "signingIn": "登录中...",
+    "sendingMagicLink": "正在发送 Magic Link...",
+    "sendMagicLink": "发送 Magic Link",
+    "creatingAccount": "创建账号中...",
+    "checkEmailMagicLink": "请查看邮箱中的 Magic Link！",
+    "clickLinkToSignIn": "点击邮件中的链接即可登录。",
+    "sendAnotherLink": "重新发送链接",
+    "checkEmailMagicLinkSignup": "请查看邮箱中的 Magic Link 以完成注册！",
+    "checkInboxVerify": "请查看收件箱以验证邮箱。",
+    "newToFlowMeet": "还没有账号？",
+    "createAnAccount": "创建账号",
+    "alreadyHaveAccount": "已有账号？"
+  },
+  "metadata": {
+    "title": "FlowMeet - 轻松组织与参与活动",
+    "description": "FlowMeet 帮你快速创建活动、管理参会，并提供清晰的流程体验。"
+  }
+}

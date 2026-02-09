@@ -1,28 +1,33 @@
-﻿import Navigation from '@/components/layout/Navigation';
+'use client';
+
+import Navigation from '@/components/layout/Navigation';
 import ProfileAvatar from '@/components/layout/ProfileAvatar';
+import { useTranslation } from '@/lib/i18n/context';
 
 export default function UserLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { t } = useTranslation();
+
   const navItems = [
-    { 
-      label: '活动报名',
+    {
+      label: t('nav.user.eventSignup'),
       children: [
-        { label: '活动报名', href: '/user/signup' },
-        { label: '活动签到', href: '/user/checkin' },
-        { label: '活动期待', href: '/user/expectations' },
+        { label: t('user.signup'), href: '/user/signup' },
+        { label: t('user.checkin'), href: '/user/checkin' },
+        { label: t('user.expectations'), href: '/user/expectations' },
       ]
     },
-    { 
-      label: '活动现场',
+    {
+      label: t('nav.user.eventLive'),
       children: [
-        { label: '场地信息', href: '/user/venue' },
-        { label: '话题生成', href: '/user/topics' },
-        { label: '活动总结', href: '/user/summary' },
-        { label: '小组信息', href: '/user/groups' },
-        { label: '活动评分', href: '/user/rating' },
+        { label: t('user.venue'), href: '/user/venue' },
+        { label: t('user.topics'), href: '/user/topics' },
+        { label: t('user.summary'), href: '/user/summary' },
+        { label: t('user.groups'), href: '/user/groups' },
+        { label: t('user.rating'), href: '/user/rating' },
       ]
     },
   ];

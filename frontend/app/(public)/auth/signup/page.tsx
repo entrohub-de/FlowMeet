@@ -1,12 +1,14 @@
-﻿'use client';
+'use client';
 
 import { useState, FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { useTranslation } from '@/lib/i18n/context';
 
 export default function SignupPage() {
   const router = useRouter();
+  const { t, locale, setLocale } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -86,19 +88,25 @@ export default function SignupPage() {
   const handleSubmit = useMagicLink ? handleMagicLinkSignUp : handlePasswordSignUp;
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background relative">
+      <button
+        onClick={() => setLocale(locale === 'zh' ? 'en' : 'zh')}
+        className="absolute top-4 right-4 px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground bg-secondary/50 hover:bg-secondary rounded-lg transition-colors cursor-pointer"
+      >
+        {locale === 'zh' ? 'EN' : '中文'}
+      </button>
       <div className="w-full max-w-md bg-card border border-border rounded-lg p-6 sm:p-8 space-y-6">
         <div className="space-y-2">
-          <h1 className="text-2xl sm:text-3xl font-semibold text-foreground">Create your account</h1>
-          <p className="text-sm text-muted-foreground">Start hosting and joining FlowMeet events.</p>
+          <h1 className="text-2xl sm:text-3xl font-semibold text-foreground">{t('auth.createAccount')}</h1>
+          <p className="text-sm text-muted-foreground">{t('auth.createAccountDesc')}</p>
         </div>
 
         {success ? (
           <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg">
             <p className="text-sm text-foreground">
               {useMagicLink
-                ? 'Check your email for the magic link to complete signup!'
-                : 'Check your inbox to verify your email.'}
+                ? t('auth.checkEmailMagicLinkSignup')
+                : t('auth.checkInboxVerify')}
             </p>
           </div>
         ) : (
@@ -113,7 +121,7 @@ export default function SignupPage() {
                     : 'bg-background text-muted-foreground hover:bg-secondary'
                 }`}
               >
-                Password
+                {t('auth.password')}
               </button>
               <button
                 type="button"
@@ -124,14 +132,14 @@ export default function SignupPage() {
                     : 'bg-background text-muted-foreground hover:bg-secondary'
                 }`}
               >
-                Magic Link
+                {t('auth.magicLink')}
               </button>
             </div>
 
             <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground" htmlFor="email">
-                  Email
+                  {t('auth.email')}
                 </label>
                 <input
                   id="email"
@@ -139,7 +147,7 @@ export default function SignupPage() {
                   type="email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
-                  placeholder="you@example.com"
+                  placeholder={t('auth.emailPlaceholder')}
                   required
                   disabled={loading}
                 />
@@ -148,7 +156,7 @@ export default function SignupPage() {
               {!useMagicLink && (
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground" htmlFor="password">
-                    Password
+                    {t('auth.password')}
                   </label>
                   <input
                     id="password"
@@ -156,7 +164,7 @@ export default function SignupPage() {
                     type="password"
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
-                    placeholder="Create a password"
+                    placeholder={t('auth.createPasswordPlaceholder')}
                     required
                     disabled={loading}
                   />
@@ -176,20 +184,20 @@ export default function SignupPage() {
               >
                 {loading
                   ? useMagicLink
-                    ? 'Sending magic link...'
-                    : 'Creating account...'
+                    ? t('auth.sendingMagicLink')
+                    : t('auth.creatingAccount')
                   : useMagicLink
-                  ? 'Send magic link'
-                  : 'Sign up'}
+                  ? t('auth.sendMagicLink')
+                  : t('auth.signUp')}
               </button>
             </form>
           </>
         )}
 
         <p className="text-sm text-center text-muted-foreground">
-          Already have an account?{' '}
+          {t('auth.alreadyHaveAccount')}{' '}
           <Link href="/login" className="text-primary hover:underline font-medium">
-            Sign in
+            {t('auth.signIn')}
           </Link>
         </p>
       </div>

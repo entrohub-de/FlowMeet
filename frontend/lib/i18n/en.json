@@ -1,0 +1,84 @@
+{
+  "common": {
+    "appName": "FlowMeet",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "back": "Back"
+  },
+  "nav": {
+    "host": {
+      "eventManagement": "Event Management",
+      "eventLive": "Event Live",
+      "venueManagement": "Venue Management",
+      "workflowSettings": "Workflow Settings"
+    },
+    "user": {
+      "eventSignup": "Event Signup",
+      "eventLive": "Event Live"
+    }
+  },
+  "user": {
+    "center": "User Center",
+    "centerHint": "Please select a page from the menu above.",
+    "signup": "Event Signup",
+    "signupPage": "Event signup page",
+    "checkin": "Check In",
+    "checkinPage": "Check-in page",
+    "expectations": "Expectations",
+    "expectationsPage": "Expectations page",
+    "venue": "Venue Info",
+    "venuePage": "Venue info page",
+    "topics": "Topic Generation",
+    "topicsPage": "Topic generation page",
+    "summary": "Event Summary",
+    "summaryPage": "Event summary page",
+    "groups": "Group Info",
+    "groupsPage": "Group info page",
+    "rating": "Event Rating",
+    "ratingPage": "Event rating page"
+  },
+  "host": {
+    "eventManagement": "Event Management",
+    "eventManagementDesc": "Create and manage your events"
+  },
+  "profile": {
+    "title": "Profile",
+    "language": "Language",
+    "logout": "Log out"
+  },
+  "home": {
+    "headline": "Discover your next FlowMeet",
+    "subheadline": "Create events, sign up, and interact in real time — all in one place.",
+    "createAccount": "Create Account",
+    "login": "Sign In"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "welcomeBack": "Welcome back to FlowMeet.",
+    "createAccount": "Create your account",
+    "createAccountDesc": "Start hosting and joining FlowMeet events.",
+    "password": "Password",
+    "magicLink": "Magic Link",
+    "email": "Email",
+    "emailPlaceholder": "you@example.com",
+    "passwordPlaceholder": "Your password",
+    "createPasswordPlaceholder": "Create a password",
+    "signingIn": "Signing in...",
+    "sendingMagicLink": "Sending magic link...",
+    "sendMagicLink": "Send magic link",
+    "creatingAccount": "Creating account...",
+    "checkEmailMagicLink": "Check your email for the magic link!",
+    "clickLinkToSignIn": "Click the link in the email to sign in.",
+    "sendAnotherLink": "Send another link",
+    "checkEmailMagicLinkSignup": "Check your email for the magic link to complete signup!",
+    "checkInboxVerify": "Check your inbox to verify your email.",
+    "newToFlowMeet": "New to FlowMeet?",
+    "createAnAccount": "Create an account",
+    "alreadyHaveAccount": "Already have an account?"
+  },
+  "metadata": {
+    "title": "FlowMeet - Organize & Join Events Easily",
+    "description": "FlowMeet helps you create events, manage attendance, and enjoy a clear workflow."
+  }
+}

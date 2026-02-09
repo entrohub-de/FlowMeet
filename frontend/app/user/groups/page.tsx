@@ -1,9 +1,15 @@
+'use client';
+
+import { useTranslation } from '@/lib/i18n/context';
+
 export default function GroupsPage() {
+  const { t } = useTranslation();
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-4">小组信息</h1>
+      <h1 className="text-3xl font-bold mb-4">{t('user.groups')}</h1>
       <p className="text-muted-foreground">
-        小组信息页面
+        {t('user.groupsPage')}
       </p>
     </div>
   );

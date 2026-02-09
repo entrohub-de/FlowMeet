@@ -1,9 +1,10 @@
 ﻿import type { Metadata } from 'next';
 import './globals.css';
+import { LocaleProvider } from '@/lib/i18n/context';
 
 export const metadata: Metadata = {
-  title: 'FlowMeet - 轻松组织与参与活动',
-  description: 'FlowMeet 帮你快速创建活动、管理参会，并提供清晰的流程体验。',
+  title: 'FlowMeet',
+  description: 'FlowMeet - Organize & join events easily.',
 };
 
 export default function RootLayout({
@@ -14,7 +15,9 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <body>
-        <main>{children}</main>
+        <LocaleProvider>
+          <main>{children}</main>
+        </LocaleProvider>
       </body>
     </html>
   );

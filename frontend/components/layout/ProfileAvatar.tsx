@@ -4,9 +4,11 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/features/auth/useAuth';
 import { supabase } from '@/lib/supabase/client';
+import { useTranslation } from '@/lib/i18n/context';
 
 export default function ProfileAvatar() {
   const { user } = useAuth();
+  const { t, locale, setLocale } = useTranslation();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -45,13 +47,20 @@ export default function ProfileAvatar() {
             onClick={() => { setOpen(false); router.push('/user/profile'); }}
             className="block w-full text-left px-4 py-2 text-sm text-muted-foreground hover:bg-secondary transition-colors cursor-pointer"
           >
-            个人资料
+            {t('profile.title')}
+          </button>
+          <button
+            onClick={() => setLocale(locale === 'zh' ? 'en' : 'zh')}
+            className="flex w-full items-center justify-between px-4 py-2 text-sm text-muted-foreground hover:bg-secondary transition-colors cursor-pointer"
+          >
+            <span>{t('profile.language')}</span>
+            <span className="text-xs font-medium text-primary">{locale === 'zh' ? 'EN' : '中文'}</span>
           </button>
           <button
             onClick={handleLogout}
             className="block w-full text-left px-4 py-2 text-sm text-destructive hover:bg-secondary transition-colors cursor-pointer"
           >
-            退出登录
+            {t('profile.logout')}
           </button>
         </div>
       )}
