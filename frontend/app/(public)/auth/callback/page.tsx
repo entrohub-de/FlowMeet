@@ -97,8 +97,8 @@ function AuthCallbackContent() {
         gap: '16px'
       }}>
         <h1>Authentication Error</h1>
-        <p style={{ color: '#d32f2f' }}>{error}</p>
-        <a href="/login" style={{ color: '#007bff', textDecoration: 'underline' }}>
+        <p className="text-destructive">{error}</p>
+        <a href="/login" className="text-primary underline">
           Back to login
         </a>
       </div>

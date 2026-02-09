@@ -38,7 +38,7 @@ export default function Navigation({ items }: NavigationProps) {
   };
 
   return (
-    <nav className="sticky top-0 bg-white border-b border-border z-50">
+    <nav className="sticky top-0 bg-background border-b border-border z-50">
       <div className="px-4 py-3 overflow-visible">
         <div className="flex items-center gap-2 overflow-visible flex-wrap">
           {items.map((item) => {
@@ -74,7 +74,7 @@ export default function Navigation({ items }: NavigationProps) {
                   </button>
 
                   {isOpen && item.children && (
-                    <div className="absolute left-0 top-full mt-1 bg-white border border-border rounded-lg shadow-lg py-2 z-50 w-56">
+                    <div className="absolute left-0 top-full mt-1 bg-popover border border-border rounded-lg shadow-lg py-2 z-50 w-56">
                       {item.children.map((child) => {
                         const isChildActive = isItemActive(child);
                         return (

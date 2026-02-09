@@ -4,48 +4,99 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 10%;
+    /* Color Tokens - Light Mode */
+    --background: var(--gray-50);
+    --foreground: var(--gray-900);
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 10%;
+    --card-foreground: var(--gray-900);
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 10%;
-    --primary: 217 91% 60%;
+    --popover-foreground: var(--gray-900);
+    --primary: var(--blue-500);
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 10%;
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 40%;
-    --accent: 0 0% 96%;
-    --accent-foreground: 0 0% 10%;
+    --secondary: var(--gray-100);
+    --secondary-foreground: var(--gray-900);
+    --muted: var(--gray-100);
+    --muted-foreground: var(--gray-600);
+    --accent: var(--gray-100);
+    --accent-foreground: var(--gray-900);
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 217 91% 60%;
+    --border: var(--gray-200);
+    --input: var(--gray-200);
+    --ring: var(--blue-500);
+
+    /* Gray Scale */
+    --gray-50:  0 0% 98%;
+    --gray-100: 0 0% 96%;
+    --gray-200: 0 0% 90%;
+    --gray-400: 0 0% 64%;
+    --gray-600: 0 0% 40%;
+    --gray-800: 0 0% 15%;
+    --gray-900: 0 0% 10%;
+
+    /* Blue Scale */
+    --blue-50:  220 50% 96%;
+    --blue-100: 220 50% 90%;
+    --blue-300: 220 50% 70%;
+    --blue-500: 220 50% 50%;
+    --blue-700: 220 50% 35%;
+    --blue-900: 220 50% 20%;
+
+    /* Border Radius */
     --radius: 0.5rem;
+
+    /* Typography - Font Sizes */
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-4xl: 2.25rem;
+
+    /* Typography - Line Heights */
+    --leading-tight: 1.25;
+    --leading-normal: 1.5;
+    --leading-relaxed: 1.625;
+
+    /* Typography - Letter Spacing */
+    --tracking-tight: -0.025em;
+    --tracking-normal: 0em;
+    --tracking-wide: 0.025em;
+
+    /* Typography - Font Weights */
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --font-weight-extrabold: 800;
+
+    /* Spacing */
+    --space-2: 0.5rem;
+    --space-4: 1rem;
+    --space-8: 2rem;
+    --space-16: 4rem;
   }
 
   .dark {
-    --background: 0 0% 10%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 217 91% 60%;
+    /* Color Tokens - Dark Mode */
+    --background: var(--gray-900);
+    --foreground: var(--gray-50);
+    --card: var(--gray-800);
+    --card-foreground: var(--gray-50);
+    --popover: var(--gray-800);
+    --popover-foreground: var(--gray-50);
+    --primary: var(--blue-300);
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 60%;
-    --accent: 0 0% 15%;
-    --accent-foreground: 0 0% 98%;
+    --secondary: var(--gray-800);
+    --secondary-foreground: var(--gray-50);
+    --muted: var(--gray-800);
+    --muted-foreground: var(--gray-400);
+    --accent: var(--gray-800);
+    --accent-foreground: var(--gray-50);
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     --border: 0 0% 20%;
     --input: 0 0% 20%;
-    --ring: 217 91% 60%;
+    --ring: var(--blue-300);
   }
 }
 
