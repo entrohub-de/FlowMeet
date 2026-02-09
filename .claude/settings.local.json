@@ -38,7 +38,14 @@
       "Bash(ipconfig:*)",
       "Bash(npx next build:*)",
       "Bash(Remove-Item -Recurse -Force \"c:\\\\Users\\\\fangn\\\\OneDrive\\\\Dokumente\\\\code\\\\flowmeet-org\\\\frontend\\\\.next\")",
-      "Bash(powershell -Command:*)"
+      "Bash(powershell -Command:*)",
+      "Bash(where:*)",
+      "Bash(git config:*)",
+      "Bash(supabase db query:*)",
+      "Bash(del /f nul)",
+      "Bash(python3 -c \"import os; os.remove\\(r''\\\\\\\\?\\\\c:\\\\Users\\\\fangn\\\\OneDrive\\\\Dokumente\\\\code\\\\flowmeet-org\\\\nul''\\)\")",
+      "Bash(python -c:*)",
+      "Bash(git clean:*)"
     ]
   }
 }

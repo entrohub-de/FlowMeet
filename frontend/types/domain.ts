@@ -3,15 +3,21 @@
  */
 
 export interface Event {
-  id: string;
-  title: string;
-  description?: string;
-  startTime: string;
-  endTime: string;
-  location?: string;
-  createdBy: string;
-  createdAt: string;
-  updatedAt: string;
+  event_id: string;
+  venue_id: string | null;
+  name: string;
+  description: string | null;
+  start_time: string;
+  end_time: string;
+  created_at: string;
+  venue?: Venue;
+}
+
+export interface Venue {
+  venue_id: string;
+  name: string;
+  capacity: number;
+  created_at: string;
 }
 
 export interface Stage {

@@ -2,13 +2,13 @@ import { supabase } from '@/lib/supabase/client';
 import type { Event } from '@/types/domain';
 
 /**
- * 获取所有活动
+ * 获取所有活动（关联场地信息）
  */
 export async function getEvents(): Promise<Event[]> {
   const { data, error } = await supabase
     .from('evt_events')
-    .select('*');
-  
+    .select('*, venue:evt_venues(venue_id, name, capacity, created_at)');
+
   if (error) throw error;
   return data || [];
 }
@@ -19,10 +19,10 @@ export async function getEvents(): Promise<Event[]> {
 export async function getEvent(eventId: string): Promise<Event | null> {
   const { data, error } = await supabase
     .from('evt_events')
-    .select('*')
-    .eq('id', eventId)
+    .select('*, venue:evt_venues(venue_id, name, capacity, created_at)')
+    .eq('event_id', eventId)
     .single();
-  
+
   if (error) throw error;
   return data;
 }
@@ -30,13 +30,15 @@ export async function getEvent(eventId: string): Promise<Event | null> {
 /**
  * 创建活动
  */
-export async function createEvent(event: Omit<Event, 'id' | 'createdAt' | 'updatedAt'>): Promise<Event> {
+export async function createEvent(
+  event: Pick<Event, 'name' | 'description' | 'start_time' | 'end_time' | 'venue_id'>
+): Promise<Event> {
   const { data, error } = await supabase
     .from('evt_events')
     .insert([event])
-    .select()
+    .select('*, venue:evt_venues(venue_id, name, capacity, created_at)')
     .single();
-  
+
   if (error) throw error;
   return data;
 }
