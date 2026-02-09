@@ -31,7 +31,11 @@
       "Bash(docker rm:*)",
       "Bash(docker ps:*)",
       "Bash(docker system prune:*)",
-      "Bash(docker volume ls:*)"
+      "Bash(docker volume ls:*)",
+      "Bash(npx supabase db query:*)",
+      "Bash(PGPASSWORD=postgres psql:*)",
+      "Bash(curl:*)",
+      "Bash(ipconfig:*)"
     ]
   }
 }
