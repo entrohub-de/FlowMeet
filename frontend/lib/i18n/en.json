@@ -44,7 +44,37 @@
   "profile": {
     "title": "Profile",
     "language": "Language",
-    "logout": "Log out"
+    "logout": "Log out",
+    "email": "Email",
+    "nickname": "Nickname",
+    "nicknamePlaceholder": "Enter nickname",
+    "gender": "Gender",
+    "genderOptions": {
+      "male": "Male",
+      "female": "Female",
+      "other": "Other",
+      "unset": "Not set"
+    },
+    "ageGroup": "Age Group",
+    "ageGroupOptions": {
+      "18-24": "18-24",
+      "25-34": "25-34",
+      "35-44": "35-44",
+      "45+": "45+",
+      "unset": "Not set"
+    },
+    "preferences": "Preferences",
+    "languages": "Languages",
+    "languagesPlaceholder": "e.g. Chinese, English, Japanese",
+    "interests": "Interests",
+    "interestsPlaceholder": "e.g. Tech, Design, Product",
+    "purpose": "Purpose",
+    "purposePlaceholder": "e.g. Networking, Learning, Collaboration",
+    "industryBackground": "Industry",
+    "industryBackgroundPlaceholder": "e.g. Internet, Finance, Education",
+    "save": "Save",
+    "saving": "Saving...",
+    "saved": "Saved"
   },
   "home": {
     "headline": "Discover your next FlowMeet",

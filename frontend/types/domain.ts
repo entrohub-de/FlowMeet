@@ -62,3 +62,22 @@ export interface User {
   role: 'host' | 'participant' | 'admin';
   createdAt: string;
 }
+
+export interface Profile {
+  id: number;
+  created_at: string;
+  user_id: string;
+  nickname: string | null;
+  gender: string | null;
+  age_group: string | null;
+}
+
+export interface Preferences {
+  id: number;
+  created_at: string;
+  user_id: string;
+  languages: string | null;
+  interests: string | null;
+  purpose: string | null;
+  industry_background: string | null;
+}

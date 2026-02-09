@@ -44,7 +44,37 @@
   "profile": {
     "title": "个人资料",
     "language": "语言",
-    "logout": "退出登录"
+    "logout": "退出登录",
+    "email": "邮箱",
+    "nickname": "昵称",
+    "nicknamePlaceholder": "输入昵称",
+    "gender": "性别",
+    "genderOptions": {
+      "male": "男",
+      "female": "女",
+      "other": "其他",
+      "unset": "未设置"
+    },
+    "ageGroup": "年龄段",
+    "ageGroupOptions": {
+      "18-24": "18-24",
+      "25-34": "25-34",
+      "35-44": "35-44",
+      "45+": "45+",
+      "unset": "未设置"
+    },
+    "preferences": "个人偏好",
+    "languages": "语言能力",
+    "languagesPlaceholder": "如：中文、英文、日语",
+    "interests": "兴趣领域",
+    "interestsPlaceholder": "如：技术、设计、产品",
+    "purpose": "参会目的",
+    "purposePlaceholder": "如：社交、学习、合作",
+    "industryBackground": "行业背景",
+    "industryBackgroundPlaceholder": "如：互联网、金融、教育",
+    "save": "保存",
+    "saving": "保存中...",
+    "saved": "已保存"
   },
   "home": {
     "headline": "发现你的下一场 FlowMeet",
