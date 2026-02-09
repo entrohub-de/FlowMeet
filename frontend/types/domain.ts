@@ -89,3 +89,12 @@ export interface Preferences {
   purpose: string | null;
   industry_background: string | null;
 }
+
+export interface Expectation {
+  expectation_id: string;
+  event_id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+}
