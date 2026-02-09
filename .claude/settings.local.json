@@ -35,7 +35,10 @@
       "Bash(npx supabase db query:*)",
       "Bash(PGPASSWORD=postgres psql:*)",
       "Bash(curl:*)",
-      "Bash(ipconfig:*)"
+      "Bash(ipconfig:*)",
+      "Bash(npx next build:*)",
+      "Bash(Remove-Item -Recurse -Force \"c:\\\\Users\\\\fangn\\\\OneDrive\\\\Dokumente\\\\code\\\\flowmeet-org\\\\frontend\\\\.next\")",
+      "Bash(powershell -Command:*)"
     ]
   }
 }
