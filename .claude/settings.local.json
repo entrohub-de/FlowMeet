@@ -50,7 +50,13 @@
       "Bash(npx supabase link:*)",
       "Bash(npx supabase db push:*)",
       "Bash(supabase db execute:*)",
-      "Bash(docker exec:*)"
+      "Bash(docker exec:*)",
+      "Bash(npx supabase db reset:*)",
+      "Bash(npx supabase stop:*)",
+      "Bash(npx supabase start:*)",
+      "Bash(timeout 5 tail:*)",
+      "Bash(exit:*)",
+      "Bash(node:*)"
     ]
   }
 }
