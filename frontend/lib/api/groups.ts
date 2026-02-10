@@ -1,5 +1,5 @@
 import { supabase } from '../supabase/client';
-import type { Group, GroupMember } from '@/types/domain';
+import type { Group } from '@/types/domain';
 
 /**
  * 获取活动的所有小组
