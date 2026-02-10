@@ -98,3 +98,26 @@ export interface Expectation {
   created_at: string;
   updated_at: string;
 }
+
+export interface Match {
+  match_id: string;
+  event_id: string;
+  user1_id: string;
+  user2_id: string;
+  status: 'pending' | 'accepted' | 'declined' | 'completed';
+  created_at: string;
+  updated_at: string;
+  user1_profile?: Profile;
+  user2_profile?: Profile;
+}
+
+export interface MatchPreference {
+  preference_id: string;
+  event_id: string;
+  user_id: string;
+  preferred_topics: string | null;
+  availability: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}

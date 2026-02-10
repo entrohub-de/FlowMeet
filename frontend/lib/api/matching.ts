@@ -1,0 +1,432 @@
+import { supabase } from '../supabase/client';
+import type { Match, MatchPreference } from '@/types/domain';
+
+/**
+ * 获取用户在某个活动的配对偏好
+ */
+export async function getMatchPreference(
+  eventId: string,
+  userId: string
+): Promise<MatchPreference | null> {
+  const { data, error } = await supabase
+    .from('evt_match_preferences')
+    .select('*')
+    .eq('event_id', eventId)
+    .eq('user_id', userId)
+    .single();
+
+  if (error) {
+    console.error('Error fetching match preference:', error);
+    return null;
+  }
+
+  return data;
+}
+
+/**
+ * 保存或更新配对偏好
+ */
+export async function saveMatchPreference(
+  eventId: string,
+  userId: string,
+  preference: {
+    preferred_topics?: string;
+    availability?: string;
+    notes?: string;
+  }
+): Promise<boolean> {
+  const { error } = await supabase.from('evt_match_preferences').upsert(
+    {
+      event_id: eventId,
+      user_id: userId,
+      ...preference,
+      updated_at: new Date().toISOString(),
+    },
+    {
+      onConflict: 'event_id,user_id',
+    }
+  );
+
+  if (error) {
+    console.error('Error saving match preference:', error);
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * 获取用户在某个活动的所有配对
+ */
+export async function getUserMatches(
+  eventId: string,
+  userId: string
+): Promise<Match[]> {
+  // 先获取配对记录
+  const { data: matches, error: matchError } = await supabase
+    .from('evt_matches')
+    .select('*')
+    .eq('event_id', eventId)
+    .or(`user1_id.eq.${userId},user2_id.eq.${userId}`)
+    .order('created_at', { ascending: false });
+
+  if (matchError) {
+    console.error('Error fetching user matches:', matchError);
+    return [];
+  }
+
+  if (!matches || matches.length === 0) {
+    return [];
+  }
+
+  // 获取所有相关用户的profiles
+  const userIds = new Set<string>();
+  matches.forEach((match) => {
+    userIds.add(match.user1_id);
+    userIds.add(match.user2_id);
+  });
+
+  const { data: profiles } = await supabase
+    .from('usr_profiles')
+    .select('*')
+    .in('user_id', Array.from(userIds));
+
+  // 合并数据
+  const profileMap = new Map(profiles?.map((p) => [p.user_id, p]) || []);
+
+  return matches.map((match) => ({
+    ...match,
+    user1_profile: profileMap.get(match.user1_id),
+    user2_profile: profileMap.get(match.user2_id),
+  }));
+}
+
+/**
+ * 发起配对请求
+ */
+export async function requestMatch(
+  eventId: string,
+  user1Id: string,
+  user2Id: string
+): Promise<boolean> {
+  const { error } = await supabase.from('evt_matches').insert({
+    event_id: eventId,
+    user1_id: user1Id,
+    user2_id: user2Id,
+    status: 'pending',
+  });
+
+  if (error) {
+    console.error('Error requesting match:', error);
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * 接受配对请求
+ */
+export async function acceptMatch(matchId: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('evt_matches')
+    .update({
+      status: 'accepted',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('match_id', matchId);
+
+  if (error) {
+    console.error('Error accepting match:', error);
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * 拒绝配对请求
+ */
+export async function declineMatch(matchId: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('evt_matches')
+    .update({
+      status: 'declined',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('match_id', matchId);
+
+  if (error) {
+    console.error('Error declining match:', error);
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * 完成配对（标记为已完成交流）
+ */
+export async function completeMatch(matchId: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('evt_matches')
+    .update({
+      status: 'completed',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('match_id', matchId);
+
+  if (error) {
+    console.error('Error completing match:', error);
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * 获取可配对的用户列表（已签到但未配对的用户）
+ */
+export async function getAvailableUsers(
+  eventId: string,
+  currentUserId: string
+): Promise<any[]> {
+  // 获取该活动的所有session
+  const { data: sessions, error: sessionError } = await supabase
+    .from('evt_sessions')
+    .select('session_id')
+    .eq('event_id', eventId);
+
+  if (sessionError) {
+    console.error('Error fetching sessions:', sessionError);
+    return [];
+  }
+
+  if (!sessions || sessions.length === 0) {
+    return [];
+  }
+
+  const sessionIds = sessions.map((s) => s.session_id);
+
+  // 获取已签到的用户
+  const { data: assignments, error: assignmentError } = await supabase
+    .from('evt_assignments')
+    .select('user_id')
+    .in('session_id', sessionIds)
+    .eq('checked_in', true);
+
+  if (assignmentError) {
+    console.error('Error fetching checked-in users:', assignmentError);
+    return [];
+  }
+
+  const checkedInUserIds = [...new Set(assignments?.map((a) => a.user_id) || [])];
+
+  // 获取当前用户已配对的用户ID
+  const { data: existingMatches, error: matchError } = await supabase
+    .from('evt_matches')
+    .select('user1_id, user2_id')
+    .eq('event_id', eventId)
+    .or(`user1_id.eq.${currentUserId},user2_id.eq.${currentUserId}`);
+
+  if (matchError) {
+    console.error('Error fetching existing matches:', matchError);
+    return [];
+  }
+
+  const matchedUserIds = new Set<string>();
+  existingMatches?.forEach((match) => {
+    if (match.user1_id === currentUserId) {
+      matchedUserIds.add(match.user2_id);
+    } else {
+      matchedUserIds.add(match.user1_id);
+    }
+  });
+
+  // 过滤出可配对的用户ID
+  const availableUserIds = checkedInUserIds.filter(
+    (id) => id !== currentUserId && !matchedUserIds.has(id)
+  );
+
+  if (availableUserIds.length === 0) {
+    return [];
+  }
+
+  // 获取这些用户的资料
+  const { data: profiles, error: profileError } = await supabase
+    .from('usr_profiles')
+    .select('*')
+    .in('user_id', availableUserIds);
+
+  if (profileError) {
+    console.error('Error fetching profiles:', profileError);
+    return [];
+  }
+
+  return profiles || [];
+}
+
+/**
+ * 调用后端 Edge Function 获取智能匹配推荐
+ */
+export async function getMatchRecommendations(
+  eventId: string
+): Promise<any[]> {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      console.error('No active session');
+      return [];
+    }
+
+    const { data, error } = await supabase.functions.invoke('get-match-recommendations', {
+      body: { eventId },
+    });
+
+    if (error) {
+      console.error('Error fetching match recommendations:', error);
+      return [];
+    }
+
+    return data?.recommendations || [];
+  } catch (error) {
+    console.error('Error calling match recommendations function:', error);
+    return [];
+  }
+}
+
+/**
+ * @deprecated 此函数已弃用，请使用 getMatchRecommendations 调用后端 API
+ * 获取可配对用户的完整信息（包括资料和偏好）
+ */
+export async function getAvailableUsersWithPreferences(
+  eventId: string,
+  currentUserId: string
+): Promise<any[]> {
+  // 获取该活动的所有session
+  const { data: sessions, error: sessionError } = await supabase
+    .from('evt_sessions')
+    .select('session_id')
+    .eq('event_id', eventId);
+
+  if (sessionError) {
+    console.error('Error fetching sessions:', sessionError);
+    return [];
+  }
+
+  if (!sessions || sessions.length === 0) {
+    return [];
+  }
+
+  const sessionIds = sessions.map((s) => s.session_id);
+
+  // 获取已签到的用户
+  const { data: assignments, error: assignmentError } = await supabase
+    .from('evt_assignments')
+    .select('user_id')
+    .in('session_id', sessionIds)
+    .eq('checked_in', true);
+
+  if (assignmentError) {
+    console.error('Error fetching checked-in users:', assignmentError);
+    return [];
+  }
+
+  const checkedInUserIds = [...new Set(assignments?.map((a) => a.user_id) || [])];
+
+  // 获取当前用户已配对的用户ID（如果表不存在则跳过）
+  const matchedUserIds = new Set<string>();
+  try {
+    const { data: existingMatches, error: matchError } = await supabase
+      .from('evt_matches')
+      .select('user1_id, user2_id')
+      .eq('event_id', eventId)
+      .or(`user1_id.eq.${currentUserId},user2_id.eq.${currentUserId}`);
+
+    if (!matchError && existingMatches) {
+      existingMatches.forEach((match) => {
+        if (match.user1_id === currentUserId) {
+          matchedUserIds.add(match.user2_id);
+        } else {
+          matchedUserIds.add(match.user1_id);
+        }
+      });
+    }
+  } catch (e) {
+    console.log('Matches table not available, showing all users');
+  }
+
+  // 过滤出可配对的用户ID
+  const availableUserIds = checkedInUserIds.filter(
+    (id) => id !== currentUserId && !matchedUserIds.has(id)
+  );
+
+  if (availableUserIds.length === 0) {
+    return [];
+  }
+
+  // 获取这些用户的资料和偏好
+  const { data: profiles, error: profileError } = await supabase
+    .from('usr_profiles')
+    .select('*')
+    .in('user_id', availableUserIds);
+
+  if (profileError) {
+    console.error('Error fetching profiles:', profileError);
+    return [];
+  }
+
+  const { data: preferences, error: prefError } = await supabase
+    .from('usr_preferences')
+    .select('*')
+    .in('user_id', availableUserIds);
+
+  if (prefError) {
+    console.error('Error fetching preferences:', prefError);
+  }
+
+  // 合并资料和偏好
+  const usersWithPreferences = profiles?.map((profile) => ({
+    profile,
+    preferences: preferences?.find((pref) => pref.user_id === profile.user_id) || null,
+  })) || [];
+
+  return usersWithPreferences;
+}
+
+/**
+ * 获取当前用户的资料和偏好
+ */
+export async function getCurrentUserWithPreferences(userId: string): Promise<any> {
+  // 获取profile，如果有多个则取第一个
+  const { data: profiles, error: profileError } = await supabase
+    .from('usr_profiles')
+    .select('*')
+    .eq('user_id', userId)
+    .limit(1);
+
+  if (profileError || !profiles || profiles.length === 0) {
+    console.error('Error fetching user profile:', profileError);
+    return null;
+  }
+
+  const profile = profiles[0];
+
+  // 获取preferences
+  const { data: preferences, error: prefError } = await supabase
+    .from('usr_preferences')
+    .select('*')
+    .eq('user_id', userId)
+    .limit(1);
+
+  if (prefError && prefError.code !== 'PGRST116') {
+    // PGRST116 是 "no rows returned" 错误，这是正常的
+    console.error('Error fetching user preferences:', prefError);
+  }
+
+  return {
+    profile,
+    preferences: preferences && preferences.length > 0 ? preferences[0] : null,
+  };
+}

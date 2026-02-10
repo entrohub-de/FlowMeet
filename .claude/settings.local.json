@@ -56,7 +56,10 @@
       "Bash(npx supabase start:*)",
       "Bash(timeout 5 tail:*)",
       "Bash(exit:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(supabase functions deploy:*)",
+      "Bash(supabase functions:*)",
+      "Bash(npx tsc:*)"
     ]
   }
 }
