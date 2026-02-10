@@ -73,8 +73,8 @@
     },
     "smartRecommendation": "智能推荐",
     "smartRecommendationDesc": "根据你的兴趣、行业背景和参会目的，为你推荐最匹配的伙伴",
-    "topics": "话题生成",
-    "topicsPage": "话题生成页面",
+    "topics": "对话话题",
+    "topicsPage": "为你的配对伙伴生成AI驱动的对话话题",
     "summary": "活动总结",
     "summaryPage": "活动总结页面",
     "groups": "小组信息",
@@ -165,6 +165,31 @@
     "newToFlowMeet": "还没有账号？",
     "createAnAccount": "创建账号",
     "alreadyHaveAccount": "已有账号？"
+  },
+  "topicsPage": {
+    "title": "对话话题生成",
+    "description": "为你的配对伙伴生成AI驱动的对话话题",
+    "selectMatch": "选择一个配对来生成话题",
+    "noMatches": "还没有已接受的配对"
+  },
+  "topic": {
+    "generate": "生成话题",
+    "regenerate": "重新生成话题",
+    "generating": "正在生成个性化话题...",
+    "rateLimited": "你可以在{minutes}分钟后生成新话题",
+    "icebreaker": "破冰话题",
+    "interests": "兴趣话题",
+    "professional": "专业话题",
+    "deepTalk": "深度对话",
+    "lastGenerated": "生成于{time}"
+  },
+  "event": {
+    "select": "选择活动",
+    "selectToStart": "选择一个活动开始使用"
+  },
+  "matching": {
+    "yourMatches": "我的配对",
+    "noAcceptedMatches": "还没有已接受的配对，去配对页面寻找伙伴吧！"
   },
   "metadata": {
     "title": "FlowMeet - 轻松组织与参与活动",

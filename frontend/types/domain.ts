@@ -139,3 +139,19 @@ export interface GroupMember {
   user_id: string;
   joined_at: string;
 }
+
+export type TopicCategory = 'icebreaker' | 'interests' | 'professional' | 'deep_talk';
+
+export interface Topic {
+  category: TopicCategory;
+  question: string;
+  reasoning: string;
+}
+
+export interface ConversationTopic {
+  topic_id: string;
+  match_id: string;
+  topics: Topic[];
+  generated_at: string;
+  created_at: string;
+}

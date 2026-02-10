@@ -73,8 +73,8 @@
     },
     "smartRecommendation": "Smart Recommendation",
     "smartRecommendationDesc": "Based on your interests, industry background, and event goals, we recommend the best matches for you",
-    "topics": "Topic Generation",
-    "topicsPage": "Topic generation page",
+    "topics": "Conversation Topics",
+    "topicsPage": "Generate AI-powered conversation topics for your matches",
     "summary": "Event Summary",
     "summaryPage": "Event summary page",
     "groups": "Group Info",
@@ -165,6 +165,31 @@
     "newToFlowMeet": "New to FlowMeet?",
     "createAnAccount": "Create an account",
     "alreadyHaveAccount": "Already have an account?"
+  },
+  "topicsPage": {
+    "title": "Conversation Starters",
+    "description": "Generate AI-powered topics for your matches",
+    "selectMatch": "Select a match to generate topics",
+    "noMatches": "No accepted matches yet"
+  },
+  "topic": {
+    "generate": "Generate Topics",
+    "regenerate": "Generate New Topics",
+    "generating": "Generating personalized topics...",
+    "rateLimited": "You can generate new topics in {minutes} minutes",
+    "icebreaker": "Icebreaker",
+    "interests": "Interests",
+    "professional": "Professional",
+    "deepTalk": "Deep Talk",
+    "lastGenerated": "Generated {time}"
+  },
+  "event": {
+    "select": "Select Event",
+    "selectToStart": "Select an event to get started"
+  },
+  "matching": {
+    "yourMatches": "Your Matches",
+    "noAcceptedMatches": "No accepted matches yet. Go to the matching page to find partners!"
   },
   "metadata": {
     "title": "FlowMeet - Organize & Join Events Easily",
