@@ -191,6 +191,59 @@
     "yourMatches": "Your Matches",
     "noAcceptedMatches": "No accepted matches yet. Go to the matching page to find partners!"
   },
+  "ratingPage": {
+    "title": "Event Rating",
+    "description": "Share your feedback to help us improve future events",
+    "tabs": {
+      "event": "Event Experience",
+      "matching": "Matching Quality",
+      "topics": "Topic Quality"
+    }
+  },
+  "rating": {
+    "comment": "Additional Comments",
+    "commentPlaceholder": "Share your thoughts...",
+    "event": {
+      "title": "Event Experience",
+      "overallScore": "Overall Experience",
+      "organizationScore": "Organization",
+      "venueScore": "Venue & Facilities",
+      "submit": "Submit Rating",
+      "update": "Update Rating"
+    },
+    "matchQuality": {
+      "title": "Overall Matching Quality",
+      "description": "How would you rate the overall quality of the matching system?",
+      "comment": "Comments",
+      "commentPlaceholder": "Share your thoughts about the matching quality...",
+      "submit": "Submit Rating",
+      "update": "Update Rating"
+    },
+    "matchPartner": {
+      "title": "Rate Your Matches",
+      "description": "Share your experience with each match partner",
+      "noMatches": "No completed matches to rate yet",
+      "comment": "Comments",
+      "commentPlaceholder": "Share your thoughts about this match...",
+      "submit": "Submit Rating",
+      "update": "Update Rating"
+    },
+    "topics": {
+      "title": "Topic Generation Quality",
+      "description": "Coming soon - rate the quality of AI-generated conversation topics",
+      "placeholder": "This feature will be available soon"
+    },
+    "stars": {
+      "1": "Poor",
+      "2": "Fair",
+      "3": "Good",
+      "4": "Very Good",
+      "5": "Excellent"
+    },
+    "submitted": "Rating submitted successfully!",
+    "updated": "Rating updated successfully!",
+    "error": "Failed to submit rating. Please try again."
+  },
   "metadata": {
     "title": "FlowMeet - Organize & Join Events Easily",
     "description": "FlowMeet helps you create events, manage attendance, and enjoy a clear workflow."

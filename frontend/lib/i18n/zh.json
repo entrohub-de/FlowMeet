@@ -191,6 +191,59 @@
     "yourMatches": "我的配对",
     "noAcceptedMatches": "还没有已接受的配对，去配对页面寻找伙伴吧！"
   },
+  "ratingPage": {
+    "title": "活动评分",
+    "description": "分享你的反馈，帮助我们改进未来的活动",
+    "tabs": {
+      "event": "活动体验",
+      "matching": "配对质量",
+      "topics": "话题质量"
+    }
+  },
+  "rating": {
+    "comment": "其他建议",
+    "commentPlaceholder": "分享你的想法...",
+    "event": {
+      "title": "活动体验",
+      "overallScore": "整体体验",
+      "organizationScore": "活动组织",
+      "venueScore": "场地设施",
+      "submit": "提交评分",
+      "update": "更新评分"
+    },
+    "matchQuality": {
+      "title": "整体配对质量",
+      "description": "你觉得配对系统的整体质量如何？",
+      "comment": "评价内容",
+      "commentPlaceholder": "分享你对配对质量的想法...",
+      "submit": "提交评分",
+      "update": "更新评分"
+    },
+    "matchPartner": {
+      "title": "评价配对伙伴",
+      "description": "分享你与每位配对伙伴的体验",
+      "noMatches": "还没有已完成的配对可以评价",
+      "comment": "评价内容",
+      "commentPlaceholder": "分享你对这次配对的想法...",
+      "submit": "提交评分",
+      "update": "更新评分"
+    },
+    "topics": {
+      "title": "话题生成质量",
+      "description": "即将推出 - 评价AI生成的对话话题质量",
+      "placeholder": "此功能即将推出"
+    },
+    "stars": {
+      "1": "很差",
+      "2": "一般",
+      "3": "不错",
+      "4": "很好",
+      "5": "优秀"
+    },
+    "submitted": "评分提交成功！",
+    "updated": "评分更新成功！",
+    "error": "提交评分失败，请重试。"
+  },
   "metadata": {
     "title": "FlowMeet - 轻松组织与参与活动",
     "description": "FlowMeet 帮你快速创建活动、管理参会，并提供清晰的流程体验。"

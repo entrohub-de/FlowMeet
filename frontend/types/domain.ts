@@ -155,3 +155,44 @@ export interface ConversationTopic {
   generated_at: string;
   created_at: string;
 }
+
+export interface EventRating {
+  rating_id: string;
+  event_id: string;
+  user_id: string;
+  overall_score: number;
+  organization_score: number | null;
+  venue_score: number | null;
+  comment: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MatchRating {
+  rating_id: string;
+  match_id: string;
+  rater_user_id: string;
+  score: number;
+  comment: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MatchQualityRating {
+  rating_id: string;
+  event_id: string;
+  user_id: string;
+  score: number;
+  comment: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TopicRating {
+  rating_id: string;
+  topic_id: string;
+  user_id: string;
+  score: number;
+  comment: string | null;
+  created_at: string;
+}
