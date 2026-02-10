@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useRef } from 'react';
@@ -116,11 +117,21 @@ export default function Navigation({ items, rightSlot }: NavigationProps) {
         )}
       >
         {/* Drawer Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border">
-          <h2 className="text-lg font-semibold">Menu</h2>
+        <div className="relative flex items-center justify-start px-6 py-4 border-b border-border">
+          {/* Logo */}
+          <Image
+            src="/images/entrohub-full-logo.png"
+            alt="Logo"
+            width={140}
+            height={40}
+            className="object-contain"
+            priority
+          />
+
+          {/* Close Button */}
           <button
             onClick={() => setIsMenuOpen(false)}
-            className="p-2 hover:bg-secondary rounded-button transition-colors"
+            className="absolute right-4 top-4 p-2 hover:bg-secondary rounded-button transition-colors"
             aria-label="Close menu"
           >
             <X className="w-5 h-5" />
