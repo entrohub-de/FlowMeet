@@ -33,7 +33,7 @@ export default function UserLayout({
 
   return (
     <div>
-      <Navigation items={navItems} rightSlot={<ProfileAvatar />} />
+      <Navigation items={navItems} rightSlot={<ProfileAvatar />} logoHref="/user" />
       {children}
     </div>
   );

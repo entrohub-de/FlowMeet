@@ -22,6 +22,8 @@
   "user": {
     "center": "User Center",
     "centerHint": "Please select a page from the menu above.",
+    "welcomeHome": "Welcome to Entrohub",
+    "welcomeHomeDesc": "Start your exploration journey here",
     "signup": "Event Signup",
     "signupPage": "Event signup page",
     "signupDesc": "Browse available events and sign up for the ones you're interested in.",

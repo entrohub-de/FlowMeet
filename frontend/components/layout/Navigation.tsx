@@ -17,9 +17,10 @@ interface NavItem {
 interface NavigationProps {
   items: NavItem[];
   rightSlot?: React.ReactNode;
+  logoHref?: string;
 }
 
-export default function Navigation({ items, rightSlot }: NavigationProps) {
+export default function Navigation({ items, rightSlot, logoHref }: NavigationProps) {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({});
@@ -119,14 +120,27 @@ export default function Navigation({ items, rightSlot }: NavigationProps) {
         {/* Drawer Header */}
         <div className="relative flex items-center justify-start px-6 py-4 border-b border-border">
           {/* Logo */}
-          <Image
-            src="/images/entrohub-full-logo.png"
-            alt="Logo"
-            width={140}
-            height={40}
-            className="object-contain"
-            priority
-          />
+          {logoHref ? (
+            <Link href={logoHref} className="flex items-center">
+              <Image
+                src="/images/entrohub-full-logo.png"
+                alt="Logo"
+                width={140}
+                height={40}
+                className="object-contain hover:opacity-80 transition-opacity"
+                priority
+              />
+            </Link>
+          ) : (
+            <Image
+              src="/images/entrohub-full-logo.png"
+              alt="Logo"
+              width={140}
+              height={40}
+              className="object-contain"
+              priority
+            />
+          )}
 
           {/* Close Button */}
           <button

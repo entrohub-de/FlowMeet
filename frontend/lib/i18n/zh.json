@@ -22,6 +22,8 @@
   "user": {
     "center": "用户中心",
     "centerHint": "请从上方菜单选择要访问的页面。",
+    "welcomeHome": "欢迎来到Entrohub",
+    "welcomeHomeDesc": "从这里开启你的探索之旅",
     "signup": "活动报名",
     "signupPage": "活动报名页面",
     "signupDesc": "浏览可报名的活动，选择感兴趣的活动报名参加。",
