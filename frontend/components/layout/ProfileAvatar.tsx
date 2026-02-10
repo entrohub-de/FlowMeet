@@ -42,23 +42,23 @@ export default function ProfileAvatar() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-1 bg-popover border border-border rounded-lg shadow-lg py-2 z-50 w-40">
+        <div className="absolute right-0 top-full mt-1 bg-popover border border-border rounded-lg shadow-lg p-2 z-50 flex flex-col gap-2 min-w-[180px]">
           <button
             onClick={() => { setOpen(false); router.push('/user/profile'); }}
-            className="block w-full text-left px-4 py-2 text-sm text-muted-foreground hover:bg-secondary transition-colors cursor-pointer"
+            className="w-full px-button h-button text-sm text-muted-foreground hover:bg-secondary transition-colors cursor-pointer rounded-button text-left"
           >
             {t('profile.title')}
           </button>
           <button
             onClick={() => setLocale(locale === 'zh' ? 'en' : 'zh')}
-            className="flex w-full items-center justify-between px-4 py-2 text-sm text-muted-foreground hover:bg-secondary transition-colors cursor-pointer"
+            className="w-full px-button h-button text-sm text-muted-foreground hover:bg-secondary transition-colors cursor-pointer rounded-button flex items-center justify-between"
           >
             <span>{t('profile.language')}</span>
             <span className="text-xs font-medium text-primary">{locale === 'zh' ? 'EN' : '中文'}</span>
           </button>
           <button
             onClick={handleLogout}
-            className="block w-full text-left px-4 py-2 text-sm text-destructive hover:bg-secondary transition-colors cursor-pointer"
+            className="w-full px-button h-button text-sm text-destructive hover:bg-secondary transition-colors cursor-pointer rounded-button text-left"
           >
             {t('profile.logout')}
           </button>

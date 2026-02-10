@@ -122,7 +122,7 @@ export default function TopicsPage() {
           {/* Demo Mode Toggle */}
           <button
             onClick={() => setDemoMode(!demoMode)}
-            className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+            className={`px-button h-button rounded-button font-medium text-sm transition-colors ${
               demoMode
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-muted text-muted-foreground hover:bg-muted/80'

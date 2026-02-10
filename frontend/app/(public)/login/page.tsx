@@ -117,7 +117,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-background relative">
       <button
         onClick={() => setLocale(locale === 'zh' ? 'en' : 'zh')}
-        className="absolute top-4 right-4 px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground bg-secondary/50 hover:bg-secondary rounded-lg transition-colors cursor-pointer"
+        className="absolute top-4 right-4 px-button h-button text-sm font-medium text-muted-foreground hover:text-foreground bg-secondary/50 hover:bg-secondary rounded-button transition-colors cursor-pointer flex items-center justify-center"
       >
         {locale === 'zh' ? 'EN' : '中文'}
       </button>
@@ -134,7 +134,7 @@ export default function LoginPage() {
               {t('auth.clickLinkToSignIn')}
             </p>
             <button
-              className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+              className="w-full px-button h-button bg-primary text-primary-foreground rounded-button font-medium hover:bg-primary/90 transition-colors"
               onClick={() => {
                 setMagicLinkSent(false);
                 setEmail('');
@@ -149,7 +149,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setUseMagicLink(false)}
-                className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
+                className={`flex-1 px-button h-button text-sm font-medium transition-colors ${
                   !useMagicLink
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-background text-muted-foreground hover:bg-secondary'
@@ -160,7 +160,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setUseMagicLink(true)}
-                className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
+                className={`flex-1 px-button h-button text-sm font-medium transition-colors ${
                   useMagicLink
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-background text-muted-foreground hover:bg-secondary'
@@ -212,7 +212,7 @@ export default function LoginPage() {
               )}
 
               <button
-                className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-button h-button bg-primary text-primary-foreground rounded-button font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 type="submit"
                 disabled={loading}
               >

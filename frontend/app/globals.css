@@ -74,6 +74,11 @@
     --space-4: 1rem;
     --space-8: 2rem;
     --space-16: 4rem;
+
+    /* Button Tokens */
+    --button-height: 48px;
+    --button-padding: 16px;
+    --button-radius: 100px;
   }
 
   .dark {

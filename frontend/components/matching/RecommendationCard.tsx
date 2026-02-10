@@ -59,7 +59,7 @@ export function RecommendationCard({
       {/* 配对按钮 */}
       <button
         onClick={() => onRequestMatch(recommendation.userId)}
-        className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+        className="w-full px-button h-button bg-primary text-primary-foreground rounded-button hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
       >
         <UserPlus className="w-4 h-4" />
         <span>{t('user.requestMatch')}</span>

@@ -84,7 +84,7 @@ export default function CheckinPage() {
             <div>
               <button
                 onClick={() => setShowOtherEvents(!showOtherEvents)}
-                className="flex items-center gap-2 text-lg font-semibold text-gray-700 hover:text-gray-900 mb-4"
+                className="flex items-center gap-2 text-lg font-semibold text-gray-700 hover:text-gray-900 mb-4 px-button h-button"
               >
                 <span>{showOtherEvents ? '▼' : '▶'}</span>
                 <span>{t('user.otherEvents')} ({otherEvents.length})</span>

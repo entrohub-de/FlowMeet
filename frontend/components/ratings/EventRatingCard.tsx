@@ -102,7 +102,7 @@ export function EventRatingCard({ eventRating, onSubmit, submitting }: EventRati
           <button
             type="submit"
             disabled={form.overall_score === 0 || submitting}
-            className="w-full bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-primary text-primary-foreground px-button h-button rounded-button hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting ? t('common.loading') : t('rating.event.submit')}
           </button>

@@ -86,7 +86,7 @@ export default function GroupsPage() {
           <div>
             <button
               onClick={() => setAllGroupsExpanded(!allGroupsExpanded)}
-              className="w-full flex items-center justify-between p-4 bg-muted/30 hover:bg-muted/50 rounded-lg transition-colors mb-4"
+              className="w-full flex items-center justify-between px-button h-button bg-muted/30 hover:bg-muted/50 rounded-button transition-colors mb-4"
             >
               <div className="flex items-center gap-2">
                 <Users className="w-5 h-5" />

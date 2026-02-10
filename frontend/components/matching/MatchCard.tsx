@@ -63,14 +63,14 @@ export function MatchCard({
             <>
               <button
                 onClick={() => onAccept(match.match_id)}
-                className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                className="px-button h-button bg-green-500 text-white rounded-button hover:bg-green-600 transition-colors flex items-center justify-center"
                 title={t('user.accept')}
               >
                 <Check className="w-5 h-5" />
               </button>
               <button
                 onClick={() => onDecline(match.match_id)}
-                className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                className="px-button h-button bg-red-500 text-white rounded-button hover:bg-red-600 transition-colors flex items-center justify-center"
                 title={t('user.decline')}
               >
                 <X className="w-5 h-5" />
@@ -80,7 +80,7 @@ export function MatchCard({
           {match.status === 'accepted' && (
             <button
               onClick={() => onComplete(match.match_id)}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2"
+              className="px-button h-button bg-primary text-primary-foreground rounded-button hover:bg-primary/90 transition-colors flex items-center gap-2"
             >
               <MessageSquare className="w-4 h-4" />
               <span>{t('user.markCompleted')}</span>

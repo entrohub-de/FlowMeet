@@ -65,6 +65,7 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
         md: "var(--radius)",
         lg: "calc(var(--radius) + 4px)",
+        button: "var(--button-radius)",
       },
       fontSize: {
         sm:    ["var(--font-size-sm)",   { lineHeight: "var(--leading-normal)" }],
@@ -95,6 +96,12 @@ const config: Config = {
         4:  "var(--space-4)",
         8:  "var(--space-8)",
         16: "var(--space-16)",
+      },
+      height: {
+        button: "var(--button-height)",
+      },
+      padding: {
+        button: "var(--button-padding)",
       },
     },
   },

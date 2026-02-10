@@ -64,7 +64,8 @@
       "Bash($env:OPENAI_API_KEY=\"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\")",
       "Bash(OPENAI_API_KEY=\"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\" supabase start)",
       "Bash(wait:*)",
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "Bash(grep:*)"
     ]
   }
 }

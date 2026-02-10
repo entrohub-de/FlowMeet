@@ -35,7 +35,7 @@ export function GenerateButton({
       onClick={onGenerate}
       disabled={disabled || loading}
       className={`
-        w-full px-4 py-2 rounded-lg font-medium
+        w-full px-button h-button rounded-button font-medium
         transition-all duration-200
         flex items-center justify-center gap-2
         ${

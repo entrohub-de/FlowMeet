@@ -69,7 +69,7 @@ export function MatchQualityRatingCard({
         <button
           type="submit"
           disabled={form.score === 0 || submitting}
-          className="w-full bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+          className="w-full bg-primary text-primary-foreground px-button h-button rounded-button hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           {submitting ? t('common.loading') : t('rating.matchQuality.submit')}
         </button>

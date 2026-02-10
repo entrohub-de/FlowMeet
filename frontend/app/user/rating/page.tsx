@@ -79,7 +79,7 @@ export default function RatingPage() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`
-                  flex items-center gap-2 px-4 py-2 border-b-2 font-medium transition-colors
+                  flex items-center gap-2 px-button h-button border-b-2 font-medium transition-colors
                   ${
                     activeTab === tab.id
                       ? 'border-primary text-primary'

@@ -97,7 +97,7 @@ export function TopicList({ topics }: TopicListProps) {
                     </div>
                     <button
                       onClick={() => handleCopy(topic.question, topic.originalIndex)}
-                      className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded hover:bg-background"
+                      className="text-muted-foreground hover:text-foreground transition-colors h-button px-button rounded hover:bg-background flex items-center justify-center"
                       title="Copy to clipboard"
                     >
                       {copiedIndex === topic.originalIndex ? (

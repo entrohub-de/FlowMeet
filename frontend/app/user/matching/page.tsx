@@ -79,7 +79,7 @@ export default function MatchingPage() {
           <div className="flex gap-2 mb-6 border-b">
             <button
               onClick={() => setActiveTab('matches')}
-              className={`px-4 py-2 font-medium transition-colors ${
+              className={`px-button h-button font-medium transition-colors ${
                 activeTab === 'matches'
                   ? 'text-primary border-b-2 border-primary'
                   : 'text-muted-foreground hover:text-foreground'
@@ -97,7 +97,7 @@ export default function MatchingPage() {
             </button>
             <button
               onClick={() => setActiveTab('available')}
-              className={`px-4 py-2 font-medium transition-colors ${
+              className={`px-button h-button font-medium transition-colors ${
                 activeTab === 'available'
                   ? 'text-primary border-b-2 border-primary'
                   : 'text-muted-foreground hover:text-foreground'
