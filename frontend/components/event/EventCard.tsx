@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Event } from '@/types/domain';
 import { Calendar, MapPin, Clock } from 'lucide-react';
+import { signupForEvent, cancelSignup, getUserSignupStatus } from '@/lib/api/signup';
+import { supabase } from '@/lib/supabase/client';
 
 function formatDateTime(dateStr: string, locale: string): string {
   const date = new Date(dateStr);
@@ -24,12 +26,50 @@ interface EventCardProps {
 export default function EventCard({ event, locale, t }: EventCardProps) {
   const [signingUp, setSigningUp] = useState(false);
   const [signedUp, setSignedUp] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Get current user
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const currentUserId = session?.user?.id || null;
+      setUserId(currentUserId);
+
+      // Check if already signed up
+      if (currentUserId) {
+        getUserSignupStatus(currentUserId, event.event_id).then((status) => {
+          setSignedUp(status);
+          setLoading(false);
+        });
+      } else {
+        setLoading(false);
+      }
+    });
+  }, [event.event_id]);
 
   const handleSignup = async () => {
+    if (!userId) {
+      // User not logged in, redirect to login or show message
+      alert(t('common.loginRequired') || '请先登录');
+      return;
+    }
+
     setSigningUp(true);
-    // TODO: call actual signup API
-    await new Promise((r) => setTimeout(r, 600));
-    setSignedUp(true);
+
+    if (signedUp) {
+      // Cancel signup
+      const success = await cancelSignup(event.event_id, userId);
+      if (success) {
+        setSignedUp(false);
+      }
+    } else {
+      // Sign up
+      const success = await signupForEvent(event.event_id, userId);
+      if (success) {
+        setSignedUp(true);
+      }
+    }
+
     setSigningUp(false);
   };
 
@@ -70,18 +110,20 @@ export default function EventCard({ event, locale, t }: EventCardProps) {
       {/* Sign Up Button */}
       <button
         onClick={handleSignup}
-        disabled={signingUp || signedUp}
+        disabled={loading || signingUp}
         className={`w-full px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
           signedUp
-            ? 'bg-muted text-muted-foreground cursor-default'
+            ? 'bg-green-100 text-green-800 hover:bg-green-200 border border-green-300'
             : 'bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed'
         }`}
       >
-        {signingUp
-          ? '...'
-          : signedUp
-            ? t('user.signedUp')
-            : t('user.signupBtn')}
+        {loading
+          ? t('common.loading')
+          : signingUp
+            ? '...'
+            : signedUp
+              ? t('user.signedUp')
+              : t('user.signupBtn')}
       </button>
     </div>
   );

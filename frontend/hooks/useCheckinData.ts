@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { getEvents } from '@/lib/api/events';
 import { getAllUserCheckinStatuses } from '@/lib/api/checkin';
+import { getUserSignups } from '@/lib/api/signup';
 import { Event } from '@/types/domain';
 
 export function useCheckinData() {
@@ -16,23 +17,34 @@ export function useCheckinData() {
       try {
         setError(null);
 
-        // 加载活动数据（不管是否登录都加载）
-        const eventsData = await getEvents();
-        setEvents(eventsData);
-
         // 获取当前用户
         const { data: { user } } = await supabase.auth.getUser();
 
-        // 如果用户已登录，加载签到状态
         if (user) {
           setUserId(user.id);
+
+          // 加载所有活动
+          const allEvents = await getEvents();
+
+          // 加载用户报名的活动
+          const signupMap = await getUserSignups(user.id);
+
+          // 只显示已报名的活动
+          const signedUpEvents = allEvents.filter((event) =>
+            signupMap.has(event.event_id)
+          );
+          setEvents(signedUpEvents);
+
+          // 加载签到状态
           try {
             const statusMap = await getAllUserCheckinStatuses(user.id);
             setCheckedInEvents(statusMap);
           } catch (error) {
             console.error('Failed to load checkin status:', error);
-            // 即使加载签到状态失败，也继续显示活动
           }
+        } else {
+          // 未登录用户不显示任何活动
+          setEvents([]);
         }
       } catch (error) {
         console.error('Failed to load events:', error);

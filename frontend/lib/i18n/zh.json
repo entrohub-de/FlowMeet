@@ -3,7 +3,8 @@
     "appName": "FlowMeet",
     "loading": "加载中...",
     "error": "出错了",
-    "back": "返回"
+    "back": "返回",
+    "loginRequired": "请先登录"
   },
   "nav": {
     "host": {

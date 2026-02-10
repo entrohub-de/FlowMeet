@@ -3,7 +3,8 @@
     "appName": "FlowMeet",
     "loading": "Loading...",
     "error": "Something went wrong",
-    "back": "Back"
+    "back": "Back",
+    "loginRequired": "Please login first"
   },
   "nav": {
     "host": {
