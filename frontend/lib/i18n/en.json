@@ -4,7 +4,8 @@
     "loading": "Loading...",
     "error": "Something went wrong",
     "back": "Back",
-    "loginRequired": "Please login first"
+    "loginRequired": "Please login first",
+    "loginToSignup": "Sign in to register"
   },
   "nav": {
     "host": {
@@ -138,8 +139,10 @@
   "home": {
     "headline": "Discover your next FlowMeet",
     "subheadline": "Create events, sign up, and interact in real time — all in one place.",
+    "slogan": "Making entrepreneurship easier",
     "createAccount": "Create Account",
-    "login": "Sign In"
+    "login": "Sign In",
+    "browseEvents": "Browse Events"
   },
   "auth": {
     "signIn": "Sign in",
@@ -186,6 +189,10 @@
   "event": {
     "select": "Select Event",
     "selectToStart": "Select an event to get started"
+  },
+  "events": {
+    "browseEvents": "Browse Events",
+    "browseDescription": "Discover interesting events and learn more details. Sign in to register."
   },
   "matching": {
     "yourMatches": "Your Matches",

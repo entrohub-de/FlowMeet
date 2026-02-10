@@ -4,7 +4,8 @@
     "loading": "加载中...",
     "error": "出错了",
     "back": "返回",
-    "loginRequired": "请先登录"
+    "loginRequired": "请先登录",
+    "loginToSignup": "登录后可以报名"
   },
   "nav": {
     "host": {
@@ -138,8 +139,10 @@
   "home": {
     "headline": "发现你的下一场 FlowMeet",
     "subheadline": "一站式创建活动、报名参会与实时互动，让流程更清晰、体验更顺畅。",
+    "slogan": "让创业不再难",
     "createAccount": "创建账号",
-    "login": "登录"
+    "login": "登录",
+    "browseEvents": "浏览活动"
   },
   "auth": {
     "signIn": "登录",
@@ -186,6 +189,10 @@
   "event": {
     "select": "选择活动",
     "selectToStart": "选择一个活动开始使用"
+  },
+  "events": {
+    "browseEvents": "活动浏览",
+    "browseDescription": "发现有趣的活动，了解更多详情。登录后可以报名参加。"
   },
   "matching": {
     "yourMatches": "我的配对",
