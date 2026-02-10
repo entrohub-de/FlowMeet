@@ -39,6 +39,8 @@
     "notCheckedIn": "未签到",
     "scanQRCode": "使用手机扫描二维码签到",
     "enterShortCode": "或输入以下6位短码",
+    "todayEvents": "今日活动",
+    "otherEvents": "其他活动",
     "expectations": "活动期待",
     "expectationsPage": "分享你对活动的期待，让主办方更了解你的需求",
     "expectationPlaceholder": "请输入你对这个活动的期待...",

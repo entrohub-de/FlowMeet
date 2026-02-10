@@ -39,6 +39,8 @@
     "notCheckedIn": "Not Checked In",
     "scanQRCode": "Scan QR code with your phone to check in",
     "enterShortCode": "Or enter the following 6-digit code",
+    "todayEvents": "Today's Events",
+    "otherEvents": "Other Events",
     "expectations": "Expectations",
     "expectationsPage": "Share your expectations for the event, let organizers know what you need",
     "expectationPlaceholder": "Enter your expectations for this event...",
