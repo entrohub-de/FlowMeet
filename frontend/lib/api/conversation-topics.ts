@@ -27,9 +27,10 @@ export async function generateTopics(matchId: string): Promise<ConversationTopic
     }
 
     return data as ConversationTopic;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in generateTopics:', error);
-    throw new Error(error.message || 'Failed to generate conversation topics');
+    const errorMessage = error instanceof Error ? error.message : 'Failed to generate conversation topics';
+    throw new Error(errorMessage);
   }
 }
 

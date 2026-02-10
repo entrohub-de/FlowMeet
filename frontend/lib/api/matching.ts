@@ -1,5 +1,14 @@
 import { supabase } from '../supabase/client';
-import type { Match, MatchPreference } from '@/types/domain';
+import type { Match, MatchPreference, Profile, Preferences } from '@/types/domain';
+import type { UserWithPreferences, MatchScore } from './matching-algorithm';
+
+interface UserProfile {
+  user_id: string;
+  nickname: string;
+  gender: string;
+  age_group: string;
+  [key: string]: unknown;
+}
 
 /**
  * 获取用户在某个活动的配对偏好
@@ -190,7 +199,7 @@ export async function completeMatch(matchId: string): Promise<boolean> {
 export async function getAvailableUsers(
   eventId: string,
   currentUserId: string
-): Promise<any[]> {
+): Promise<UserProfile[]> {
   // 获取该活动的所有session
   const { data: sessions, error: sessionError } = await supabase
     .from('evt_sessions')
@@ -271,7 +280,7 @@ export async function getAvailableUsers(
  */
 export async function getMatchRecommendations(
   eventId: string
-): Promise<any[]> {
+): Promise<MatchScore[]> {
   try {
     const { data: { session } } = await supabase.auth.getSession();
 
@@ -303,7 +312,7 @@ export async function getMatchRecommendations(
 export async function getAvailableUsersWithPreferences(
   eventId: string,
   currentUserId: string
-): Promise<any[]> {
+): Promise<UserWithPreferences[]> {
   // 获取该活动的所有session
   const { data: sessions, error: sessionError } = await supabase
     .from('evt_sessions')
@@ -353,7 +362,7 @@ export async function getAvailableUsersWithPreferences(
         }
       });
     }
-  } catch (e) {
+  } catch {
     console.log('Matches table not available, showing all users');
   }
 
@@ -387,9 +396,9 @@ export async function getAvailableUsersWithPreferences(
   }
 
   // 合并资料和偏好
-  const usersWithPreferences = profiles?.map((profile) => ({
-    profile,
-    preferences: preferences?.find((pref) => pref.user_id === profile.user_id) || null,
+  const usersWithPreferences: UserWithPreferences[] = profiles?.map((profile) => ({
+    profile: profile as Profile,
+    preferences: (preferences?.find((pref) => pref.user_id === profile.user_id) as Preferences) || null,
   })) || [];
 
   return usersWithPreferences;
@@ -398,7 +407,7 @@ export async function getAvailableUsersWithPreferences(
 /**
  * 获取当前用户的资料和偏好
  */
-export async function getCurrentUserWithPreferences(userId: string): Promise<any> {
+export async function getCurrentUserWithPreferences(userId: string): Promise<UserWithPreferences | null> {
   // 获取profile，如果有多个则取第一个
   const { data: profiles, error: profileError } = await supabase
     .from('usr_profiles')
@@ -426,7 +435,7 @@ export async function getCurrentUserWithPreferences(userId: string): Promise<any
   }
 
   return {
-    profile,
-    preferences: preferences && preferences.length > 0 ? preferences[0] : null,
+    profile: profile as Profile,
+    preferences: preferences && preferences.length > 0 ? (preferences[0] as Preferences) : null,
   };
 }

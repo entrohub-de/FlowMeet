@@ -4,7 +4,7 @@
 
 export interface EventLivePayload {
   type: 'announcement' | 'poll' | 'stage_change' | 'presence';
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   timestamp: string;
 }
 

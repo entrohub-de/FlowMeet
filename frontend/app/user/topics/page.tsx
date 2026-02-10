@@ -152,7 +152,7 @@ export default function TopicsPage() {
             <div>
               <h3 className="font-semibold text-foreground">演示模式已启用</h3>
               <p className="text-sm text-muted-foreground">
-                正在显示模拟配对数据。点击"生成话题"按钮需要配置 OpenAI API 密钥。
+                正在显示模拟配对数据。点击「生成话题」按钮需要配置 OpenAI API 密钥。
               </p>
             </div>
           </div>

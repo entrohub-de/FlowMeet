@@ -14,7 +14,7 @@ export const CHANNEL_NAMES = {
  */
 export function subscribeToEvent(
   eventId: string,
-  callback: (payload: any) => void,
+  callback: (payload: unknown) => void,
   onError?: (error: Error) => void
 ) {
   const channel = supabase
@@ -38,7 +38,7 @@ export function subscribeToEvent(
  */
 export function subscribeToPresence(
   eventId: string,
-  callback: (state: any) => void
+  callback: (state: Record<string, unknown>) => void
 ) {
   const channel = supabase
     .channel(CHANNEL_NAMES.presence(eventId), {

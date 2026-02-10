@@ -38,7 +38,6 @@ export function MatchPartnerRatingCard({
       ) : (
         <div className="space-y-4">
           {matches.map((match) => {
-            const partnerId = match.user1_id === userId ? match.user2_id : match.user1_id;
             const partnerProfile =
               match.user1_id === userId ? match.user2_profile : match.user1_profile;
             const currentRating = matchRatings[match.match_id];
@@ -71,6 +70,7 @@ export function MatchPartnerRatingCard({
                   <StarRating
                     value={currentRating?.score || 0}
                     onChange={(value) => handleRatingChange(match.match_id, value)}
+                    readonly={submitting}
                     size="md"
                     showLabel
                   />

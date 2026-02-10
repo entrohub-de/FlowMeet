@@ -1,6 +1,23 @@
 import { supabase } from '../supabase/client';
 import type { Group } from '@/types/domain';
 
+interface GroupMember {
+  user_id: string;
+  joined_at: string;
+  profile?: {
+    user_id: string;
+    nickname: string;
+    gender: string;
+    age_group: string;
+    [key: string]: unknown;
+  };
+}
+
+interface GroupWithMembers extends Group {
+  members: GroupMember[];
+  currentSize: number;
+}
+
 /**
  * 获取活动的所有小组
  */
@@ -22,7 +39,7 @@ export async function getEventGroups(eventId: string): Promise<Group[]> {
 /**
  * 获取小组成员（包含用户资料）
  */
-export async function getGroupMembers(groupId: string): Promise<any[]> {
+export async function getGroupMembers(groupId: string): Promise<GroupMember[]> {
   const { data: members, error: memberError } = await supabase
     .from('evt_group_members')
     .select('user_id, joined_at')
@@ -192,7 +209,7 @@ export async function autoGenerateGroups(
 /**
  * 获取小组的完整信息（包括成员）
  */
-export async function getGroupsWithMembers(eventId: string): Promise<any[]> {
+export async function getGroupsWithMembers(eventId: string): Promise<GroupWithMembers[]> {
   const groups = await getEventGroups(eventId);
 
   const groupsWithMembers = await Promise.all(
