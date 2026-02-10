@@ -21,16 +21,16 @@ export function RecommendationCard({
       <div className="flex items-start gap-4 mb-4">
         <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
           <span className="text-2xl font-semibold text-primary">
-            {(recommendation.nickname || recommendation.profile?.nickname)?.[0] || '?'}
+            {recommendation.profile.nickname?.[0] || '?'}
           </span>
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-foreground mb-1">
-            {recommendation.nickname || recommendation.profile?.nickname || t('user.anonymous')}
+            {recommendation.profile.nickname || t('user.anonymous')}
           </h3>
           <p className="text-sm text-muted-foreground mb-2">
-            {recommendation.gender || recommendation.profile?.gender || ''}{' '}
-            {recommendation.ageGroup || recommendation.profile?.age_group || ''}
+            {recommendation.profile.gender || ''}{' '}
+            {recommendation.profile.age_group || ''}
           </p>
           {/* 匹配度徽章 */}
           <div className="flex items-center gap-2">
