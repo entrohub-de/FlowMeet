@@ -72,6 +72,23 @@
       "declined": "已拒绝",
       "completed": "已完成"
     },
+    "matchLocation": {
+      "title": "位置描述",
+      "myLocation": "我的位置",
+      "partnerLocation": "对方位置",
+      "enterLocation": "输入你当前的位置...",
+      "updateLocation": "更新位置",
+      "updating": "更新中...",
+      "updatedAt": "更新于{time}",
+      "justNow": "刚刚",
+      "minutesAgo": "{n}分钟前",
+      "hoursAgo": "{n}小时前",
+      "locationPlaceholder": "如：咖啡区、二楼靠窗、前台附近",
+      "maxLength": "位置描述最多100个字符",
+      "locationUpdated": "位置已更新",
+      "locationUpdateFailed": "位置更新失败，请重试",
+      "noLocation": "暂无位置信息"
+    },
     "smartRecommendation": "智能推荐",
     "smartRecommendationDesc": "根据你的兴趣、行业背景和参会目的，为你推荐最匹配的伙伴",
     "topics": "对话话题",

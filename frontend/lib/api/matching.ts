@@ -439,3 +439,67 @@ export async function getCurrentUserWithPreferences(userId: string): Promise<Use
     preferences: preferences && preferences.length > 0 ? (preferences[0] as Preferences) : null,
   };
 }
+
+/**
+ * 更新配对中当前用户的位置描述
+ */
+export async function updateMatchLocation(
+  matchId: string,
+  location: string
+): Promise<boolean> {
+  try {
+    // 获取当前用户ID
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      console.error('No active session');
+      return false;
+    }
+
+    const userId = session.user.id;
+
+    // 获取配对信息以确定是user1还是user2
+    const { data: match, error: fetchError } = await supabase
+      .from('evt_matches')
+      .select('user1_id, user2_id')
+      .eq('match_id', matchId)
+      .single();
+
+    if (fetchError || !match) {
+      console.error('Error fetching match:', fetchError);
+      return false;
+    }
+
+    // 确定要更新的字段
+    let updateData: Record<string, string> = {};
+    if (match.user1_id === userId) {
+      updateData = {
+        user1_location: location,
+        location_updated_by_user1_at: new Date().toISOString(),
+      };
+    } else if (match.user2_id === userId) {
+      updateData = {
+        user2_location: location,
+        location_updated_by_user2_at: new Date().toISOString(),
+      };
+    } else {
+      console.error('User is not part of this match');
+      return false;
+    }
+
+    // 更新位置
+    const { error: updateError } = await supabase
+      .from('evt_matches')
+      .update(updateData)
+      .eq('match_id', matchId);
+
+    if (updateError) {
+      console.error('Error updating match location:', updateError);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Unexpected error updating match location:', error);
+    return false;
+  }
+}

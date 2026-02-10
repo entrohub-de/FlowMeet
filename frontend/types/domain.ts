@@ -107,6 +107,10 @@ export interface Match {
   status: 'pending' | 'accepted' | 'declined' | 'completed';
   created_at: string;
   updated_at: string;
+  user1_location: string | null;
+  user2_location: string | null;
+  location_updated_by_user1_at: string | null;
+  location_updated_by_user2_at: string | null;
   user1_profile?: Profile;
   user2_profile?: Profile;
 }

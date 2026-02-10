@@ -1,6 +1,9 @@
-import { Check, X, MessageSquare } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Check, X, MessageSquare, MapPin } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 import type { Match, Profile } from '@/types/domain';
+import { updateMatchLocation } from '@/lib/api/matching';
+import { supabase } from '@/lib/supabase/client';
 
 interface MatchCardProps {
   match: Match;
@@ -20,6 +23,61 @@ export function MatchCard({
   onComplete,
 }: MatchCardProps) {
   const { t } = useTranslation();
+  const [myLocation, setMyLocation] = useState('');
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  // 获取当前用户ID
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setCurrentUserId(session?.user?.id || null);
+    });
+  }, []);
+
+  // 确定哪个是我的位置，哪个是对方的位置
+  const isUser1 = currentUserId === match.user1_id;
+  const partnerLocation = isUser1 ? match.user2_location : match.user1_location;
+  const partnerLocationUpdatedAt = isUser1
+    ? match.location_updated_by_user2_at
+    : match.location_updated_by_user1_at;
+
+  // 格式化时间显示
+  const formatUpdateTime = (timestamp: string | null): string => {
+    if (!timestamp) return '';
+
+    const now = new Date();
+    const updated = new Date(timestamp);
+    const diffMs = now.getTime() - updated.getTime();
+    const diffMinutes = Math.floor(diffMs / 60000);
+
+    if (diffMinutes < 1) return t('user.matchLocation.justNow');
+    if (diffMinutes < 60) return t('user.matchLocation.minutesAgo').replace('{n}', String(diffMinutes));
+    if (diffMinutes < 1440) {
+      const hours = Math.floor(diffMinutes / 60);
+      return t('user.matchLocation.hoursAgo').replace('{n}', String(hours));
+    }
+    return updated.toLocaleString();
+  };
+
+  const handleUpdateLocation = async () => {
+    if (!myLocation.trim() || isUpdating) return;
+
+    setIsUpdating(true);
+    try {
+      const success = await updateMatchLocation(match.match_id, myLocation.trim());
+      if (success) {
+        // 成功后可以显示提示或刷新数据
+        setMyLocation('');
+      } else {
+        alert(t('user.matchLocation.locationUpdateFailed'));
+      }
+    } catch (error) {
+      console.error('Error updating location:', error);
+      alert(t('user.matchLocation.locationUpdateFailed'));
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   return (
     <div className="bg-card border border-border rounded-xl p-5 hover:shadow-md transition-shadow">
@@ -56,6 +114,54 @@ export function MatchCard({
               {t(`user.matchStatus.${match.status}`)}
             </span>
           </div>
+
+          {/* Location Section - Only show for accepted matches */}
+          {match.status === 'accepted' && (
+            <div className="mt-4 pt-4 border-t border-border space-y-3">
+              {/* Partner's Location */}
+              {partnerLocation && (
+                <div className="flex items-start gap-2 text-sm">
+                  <MapPin className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-muted-foreground text-xs mb-1">
+                      {t('user.matchLocation.partnerLocation')}
+                    </p>
+                    <p className="text-foreground font-medium">{partnerLocation}</p>
+                    {partnerLocationUpdatedAt && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {formatUpdateTime(partnerLocationUpdatedAt)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* My Location Input */}
+              <div className="space-y-2">
+                <label className="text-xs text-muted-foreground">
+                  {t('user.matchLocation.myLocation')}
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={myLocation}
+                    onChange={(e) => setMyLocation(e.target.value)}
+                    placeholder={t('user.matchLocation.locationPlaceholder')}
+                    maxLength={100}
+                    className="flex-1 px-3 py-2 text-sm bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    disabled={isUpdating}
+                  />
+                  <button
+                    onClick={handleUpdateLocation}
+                    disabled={!myLocation.trim() || isUpdating}
+                    className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isUpdating ? t('user.matchLocation.updating') : t('user.matchLocation.updateLocation')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex gap-2">

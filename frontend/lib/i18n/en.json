@@ -72,6 +72,23 @@
       "declined": "Declined",
       "completed": "Completed"
     },
+    "matchLocation": {
+      "title": "Location",
+      "myLocation": "My Location",
+      "partnerLocation": "Partner's Location",
+      "enterLocation": "Enter your current location...",
+      "updateLocation": "Update Location",
+      "updating": "Updating...",
+      "updatedAt": "Updated {time}",
+      "justNow": "just now",
+      "minutesAgo": "{n} min ago",
+      "hoursAgo": "{n} hr ago",
+      "locationPlaceholder": "e.g., Coffee area, 2nd floor by window, Near entrance",
+      "maxLength": "Location description max 100 characters",
+      "locationUpdated": "Location updated",
+      "locationUpdateFailed": "Failed to update location, please retry",
+      "noLocation": "No location info"
+    },
     "smartRecommendation": "Smart Recommendation",
     "smartRecommendationDesc": "Based on your interests, industry background, and event goals, we recommend the best matches for you",
     "topics": "Conversation Topics",
