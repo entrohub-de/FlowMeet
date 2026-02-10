@@ -163,7 +163,7 @@ export async function autoGenerateGroups(
 
     // 6. 将用户随机分配到小组
     const shuffledUsers = [...userIds].sort(() => Math.random() - 0.5);
-    const groupMembers = [];
+    const groupMembers: { group_id: string; user_id: string }[] = [];
 
     shuffledUsers.forEach((userId, index) => {
       const groupIndex = index % numGroups;
