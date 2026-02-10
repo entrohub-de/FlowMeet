@@ -224,3 +224,189 @@ BEGIN
   RAISE NOTICE '   - 活动总数：%', event_count;
   RAISE NOTICE '   - 期待总数：%', expectation_count;
 END $$;
+
+-- 5. 创建配对测试数据（展示不同的配对状态和位置场景）
+DO $$
+DECLARE
+  test_event_id UUID;
+  test_session_id UUID;
+  user_ids UUID[];
+  user1_id UUID;
+  user2_id UUID;
+  user3_id UUID;
+  user4_id UUID;
+  user5_id UUID;
+  user6_id UUID;
+BEGIN
+  -- 创建一个专门用于测试配对的活动
+  test_event_id := gen_random_uuid();
+  test_session_id := gen_random_uuid();
+
+  INSERT INTO public.evt_events (event_id, name, description, start_time, end_time, checkin_qr_enabled, checkin_code)
+  VALUES (
+    test_event_id,
+    '配对测试活动 - 正在进行',
+    '专门用于测试配对和位置功能的活动。包含多种配对状态场景。',
+    NOW() - INTERVAL '1 hour',
+    NOW() + INTERVAL '2 hours',
+    true,
+    '888888'
+  );
+
+  -- 创建场次
+  INSERT INTO public.evt_sessions (session_id, event_id, name, start_time, end_time)
+  VALUES (
+    test_session_id,
+    test_event_id,
+    '测试场次',
+    NOW() - INTERVAL '1 hour',
+    NOW() + INTERVAL '2 hours'
+  );
+
+  -- 获取前6个测试用户
+  SELECT ARRAY_AGG(id) INTO user_ids
+  FROM auth.users
+  WHERE email LIKE '%@flowmeet.com'
+  LIMIT 6;
+
+  IF ARRAY_LENGTH(user_ids, 1) < 6 THEN
+    RAISE NOTICE '⚠️  需要至少6个测试用户才能创建完整的配对场景';
+    RETURN;
+  END IF;
+
+  user1_id := user_ids[1];
+  user2_id := user_ids[2];
+  user3_id := user_ids[3];
+  user4_id := user_ids[4];
+  user5_id := user_ids[5];
+  user6_id := user_ids[6];
+
+  -- 为这些用户创建详细的偏好信息（用于匹配推荐）
+  INSERT INTO public.usr_preferences (user_id, languages, interests, purpose, industry_background)
+  VALUES
+    (user1_id, '中文,英文', '技术,创业,AI', '社交,学习,寻找合作', '互联网,软件开发'),
+    (user2_id, '中文,英文', '设计,创业,产品', '社交,寻找合作', '互联网,设计'),
+    (user3_id, 'English,Chinese', 'Technology,Investment', 'Networking,Learning', 'Finance,VC'),
+    (user4_id, 'English', 'Marketing,Content', 'Networking', 'Media,Marketing'),
+    (user5_id, '中文', '摄影,艺术,旅行', '社交,灵感', '创意产业'),
+    (user6_id, '中文,英文', '健康,运动,创业', '社交,学习', '健康产业')
+  ON CONFLICT (user_id) DO UPDATE SET
+    languages = EXCLUDED.languages,
+    interests = EXCLUDED.interests,
+    purpose = EXCLUDED.purpose,
+    industry_background = EXCLUDED.industry_background;
+
+  -- 让所有用户签到
+  INSERT INTO public.evt_assignments (session_id, user_id, checked_in)
+  SELECT test_session_id, unnest(user_ids), true
+  ON CONFLICT (session_id, user_id) DO UPDATE SET checked_in = true;
+
+  -- 场景1: 完美场景 - 双方都设置了位置（刚刚更新）
+  INSERT INTO public.evt_matches (
+    event_id, user1_id, user2_id, status,
+    user1_location, user2_location,
+    location_updated_by_user1_at, location_updated_by_user2_at
+  ) VALUES (
+    test_event_id, user1_id, user2_id, 'accepted',
+    '咖啡区靠窗，穿蓝色T恤，戴黑框眼镜', '二楼休息区沙发，穿红色连衣裙',
+    NOW() - INTERVAL '30 seconds', NOW() - INTERVAL '1 minute'
+  );
+
+  -- 场景2: 只有对方位置 - 对方已设置位置，我还没设置
+  INSERT INTO public.evt_matches (
+    event_id, user1_id, user2_id, status,
+    user1_location, user2_location,
+    location_updated_by_user1_at, location_updated_by_user2_at
+  ) VALUES (
+    test_event_id, user1_id, user3_id, 'accepted',
+    NULL, '主会场入口，靠近签到台，穿黑色西装',
+    NULL, NOW() - INTERVAL '5 minutes'
+  );
+
+  -- 场景3: 空位置 - 双方都还没设置位置
+  INSERT INTO public.evt_matches (
+    event_id, user1_id, user2_id, status,
+    user1_location, user2_location,
+    location_updated_by_user1_at, location_updated_by_user2_at
+  ) VALUES (
+    test_event_id, user1_id, user4_id, 'accepted',
+    NULL, NULL,
+    NULL, NULL
+  );
+
+  -- 场景4: 待处理状态 - 不应该显示位置功能
+  INSERT INTO public.evt_matches (
+    event_id, user1_id, user2_id, status
+  ) VALUES (
+    test_event_id, user1_id, user5_id, 'pending'
+  );
+
+  -- 场景5: 已完成状态 - 显示历史位置（只读）
+  INSERT INTO public.evt_matches (
+    event_id, user1_id, user2_id, status,
+    user1_location, user2_location,
+    location_updated_by_user1_at, location_updated_by_user2_at
+  ) VALUES (
+    test_event_id, user2_id, user3_id, 'completed',
+    '咖啡区', '前台',
+    NOW() - INTERVAL '30 minutes', NOW() - INTERVAL '28 minutes'
+  );
+
+  -- 场景6: 旧位置 - 测试时间显示（几小时前）
+  INSERT INTO public.evt_matches (
+    event_id, user1_id, user2_id, status,
+    user1_location, user2_location,
+    location_updated_by_user1_at, location_updated_by_user2_at
+  ) VALUES (
+    test_event_id, user1_id, user6_id, 'accepted',
+    '三楼会议室B门口', NULL,
+    NOW() - INTERVAL '2 hours 15 minutes', NULL
+  );
+
+  -- 场景7: 中等时间 - 测试分钟显示（30分钟前）
+  INSERT INTO public.evt_matches (
+    event_id, user1_id, user2_id, status,
+    user1_location, user2_location,
+    location_updated_by_user1_at, location_updated_by_user2_at
+  ) VALUES (
+    test_event_id, user3_id, user4_id, 'accepted',
+    NULL, '一楼大厅中央',
+    NULL, NOW() - INTERVAL '30 minutes'
+  );
+
+  -- 场景8: 已拒绝状态 - 不应该显示
+  INSERT INTO public.evt_matches (
+    event_id, user1_id, user2_id, status
+  ) VALUES (
+    test_event_id, user5_id, user6_id, 'declined'
+  );
+
+  RAISE NOTICE '';
+  RAISE NOTICE '🎯 配对测试场景已创建！';
+  RAISE NOTICE '=================================';
+  RAISE NOTICE '活动：配对测试活动 - 正在进行';
+  RAISE NOTICE '签到码：888888';
+  RAISE NOTICE '';
+  RAISE NOTICE '测试场景：';
+  RAISE NOTICE '1️⃣  双方都有位置（刚刚更新）';
+  RAISE NOTICE '2️⃣  只有对方位置（5分钟前）';
+  RAISE NOTICE '3️⃣  双方都没位置';
+  RAISE NOTICE '4️⃣  待处理状态（不显示位置）';
+  RAISE NOTICE '5️⃣  已完成状态（只读显示）';
+  RAISE NOTICE '6️⃣  旧位置（2小时前）';
+  RAISE NOTICE '7️⃣  中等时间（30分钟前）';
+  RAISE NOTICE '8️⃣  已拒绝（不显示）';
+  RAISE NOTICE '';
+  RAISE NOTICE '🧪 如何测试：';
+  RAISE NOTICE '1. 登录: david.zhang@flowmeet.com / password123';
+  RAISE NOTICE '2. 访问: /user/matching';
+  RAISE NOTICE '3. 选择: 配对测试活动 - 正在进行';
+  RAISE NOTICE '4. 查看: 不同状态的配对卡片';
+  RAISE NOTICE '';
+  RAISE NOTICE '💡 提示：';
+  RAISE NOTICE '- 尝试更新你的位置';
+  RAISE NOTICE '- 刷新页面查看对方位置';
+  RAISE NOTICE '- 观察不同时间的显示格式';
+  RAISE NOTICE '=================================';
+
+END $$;
