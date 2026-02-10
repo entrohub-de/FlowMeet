@@ -121,3 +121,21 @@ export interface MatchPreference {
   created_at: string;
   updated_at: string;
 }
+
+export interface Group {
+  group_id: string;
+  event_id: string;
+  session_id: string | null;
+  name: string;
+  description: string | null;
+  max_size: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GroupMember {
+  member_id: string;
+  group_id: string;
+  user_id: string;
+  joined_at: string;
+}

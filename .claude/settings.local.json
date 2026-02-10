@@ -59,7 +59,8 @@
       "Bash(node:*)",
       "Bash(supabase functions deploy:*)",
       "Bash(supabase functions:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npx supabase:*)"
     ]
   }
 }
