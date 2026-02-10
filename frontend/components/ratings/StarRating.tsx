@@ -70,10 +70,10 @@ export function StarRating({
                 transition-colors
                 ${
                   rating <= displayValue
-                    ? 'fill-yellow-400 text-yellow-400'
-                    : 'text-gray-300'
+                    ? 'fill-accent text-accent'
+                    : 'text-muted'
                 }
-                ${!readonly && rating <= hoverValue && 'fill-yellow-300 text-yellow-300'}
+                ${!readonly && rating <= hoverValue && 'fill-accent/80 text-accent/80'}
               `}
             />
           </button>

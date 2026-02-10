@@ -14,26 +14,26 @@ const categoryConfig: Record<
   icebreaker: {
     icon: '🧊',
     label: 'topic.icebreaker',
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
+    color: 'text-primary',
+    bgColor: 'bg-primary/10',
   },
   interests: {
     icon: '🎯',
     label: 'topic.interests',
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50',
+    color: 'text-accent',
+    bgColor: 'bg-accent/10',
   },
   professional: {
     icon: '💼',
     label: 'topic.professional',
-    color: 'text-green-600',
-    bgColor: 'bg-green-50',
+    color: 'text-secondary-foreground',
+    bgColor: 'bg-secondary',
   },
   deep_talk: {
     icon: '💭',
     label: 'topic.deepTalk',
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50',
+    color: 'text-muted-foreground',
+    bgColor: 'bg-muted',
   },
 };
 

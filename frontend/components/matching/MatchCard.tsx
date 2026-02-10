@@ -43,14 +43,14 @@ export function MatchCard({
 
           <div className="ml-15">
             <span
-              className={`inline-block text-xs px-2 py-1 rounded-full ${
+              className={`inline-block text-xs px-2 py-1 rounded-full border ${
                 match.status === 'accepted'
-                  ? 'bg-green-100 text-green-800'
+                  ? 'bg-primary/20 text-primary border-primary/40'
                   : match.status === 'pending'
-                    ? 'bg-yellow-100 text-yellow-800'
+                    ? 'bg-accent/20 text-accent border-accent/40'
                     : match.status === 'completed'
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-gray-100 text-gray-800'
+                      ? 'bg-muted text-muted-foreground border-border'
+                      : 'bg-muted/50 text-muted-foreground border-border'
               }`}
             >
               {t(`user.matchStatus.${match.status}`)}
@@ -63,14 +63,14 @@ export function MatchCard({
             <>
               <button
                 onClick={() => onAccept(match.match_id)}
-                className="px-button h-button bg-green-500 text-white rounded-button hover:bg-green-600 transition-colors flex items-center justify-center"
+                className="px-button h-button bg-primary text-primary-foreground rounded-button hover:bg-primary/90 transition-colors flex items-center justify-center"
                 title={t('user.accept')}
               >
                 <Check className="w-5 h-5" />
               </button>
               <button
                 onClick={() => onDecline(match.match_id)}
-                className="px-button h-button bg-red-500 text-white rounded-button hover:bg-red-600 transition-colors flex items-center justify-center"
+                className="px-button h-button bg-destructive text-destructive-foreground rounded-button hover:bg-destructive/90 transition-colors flex items-center justify-center"
                 title={t('user.decline')}
               >
                 <X className="w-5 h-5" />

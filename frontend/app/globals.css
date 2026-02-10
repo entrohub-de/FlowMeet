@@ -6,19 +6,19 @@
   :root {
     /* Color Tokens - Light Mode */
     --background: var(--gray-50);
-    --foreground: var(--gray-900);
+    --foreground: 30 7% 6%; /* Brand Black #10100E */
     --card: 0 0% 100%;
-    --card-foreground: var(--gray-900);
+    --card-foreground: 30 7% 6%;
     --popover: 0 0% 100%;
-    --popover-foreground: var(--gray-900);
+    --popover-foreground: 30 7% 6%;
     --primary: var(--blue-500);
     --primary-foreground: 0 0% 100%;
     --secondary: var(--gray-100);
-    --secondary-foreground: var(--gray-900);
+    --secondary-foreground: 30 7% 6%;
     --muted: var(--gray-100);
     --muted-foreground: var(--gray-600);
-    --accent: var(--gray-100);
-    --accent-foreground: var(--gray-900);
+    --accent: 63 85% 65%; /* Brand Lime Green #EBF25C */
+    --accent-foreground: 30 7% 6%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     --border: var(--gray-200);
@@ -34,13 +34,13 @@
     --gray-800: 0 0% 15%;
     --gray-900: 0 0% 10%;
 
-    /* Blue Scale */
-    --blue-50:  220 50% 96%;
-    --blue-100: 220 50% 90%;
-    --blue-300: 220 50% 70%;
-    --blue-500: 220 50% 50%;
-    --blue-700: 220 50% 35%;
-    --blue-900: 220 50% 20%;
+    /* Blue Scale - Brand Vibrant Blue #5272F7 */
+    --blue-50:  231 91% 97%;
+    --blue-100: 231 91% 92%;
+    --blue-300: 231 91% 75%;
+    --blue-500: 231 91% 65%;
+    --blue-700: 231 91% 50%;
+    --blue-900: 231 91% 35%;
 
     /* Border Radius */
     --radius: 0.5rem;
@@ -83,25 +83,25 @@
 
   .dark {
     /* Color Tokens - Dark Mode */
-    --background: var(--gray-900);
-    --foreground: var(--gray-50);
+    --background: 30 7% 6%; /* Brand Black #10100E */
+    --foreground: 0 0% 98%;
     --card: var(--gray-800);
-    --card-foreground: var(--gray-50);
+    --card-foreground: 0 0% 98%;
     --popover: var(--gray-800);
-    --popover-foreground: var(--gray-50);
-    --primary: var(--blue-300);
+    --popover-foreground: 0 0% 98%;
+    --primary: 231 91% 75%; /* Brighter blue for dark mode contrast */
     --primary-foreground: 0 0% 100%;
     --secondary: var(--gray-800);
-    --secondary-foreground: var(--gray-50);
+    --secondary-foreground: 0 0% 98%;
     --muted: var(--gray-800);
     --muted-foreground: var(--gray-400);
-    --accent: var(--gray-800);
-    --accent-foreground: var(--gray-50);
+    --accent: 63 85% 70%; /* Brighter lime green for dark mode */
+    --accent-foreground: 30 7% 95%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     --border: 0 0% 20%;
     --input: 0 0% 20%;
-    --ring: var(--blue-300);
+    --ring: 231 91% 75%;
   }
 }
 

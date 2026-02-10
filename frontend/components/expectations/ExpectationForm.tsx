@@ -37,14 +37,14 @@ export function ExpectationForm({
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder={t('user.expectationPlaceholder')}
-          className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+          className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
           rows={4}
           required
         />
         <button
           type="submit"
           disabled={submitting || !content.trim()}
-          className="mt-4 px-button h-button bg-blue-600 text-white rounded-button hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="mt-4 px-button h-button bg-primary text-primary-foreground rounded-button hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {submitting
             ? t('profile.saving')

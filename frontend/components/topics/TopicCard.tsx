@@ -114,7 +114,7 @@ export function TopicCard({ match, currentUserId }: TopicCardProps) {
         <div className="px-5 pb-5 space-y-4 border-t border-border pt-4">
           {/* Demo Mode Notice */}
           {isDemoMatch && (
-            <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg text-sm">
+            <div className="bg-accent/10 border border-accent/30 text-accent px-4 py-3 rounded-lg text-sm">
               🎭 <strong>演示模式：</strong>这是模拟数据。要实际生成话题，请使用真实的配对数据或配置 OpenAI API 密钥。
             </div>
           )}
