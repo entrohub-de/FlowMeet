@@ -295,9 +295,10 @@ export async function getUserMatchesForRating(
   eventId: string,
   userId: string
 ): Promise<Match[]> {
-  const { data, error } = await supabase
+  // First get the matches
+  const { data: matches, error } = await supabase
     .from('evt_matches')
-    .select('*, user1_profile:usr_profiles!user1_id(*), user2_profile:usr_profiles!user2_id(*)')
+    .select('*')
     .eq('event_id', eventId)
     .or(`user1_id.eq.${userId},user2_id.eq.${userId}`)
     .eq('status', 'accepted')
@@ -308,5 +309,28 @@ export async function getUserMatchesForRating(
     throw error;
   }
 
-  return data || [];
+  if (!matches || matches.length === 0) {
+    return [];
+  }
+
+  // Get all related user profiles
+  const userIds = new Set<string>();
+  matches.forEach((match) => {
+    userIds.add(match.user1_id);
+    userIds.add(match.user2_id);
+  });
+
+  const { data: profiles } = await supabase
+    .from('usr_profiles')
+    .select('*')
+    .in('user_id', Array.from(userIds));
+
+  // Merge the data
+  const profileMap = new Map(profiles?.map((p) => [p.user_id, p]) || []);
+
+  return matches.map((match) => ({
+    ...match,
+    user1_profile: profileMap.get(match.user1_id),
+    user2_profile: profileMap.get(match.user2_id),
+  }));
 }
