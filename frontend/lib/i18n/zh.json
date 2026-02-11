@@ -18,6 +18,8 @@
     "host": {
       "eventManagement": "活动管理",
       "eventLive": "活动现场",
+      "eventLiveCheckin": "签到",
+      "eventLiveFlow": "流程控制",
       "venueManagement": "场地管理",
       "workflowSettings": "流程设置"
     },

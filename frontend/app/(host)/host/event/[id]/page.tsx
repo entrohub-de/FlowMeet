@@ -6,11 +6,13 @@ import { useTranslation } from '@/lib/i18n/context';
 import { getEvents } from '@/lib/api/events';
 import { getEventSignups } from '@/lib/api/signup';
 import type { Event, Signup } from '@/types/domain';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, UserCheck, ListChecks } from 'lucide-react';
 import EventInfoCard from '@/components/event/detail/EventInfoCard';
 import StatsCard from '@/components/event/detail/StatsCard';
 import ParticipantsCard from '@/components/event/detail/ParticipantsCard';
 import ExpectationsCard from '@/components/event/detail/ExpectationsCard';
+
+type TabType = 'checkin' | 'flow';
 
 export default function EventDetailPage() {
   const { t } = useTranslation();
@@ -22,6 +24,7 @@ export default function EventDetailPage() {
   const [signups, setSignups] = useState<Signup[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<TabType>('checkin');
 
   useEffect(() => {
     const loadData = async () => {
@@ -97,6 +100,19 @@ export default function EventDetailPage() {
   const location = event.venue?.name || t('user.locationTbd');
   const signupsWithExpectations = signups.filter(s => s.expectation?.content);
 
+  const tabs = [
+    {
+      id: 'checkin' as TabType,
+      label: '签到',
+      icon: UserCheck,
+    },
+    {
+      id: 'flow' as TabType,
+      label: '流程控制',
+      icon: ListChecks,
+    },
+  ];
+
   return (
     <div className="min-h-[calc(100vh-60px)] p-4 bg-muted/30">
       <div className="max-w-6xl mx-auto">
@@ -120,7 +136,7 @@ export default function EventDetailPage() {
           </div>
         </div>
 
-        {/* Cards Grid */}
+        {/* Event Info Summary */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           <div className="lg:col-span-1">
             <EventInfoCard event={event} location={location} />
@@ -133,11 +149,54 @@ export default function EventDetailPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ParticipantsCard signups={signups} />
-          {signupsWithExpectations.length > 0 && (
-            <ExpectationsCard signups={signupsWithExpectations} />
-          )}
+        {/* Tabs Navigation */}
+        <div className="bg-card border border-border rounded-t-xl shadow-sm">
+          <div className="flex border-b border-border">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors relative ${
+                    isActive
+                      ? 'text-primary'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Icon className="w-5 h-5" />
+                  {tab.label}
+                  {isActive && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Tab Content */}
+          <div className="p-6">
+            {activeTab === 'checkin' && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <ParticipantsCard signups={signups} />
+                  {signupsWithExpectations.length > 0 && (
+                    <ExpectationsCard signups={signupsWithExpectations} />
+                  )}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'flow' && (
+              <div className="space-y-6">
+                <div className="text-center py-12 text-muted-foreground">
+                  <ListChecks className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>流程控制功能开发中...</p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

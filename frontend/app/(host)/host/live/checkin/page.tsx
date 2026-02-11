@@ -1,0 +1,158 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useTranslation } from '@/lib/i18n/context';
+import { getEvents } from '@/lib/api/events';
+import { getEventSignups } from '@/lib/api/signup';
+import type { Event, Signup } from '@/types/domain';
+import { UserCheck } from 'lucide-react';
+import CustomSelect from '@/components/ui/CustomSelect';
+
+export default function CheckinPage() {
+  const { t } = useTranslation();
+  const [events, setEvents] = useState<Event[]>([]);
+  const [selectedEventId, setSelectedEventId] = useState<string>('');
+  const [signups, setSignups] = useState<Signup[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        const eventsData = await getEvents();
+        setEvents(eventsData);
+        if (eventsData.length > 0) {
+          setSelectedEventId(eventsData[0].event_id);
+        }
+      } catch (error) {
+        console.error('Failed to load events:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadEvents();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedEventId) return;
+
+    const loadSignups = async () => {
+      try {
+        const signupsData = await getEventSignups(selectedEventId);
+        setSignups(signupsData);
+      } catch (error) {
+        console.error('Failed to load signups:', error);
+      }
+    };
+
+    loadSignups();
+  }, [selectedEventId]);
+
+  if (loading) {
+    return (
+      <div className="min-h-[calc(100vh-60px)] p-4 flex items-center justify-center">
+        <div className="text-muted-foreground">{t('common.loading')}</div>
+      </div>
+    );
+  }
+
+  const selectedEvent = events.find(e => e.event_id === selectedEventId);
+  const checkedInCount = signups.filter(s => s.checked_in).length;
+
+  return (
+    <div className="min-h-[calc(100vh-60px)] p-4 bg-muted/30">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-6">
+          <div className="flex items-center gap-3 mb-4">
+            <UserCheck className="w-8 h-8 text-primary" />
+            <h1 className="text-3xl font-bold text-foreground">签到管理</h1>
+          </div>
+
+          {/* Event Selector */}
+          {events.length > 0 && (
+            <CustomSelect
+              options={events.map((event) => ({
+                value: event.event_id,
+                label: event.name,
+              }))}
+              value={selectedEventId}
+              onChange={setSelectedEventId}
+              placeholder="选择活动"
+              className="w-full md:w-auto md:min-w-[300px]"
+            />
+          )}
+        </div>
+
+        {/* Stats Cards */}
+        {selectedEvent && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+              <div className="text-sm text-muted-foreground mb-2">总报名人数</div>
+              <div className="text-3xl font-bold text-foreground">{signups.length}</div>
+            </div>
+            <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+              <div className="text-sm text-muted-foreground mb-2">已签到</div>
+              <div className="text-3xl font-bold text-primary">{checkedInCount}</div>
+            </div>
+            <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+              <div className="text-sm text-muted-foreground mb-2">签到率</div>
+              <div className="text-3xl font-bold text-foreground">
+                {signups.length > 0 ? Math.round((checkedInCount / signups.length) * 100) : 0}%
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Participants List */}
+        <div className="bg-card border border-border rounded-xl shadow-sm">
+          <div className="p-6 border-b border-border">
+            <h2 className="text-xl font-semibold text-foreground">参与者列表</h2>
+          </div>
+          <div className="p-6">
+            {signups.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <UserCheck className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>暂无报名参与者</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {signups.map((signup) => (
+                  <div
+                    key={signup.signup_id}
+                    className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <UserCheck className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <div className="font-medium text-foreground">
+                          {signup.profile?.nickname || signup.profile?.email || '匿名用户'}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {new Date(signup.signup_timestamp).toLocaleString('zh-CN')}
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      {signup.checked_in ? (
+                        <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-medium">
+                          已签到
+                        </span>
+                      ) : (
+                        <span className="px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-sm font-medium">
+                          未签到
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
