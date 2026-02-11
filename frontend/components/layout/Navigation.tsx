@@ -138,7 +138,7 @@ export default function Navigation({ items, rightSlot, logoHref }: NavigationPro
       <div
         ref={menuRef}
         className={cn(
-          "fixed top-0 left-0 h-full w-80 bg-background border-r border-border shadow-2xl z-50 transform transition-transform duration-300 ease-in-out overflow-y-auto",
+          "fixed top-0 left-0 h-full w-56 bg-background border-r border-border shadow-2xl z-50 transform transition-transform duration-300 ease-in-out overflow-y-auto",
           isMenuOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -209,7 +209,7 @@ export default function Navigation({ items, rightSlot, logoHref }: NavigationPro
                   </button>
 
                   {isOpen && item.children && (
-                    <div className="ml-4 mt-1 space-y-1">
+                    <div className="ml-3 mt-1 space-y-1">
                       {item.children.map((child) => {
                         const isChildActive = isItemActive(child);
                         return (

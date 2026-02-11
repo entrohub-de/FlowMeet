@@ -16,9 +16,9 @@
     },
     "user": {
       "eventSignup": "参与活动",
-      "signup": "活动报名",
-      "checkin": "活动签到",
-      "expectations": "活动期待",
+      "signup": "报名",
+      "checkin": "签到",
+      "expectations": "期待",
       "eventLive": "活动现场",
       "matching": "1v1配对",
       "groups": "小组配对",
