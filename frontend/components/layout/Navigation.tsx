@@ -93,6 +93,31 @@ export default function Navigation({ items, rightSlot, logoHref }: NavigationPro
               {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
+            {/* Center Logo */}
+            <div className="absolute left-1/2 transform -translate-x-1/2">
+              {logoHref ? (
+                <Link href={logoHref}>
+                  <Image
+                    src="/images/entrohub-full-logo.png"
+                    alt="Logo"
+                    width={120}
+                    height={32}
+                    className="object-contain hover:opacity-80 transition-opacity"
+                    priority
+                  />
+                </Link>
+              ) : (
+                <Image
+                  src="/images/entrohub-full-logo.png"
+                  alt="Logo"
+                  width={120}
+                  height={32}
+                  className="object-contain"
+                  priority
+                />
+              )}
+            </div>
+
             {/* Right Slot (Profile Avatar, etc.) */}
             <div className="flex items-center">
               {rightSlot}

@@ -36,7 +36,7 @@ export default function ProfileAvatar() {
     <div ref={menuRef} className="relative ml-auto">
       <button
         onClick={() => setOpen(!open)}
-        className="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center text-sm font-semibold cursor-pointer hover:opacity-90 transition-opacity"
+        className="w-9 h-9 rounded-full bg-gray-500 text-white flex items-center justify-center text-sm font-semibold cursor-pointer hover:opacity-90 transition-opacity"
       >
         {initial}
       </button>
