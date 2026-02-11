@@ -19,7 +19,7 @@ export async function getEventRating(
   userId: string
 ): Promise<EventRating | null> {
   const { data, error } = await supabase
-    .from('evt_event_ratings')
+    .from('rating_events')
     .select('*')
     .eq('event_id', eventId)
     .eq('user_id', userId)
@@ -47,7 +47,7 @@ export async function upsertEventRating(
   }
 ): Promise<EventRating> {
   const { data: rating, error } = await supabase
-    .from('evt_event_ratings')
+    .from('rating_events')
     .upsert(
       {
         event_id: eventId,
@@ -83,7 +83,7 @@ export async function getMatchRating(
   userId: string
 ): Promise<MatchRating | null> {
   const { data, error } = await supabase
-    .from('evt_match_ratings')
+    .from('rating_matches')
     .select('*')
     .eq('match_id', matchId)
     .eq('rater_user_id', userId)
@@ -124,7 +124,7 @@ export async function getEventMatchRatings(
 
   // Get ratings for these matches
   const { data, error } = await supabase
-    .from('evt_match_ratings')
+    .from('rating_matches')
     .select('*')
     .in('match_id', matchIds)
     .eq('rater_user_id', userId);
@@ -147,7 +147,7 @@ export async function upsertMatchRating(
   comment?: string
 ): Promise<MatchRating> {
   const { data, error } = await supabase
-    .from('evt_match_ratings')
+    .from('rating_matches')
     .upsert(
       {
         match_id: matchId,
@@ -181,7 +181,7 @@ export async function getMatchQualityRating(
   userId: string
 ): Promise<MatchQualityRating | null> {
   const { data, error } = await supabase
-    .from('evt_match_quality_ratings')
+    .from('rating_match_quality')
     .select('*')
     .eq('event_id', eventId)
     .eq('user_id', userId)
@@ -205,7 +205,7 @@ export async function upsertMatchQualityRating(
   comment?: string
 ): Promise<MatchQualityRating> {
   const { data, error } = await supabase
-    .from('evt_match_quality_ratings')
+    .from('rating_match_quality')
     .upsert(
       {
         event_id: eventId,
@@ -239,7 +239,7 @@ export async function getTopicRating(
   userId: string
 ): Promise<TopicRating | null> {
   const { data, error } = await supabase
-    .from('evt_topic_ratings')
+    .from('rating_topics')
     .select('*')
     .eq('topic_id', topicId)
     .eq('user_id', userId)
@@ -263,7 +263,7 @@ export async function upsertTopicRating(
   comment?: string
 ): Promise<TopicRating> {
   const { data, error } = await supabase
-    .from('evt_topic_ratings')
+    .from('rating_topics')
     .upsert(
       {
         topic_id: topicId,
