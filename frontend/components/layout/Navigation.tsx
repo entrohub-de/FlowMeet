@@ -59,7 +59,10 @@ export default function Navigation({ items, rightSlot, logoHref }: NavigationPro
 
   return (
     <>
-      <nav className="sticky top-0 bg-background border-b border-border z-50">
+      <nav className={cn(
+        "sticky top-0 border-b border-border z-50 transition-colors",
+        isMenuOpen ? "bg-gray-200" : "bg-background"
+      )}>
         <div className="px-4 py-3">
           <div className="flex items-center justify-between">
             {/* Hamburger Menu Button */}
