@@ -179,7 +179,7 @@ export default function Navigation({ items, rightSlot, logoHref }: NavigationPro
                   </div>
 
                   <div className="ml-3 mt-1 space-y-1">
-                    {item.children.map((child) => {
+                    {item.children?.map((child) => {
                       const isChildActive = isItemActive(child);
                       return (
                         <Link

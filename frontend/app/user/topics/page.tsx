@@ -16,6 +16,10 @@ const DEMO_MATCHES: Match[] = [
     user1_id: 'current-user',
     user2_id: 'demo-user-1',
     status: 'accepted',
+    user1_location: null,
+    user2_location: null,
+    location_updated_by_user1_at: null,
+    location_updated_by_user2_at: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     user1_profile: {
@@ -41,6 +45,10 @@ const DEMO_MATCHES: Match[] = [
     user1_id: 'current-user',
     user2_id: 'demo-user-2',
     status: 'accepted',
+    user1_location: null,
+    user2_location: null,
+    location_updated_by_user1_at: null,
+    location_updated_by_user2_at: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     user1_profile: {
@@ -66,6 +74,10 @@ const DEMO_MATCHES: Match[] = [
     user1_id: 'current-user',
     user2_id: 'demo-user-3',
     status: 'accepted',
+    user1_location: null,
+    user2_location: null,
+    location_updated_by_user1_at: null,
+    location_updated_by_user2_at: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     user1_profile: {

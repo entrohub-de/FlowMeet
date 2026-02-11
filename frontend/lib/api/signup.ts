@@ -138,7 +138,7 @@ export async function getEventSignupCount(eventId: string): Promise<number> {
  * 获取用户已报名的活动详情列表
  * 只返回 active 状态的报名
  */
-export async function getUserSignedUpEvents(userId: string) {
+export async function getUserSignedUpEvents(userId: string): Promise<any[]> {
   try {
     const { data, error } = await supabase
       .from('evt_signups')
@@ -151,7 +151,7 @@ export async function getUserSignedUpEvents(userId: string) {
       return [];
     }
 
-    return data?.map(item => item.event).filter(Boolean) || [];
+    return (data?.map((item: any) => item.event).filter(Boolean) || []) as any[];
   } catch (error) {
     console.error('Error getting user signed up events:', error);
     return [];
