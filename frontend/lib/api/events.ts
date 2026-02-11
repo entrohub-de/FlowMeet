@@ -57,3 +57,15 @@ export async function createEvent(
   if (error) throw error;
   return data;
 }
+
+/**
+ * 删除活动
+ */
+export async function deleteEvent(eventId: string): Promise<void> {
+  const { error } = await supabase
+    .from('evt_events')
+    .delete()
+    .eq('event_id', eventId);
+
+  if (error) throw error;
+}

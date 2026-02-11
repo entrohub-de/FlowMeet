@@ -12,7 +12,7 @@ export default function HostLayout({
   const { t } = useTranslation();
 
   const navItems = [
-    { label: t('nav.host.eventManagement'), href: '/host' },
+    { label: t('nav.host.eventManagement'), href: '/host/event' },
     { label: t('nav.host.eventLive'), href: '/host/live' },
     { label: t('nav.host.venueManagement'), href: '/host/venues' },
     { label: t('nav.host.workflowSettings'), href: '/host/workflows' },

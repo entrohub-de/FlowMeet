@@ -147,7 +147,36 @@
   },
   "host": {
     "eventManagement": "活动管理",
-    "eventManagementDesc": "创建和管理你的活动"
+    "eventManagementDesc": "创建和管理你的活动",
+    "events": {
+      "title": "活动管理",
+      "description": "创建和管理你的活动",
+      "createEvent": "创建活动",
+      "createFirstEvent": "创建第一个活动",
+      "noEvents": "还没有活动",
+      "manage": "管理",
+      "confirmDelete": "确定要删除这个活动吗？此操作无法撤销。",
+      "deleteFailed": "删除活动失败，请重试。",
+      "deleteModalTitle": "删除活动",
+      "deleteModalMessage": "确定要删除这个活动吗？此操作无法撤销。",
+      "status": {
+        "upcoming": "即将开始",
+        "ongoing": "进行中",
+        "past": "已结束"
+      },
+      "eventName": "活动名称",
+      "eventNamePlaceholder": "请输入活动名称",
+      "eventDescription": "活动描述",
+      "descriptionPlaceholder": "请输入活动描述",
+      "startTime": "开始时间",
+      "endTime": "结束时间",
+      "venue": "活动场地",
+      "selectVenue": "选择场地（可选）",
+      "fillRequiredFields": "请填写所有必填项",
+      "create": "创建活动",
+      "creating": "创建中...",
+      "createFailed": "创建活动失败，请重试。"
+    }
   },
   "profile": {
     "title": "个人资料",

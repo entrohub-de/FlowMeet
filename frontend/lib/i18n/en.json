@@ -147,7 +147,36 @@
   },
   "host": {
     "eventManagement": "Event Management",
-    "eventManagementDesc": "Create and manage your events"
+    "eventManagementDesc": "Create and manage your events",
+    "events": {
+      "title": "Event Management",
+      "description": "Create and manage your events",
+      "createEvent": "Create Event",
+      "createFirstEvent": "Create Your First Event",
+      "noEvents": "No events yet",
+      "manage": "Manage",
+      "confirmDelete": "Are you sure you want to delete this event? This action cannot be undone.",
+      "deleteFailed": "Failed to delete event. Please try again.",
+      "deleteModalTitle": "Delete Event",
+      "deleteModalMessage": "Are you sure you want to delete this event? This action cannot be undone.",
+      "status": {
+        "upcoming": "Upcoming",
+        "ongoing": "Ongoing",
+        "past": "Past"
+      },
+      "eventName": "Event Name",
+      "eventNamePlaceholder": "Enter event name",
+      "eventDescription": "Description",
+      "descriptionPlaceholder": "Enter event description",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "venue": "Venue",
+      "selectVenue": "Select a venue (optional)",
+      "fillRequiredFields": "Please fill in all required fields",
+      "create": "Create Event",
+      "creating": "Creating...",
+      "createFailed": "Failed to create event. Please try again."
+    }
   },
   "profile": {
     "title": "Profile",
