@@ -19,6 +19,7 @@ export default function ExpectationsPage() {
     submitting,
     error,
     submitExpectation,
+    removeExpectation,
   } = useExpectations();
 
   if (loading) {
@@ -39,9 +40,6 @@ export default function ExpectationsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-4">{t('user.expectations')}</h1>
-      <p className="text-gray-600 mb-8">{t('user.expectationsPage')}</p>
-
       <EventSelector
         events={events}
         selectedEventId={selectedEventId}
@@ -50,8 +48,9 @@ export default function ExpectationsPage() {
 
       {selectedEventId && userId && (
         <ExpectationForm
-          initialValue={myExpectation}
+          expectation={myExpectation}
           onSubmit={submitExpectation}
+          onDelete={removeExpectation}
           submitting={submitting}
         />
       )}

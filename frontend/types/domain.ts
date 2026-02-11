@@ -95,6 +95,7 @@ export interface Expectation {
   event_id: string;
   user_id: string;
   content: string;
+  status: 'active' | 'deleted';
   created_at: string;
   updated_at: string;
 }

@@ -5,13 +5,14 @@ import {
   getEventExpectations,
   getUserExpectation,
   upsertExpectation,
+  deleteExpectation,
 } from '@/lib/api/expectations';
 import { Event, Expectation } from '@/types/domain';
 
 export function useExpectations() {
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedEventId, setSelectedEventId] = useState<string>('');
-  const [myExpectation, setMyExpectation] = useState<string>('');
+  const [myExpectation, setMyExpectation] = useState<Expectation | null>(null);
   const [allExpectations, setAllExpectations] = useState<Expectation[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -58,7 +59,7 @@ export function useExpectations() {
         // 加载用户自己的期待
         if (userId) {
           const userExp = await getUserExpectation(selectedEventId, userId);
-          setMyExpectation(userExp?.content || '');
+          setMyExpectation(userExp);
         }
       } catch (error) {
         console.error('Failed to load expectations:', error);
@@ -73,16 +74,39 @@ export function useExpectations() {
 
     setSubmitting(true);
     try {
-      await upsertExpectation(selectedEventId, userId, content.trim());
+      const updatedExpectation = await upsertExpectation(selectedEventId, userId, content.trim());
 
       // 重新加载期待列表
       const expectations = await getEventExpectations(selectedEventId);
       setAllExpectations(expectations);
-      setMyExpectation(content.trim());
+      setMyExpectation(updatedExpectation);
 
       return true;
     } catch (error) {
       console.error('Failed to submit expectation:', error);
+      setError(error as Error);
+      return false;
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // 删除期待
+  const removeExpectation = async (): Promise<boolean> => {
+    if (!myExpectation?.expectation_id) return false;
+
+    setSubmitting(true);
+    try {
+      await deleteExpectation(myExpectation.expectation_id);
+
+      // 重新加载期待列表
+      const expectations = await getEventExpectations(selectedEventId);
+      setAllExpectations(expectations);
+      setMyExpectation(null);
+
+      return true;
+    } catch (error) {
+      console.error('Failed to delete expectation:', error);
       setError(error as Error);
       return false;
     } finally {
@@ -102,5 +126,6 @@ export function useExpectations() {
     submitting,
     error,
     submitExpectation,
+    removeExpectation,
   };
 }

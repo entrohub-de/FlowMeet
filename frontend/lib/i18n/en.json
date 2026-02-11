@@ -5,7 +5,12 @@
     "error": "Something went wrong",
     "back": "Back",
     "loginRequired": "Please login first",
-    "loginToSignup": "Sign in to register"
+    "loginToSignup": "Sign in to register",
+    "edit": "Edit",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "deleting": "Deleting...",
+    "confirmDelete": "Confirm Delete"
   },
   "nav": {
     "host": {
@@ -74,6 +79,7 @@
     "expectationSubmitted": "Expectation submitted",
     "myExpectation": "My Expectation",
     "allExpectations": "All Participants' Expectations",
+    "confirmDeleteExpectation": "Are you sure you want to delete your expectation? This action cannot be undone.",
     "noExpectations": "No expectations shared yet",
     "selectEvent": "Please select an event",
     "venue": "Venue Info",
