@@ -201,3 +201,13 @@ export interface TopicRating {
   comment: string | null;
   created_at: string;
 }
+
+export interface Signup {
+  signup_id: string;
+  event_id: string;
+  user_id: string;
+  status: 'active' | 'cancelled';
+  created_at: string;
+  profile?: Profile;
+  expectation?: Expectation;
+}

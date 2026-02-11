@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase/client';
-import type { Event } from '@/types/domain';
+import type { Event, Signup } from '@/types/domain';
 
 /**
  * 报名参加活动
@@ -160,6 +160,73 @@ export async function getUserSignedUpEvents(userId: string): Promise<Event[]> {
     return events;
   } catch (error) {
     console.error('Error getting user signed up events:', error);
+    return [];
+  }
+}
+
+/**
+ * 获取某个活动的所有报名详情
+ * 包括用户资料和期待
+ * 只返回 active 状态的报名
+ */
+export async function getEventSignups(eventId: string): Promise<Signup[]> {
+  try {
+    // First, get all signups for the event
+    const { data: signupsData, error: signupsError } = await supabase
+      .from('evt_signups')
+      .select('signup_id, event_id, user_id, status, created_at')
+      .eq('event_id', eventId)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false });
+
+    if (signupsError) {
+      console.error('Error getting event signups:', signupsError);
+      return [];
+    }
+
+    if (!signupsData || signupsData.length === 0) {
+      return [];
+    }
+
+    // Get all user IDs
+    const userIds = signupsData.map(s => s.user_id);
+
+    // Fetch all profiles for these users
+    const { data: profilesData } = await supabase
+      .from('usr_profiles')
+      .select('*')
+      .in('user_id', userIds);
+
+    // Fetch all expectations for these users and this event
+    const { data: expectationsData } = await supabase
+      .from('evt_expectations')
+      .select('*')
+      .eq('event_id', eventId)
+      .in('user_id', userIds)
+      .eq('status', 'active');
+
+    // Create lookup maps
+    const profilesMap = new Map(
+      (profilesData || []).map(p => [p.user_id, p])
+    );
+    const expectationsMap = new Map(
+      (expectationsData || []).map(e => [e.user_id, e])
+    );
+
+    // Combine the data
+    const signups: Signup[] = signupsData.map(signup => ({
+      signup_id: signup.signup_id,
+      event_id: signup.event_id,
+      user_id: signup.user_id,
+      status: signup.status,
+      created_at: signup.created_at,
+      profile: profilesMap.get(signup.user_id),
+      expectation: expectationsMap.get(signup.user_id),
+    }));
+
+    return signups;
+  } catch (error) {
+    console.error('Error getting event signups:', error);
     return [];
   }
 }
