@@ -133,3 +133,27 @@ export async function getEventSignupCount(eventId: string): Promise<number> {
     return 0;
   }
 }
+
+/**
+ * 获取用户已报名的活动详情列表
+ * 只返回 active 状态的报名
+ */
+export async function getUserSignedUpEvents(userId: string) {
+  try {
+    const { data, error } = await supabase
+      .from('evt_signups')
+      .select('event:evt_events(*, venue:evt_venues(venue_id, name, capacity, created_at))')
+      .eq('user_id', userId)
+      .eq('status', 'active');
+
+    if (error) {
+      console.error('Error getting user signed up events:', error);
+      return [];
+    }
+
+    return data?.map(item => item.event).filter(Boolean) || [];
+  } catch (error) {
+    console.error('Error getting user signed up events:', error);
+    return [];
+  }
+}

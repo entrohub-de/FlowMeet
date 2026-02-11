@@ -21,12 +21,7 @@ export function ExpectationForm({
     e.preventDefault();
     if (!content.trim()) return;
 
-    const success = await onSubmit(content);
-    if (success) {
-      alert(t('user.expectationSubmitted'));
-    } else {
-      alert(t('common.error'));
-    }
+    await onSubmit(content);
   };
 
   return (

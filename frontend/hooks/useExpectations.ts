@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import { getEvents } from '@/lib/api/events';
+import { getUserSignedUpEvents } from '@/lib/api/signup';
 import {
   getEventExpectations,
   getUserExpectation,
@@ -27,13 +27,13 @@ export function useExpectations() {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           setUserId(user.id);
-        }
+          // 只获取用户已报名的活动
+          const eventsData = await getUserSignedUpEvents(user.id);
+          setEvents(eventsData);
 
-        const eventsData = await getEvents();
-        setEvents(eventsData);
-
-        if (eventsData.length > 0) {
-          setSelectedEventId(eventsData[0].event_id);
+          if (eventsData.length > 0) {
+            setSelectedEventId(eventsData[0].event_id);
+          }
         }
       } catch (error) {
         console.error('Failed to load data:', error);

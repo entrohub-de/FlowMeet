@@ -5,7 +5,6 @@ import { useExpectations } from '@/hooks/useExpectations';
 import {
   EventSelector,
   ExpectationForm,
-  ExpectationsList,
 } from '@/components/expectations';
 
 export default function ExpectationsPage() {
@@ -15,7 +14,6 @@ export default function ExpectationsPage() {
     selectedEventId,
     setSelectedEventId,
     myExpectation,
-    allExpectations,
     userId,
     loading,
     submitting,
@@ -50,18 +48,12 @@ export default function ExpectationsPage() {
         onEventChange={setSelectedEventId}
       />
 
-      {selectedEventId && (
-        <div className="space-y-8">
-          {userId && (
-            <ExpectationForm
-              initialValue={myExpectation}
-              onSubmit={submitExpectation}
-              submitting={submitting}
-            />
-          )}
-
-          <ExpectationsList expectations={allExpectations} />
-        </div>
+      {selectedEventId && userId && (
+        <ExpectationForm
+          initialValue={myExpectation}
+          onSubmit={submitExpectation}
+          submitting={submitting}
+        />
       )}
     </div>
   );
