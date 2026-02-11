@@ -16,7 +16,32 @@
     },
     "user": {
       "eventSignup": "Join Events",
-      "eventLive": "Event Live"
+      "signup": "Event Signup",
+      "checkin": "Check In",
+      "expectations": "Expectations",
+      "eventLive": "Event Live",
+      "matching": "1v1 Matching",
+      "groups": "Groups",
+      "topics": "Topics",
+      "rating": "Rating"
+    }
+  },
+  "pages": {
+    "signup": {
+      "title": "Event Signup",
+      "description": "Browse available events and sign up for the ones you're interested in"
+    },
+    "matching": {
+      "title": "1v1 Matching",
+      "description": "Find like-minded partners at the event for one-on-one deep conversations"
+    },
+    "groups": {
+      "title": "Groups",
+      "description": "View group assignments, organizers will assign participants to different groups"
+    },
+    "rating": {
+      "title": "Event Rating",
+      "description": "Share your feedback to help us improve future events"
     }
   },
   "user": {
@@ -24,9 +49,7 @@
     "centerHint": "Please select a page from the menu above.",
     "welcomeHome": "Welcome to Entrohub",
     "welcomeHomeDesc": "Start your exploration journey here",
-    "signup": "Event Signup",
     "signupPage": "Event signup page",
-    "signupDesc": "Browse available events and sign up for the ones you're interested in.",
     "noEvents": "No events available",
     "noEventsDesc": "There are no events open for signup at the moment. Check back later.",
     "eventTime": "Time",
@@ -34,8 +57,6 @@
     "locationTbd": "TBD",
     "signupBtn": "Sign Up",
     "signedUp": "Signed Up",
-    "checkin": "Check In",
-    "checkinPage": "Scan QR code or enter short code to check in",
     "checkinQRCode": "Scan QR Code to Check In",
     "checkinShortCode": "Short Code",
     "checkinStatus": "Check-in Status",

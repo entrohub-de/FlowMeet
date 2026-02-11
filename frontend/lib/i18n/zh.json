@@ -16,7 +16,32 @@
     },
     "user": {
       "eventSignup": "参与活动",
-      "eventLive": "活动现场"
+      "signup": "活动报名",
+      "checkin": "活动签到",
+      "expectations": "活动期待",
+      "eventLive": "活动现场",
+      "matching": "1v1配对",
+      "groups": "小组配对",
+      "topics": "对话话题",
+      "rating": "活动评分"
+    }
+  },
+  "pages": {
+    "signup": {
+      "title": "活动报名",
+      "description": "浏览可报名的活动，选择感兴趣的活动报名参加"
+    },
+    "matching": {
+      "title": "1v1配对",
+      "description": "在活动现场寻找志同道合的伙伴，进行一对一深度交流"
+    },
+    "groups": {
+      "title": "小组配对",
+      "description": "查看活动的小组分配，主办方会将参与者分配到不同的小组"
+    },
+    "rating": {
+      "title": "活动评分",
+      "description": "分享你的反馈，帮助我们改进未来的活动"
     }
   },
   "user": {
@@ -24,9 +49,7 @@
     "centerHint": "请从上方菜单选择要访问的页面。",
     "welcomeHome": "欢迎来到Entrohub",
     "welcomeHomeDesc": "从这里开启你的探索之旅",
-    "signup": "活动报名",
     "signupPage": "活动报名页面",
-    "signupDesc": "浏览可报名的活动，选择感兴趣的活动报名参加。",
     "noEvents": "暂无可报名的活动",
     "noEventsDesc": "目前还没有活动开放报名，请稍后再来查看。",
     "eventTime": "活动时间",
@@ -34,8 +57,6 @@
     "locationTbd": "待定",
     "signupBtn": "立即报名",
     "signedUp": "已报名",
-    "checkin": "活动签到",
-    "checkinPage": "扫描二维码或输入短码完成签到",
     "checkinQRCode": "扫描二维码签到",
     "checkinShortCode": "签到短码",
     "checkinStatus": "签到状态",

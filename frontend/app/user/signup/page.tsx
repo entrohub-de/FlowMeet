@@ -20,15 +20,6 @@ export default function SignupPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-semibold text-foreground mb-2">
-          {t('user.signup')}
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          {t('user.signupDesc')}
-        </p>
-      </div>
-
       {loading ? (
         <div className="text-center py-16">
           <p className="text-muted-foreground">{t('common.loading')}</p>

@@ -15,18 +15,18 @@ export default function UserLayout({
     {
       label: t('nav.user.eventSignup'),
       children: [
-        { label: t('user.signup'), href: '/user/signup' },
-        { label: t('user.checkin'), href: '/user/checkin' },
-        { label: t('user.expectations'), href: '/user/expectations' },
+        { label: t('nav.user.signup'), href: '/user/signup' },
+        { label: t('nav.user.checkin'), href: '/user/checkin' },
+        { label: t('nav.user.expectations'), href: '/user/expectations' },
       ]
     },
     {
       label: t('nav.user.eventLive'),
       children: [
-        { label: t('user.matching'), href: '/user/matching' },
-        { label: t('user.groups'), href: '/user/groups' },
-        { label: t('user.topics'), href: '/user/topics' },
-        { label: t('user.rating'), href: '/user/rating' },
+        { label: t('nav.user.matching'), href: '/user/matching' },
+        { label: t('nav.user.groups'), href: '/user/groups' },
+        { label: t('nav.user.topics'), href: '/user/topics' },
+        { label: t('nav.user.rating'), href: '/user/rating' },
       ]
     },
   ];

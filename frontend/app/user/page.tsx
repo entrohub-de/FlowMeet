@@ -10,26 +10,26 @@ export default function UserHomePage() {
 
   const quickLinks = [
     {
-      title: t('user.signup'),
-      description: t('user.signupDesc'),
+      title: t('nav.user.signup'),
+      description: t('pages.signup.description'),
       href: '/user/signup',
       icon: Calendar,
     },
     {
-      title: t('user.matching'),
-      description: t('user.matchingPageDesc'),
+      title: t('nav.user.matching'),
+      description: t('pages.matching.description'),
       href: '/user/matching',
       icon: Users,
     },
     {
-      title: t('user.groups'),
-      description: t('user.groupsPageDesc'),
+      title: t('nav.user.groups'),
+      description: t('pages.groups.description'),
       href: '/user/groups',
       icon: MessageSquare,
     },
     {
-      title: t('user.rating'),
-      description: t('user.ratingPageDesc'),
+      title: t('nav.user.rating'),
+      description: t('pages.rating.description'),
       href: '/user/rating',
       icon: Award,
     },
