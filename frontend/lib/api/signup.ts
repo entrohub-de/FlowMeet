@@ -2,14 +2,18 @@ import { supabase } from '@/lib/supabase/client';
 
 /**
  * 报名参加活动
+ * 如果用户之前取消过，则将状态改为 active
  */
 export async function signupForEvent(eventId: string, userId: string): Promise<boolean> {
   try {
     const { error } = await supabase
       .from('evt_signups')
-      .insert({
+      .upsert({
         event_id: eventId,
         user_id: userId,
+        status: 'active',
+      }, {
+        onConflict: 'event_id,user_id',
       });
 
     if (error) {
@@ -26,12 +30,13 @@ export async function signupForEvent(eventId: string, userId: string): Promise<b
 
 /**
  * 取消报名
+ * 不删除记录，而是将状态改为 cancelled
  */
 export async function cancelSignup(eventId: string, userId: string): Promise<boolean> {
   try {
     const { error } = await supabase
       .from('evt_signups')
-      .delete()
+      .update({ status: 'cancelled' })
       .eq('event_id', eventId)
       .eq('user_id', userId);
 
@@ -49,6 +54,7 @@ export async function cancelSignup(eventId: string, userId: string): Promise<boo
 
 /**
  * 获取用户对某个活动的报名状态
+ * 只返回 active 状态的报名
  */
 export async function getUserSignupStatus(
   userId: string,
@@ -57,13 +63,13 @@ export async function getUserSignupStatus(
   try {
     const { data, error } = await supabase
       .from('evt_signups')
-      .select('signup_id')
+      .select('signup_id, status')
       .eq('event_id', eventId)
       .eq('user_id', userId)
-      .single();
+      .eq('status', 'active')
+      .maybeSingle();
 
-    if (error && error.code !== 'PGRST116') {
-      // PGRST116 is "not found" error, which is expected when not signed up
+    if (error) {
       console.error('Error getting signup status:', error);
       return false;
     }
@@ -77,13 +83,15 @@ export async function getUserSignupStatus(
 
 /**
  * 获取用户所有报名的活动
+ * 只返回 active 状态的报名
  */
 export async function getUserSignups(userId: string): Promise<Map<string, boolean>> {
   try {
     const { data, error } = await supabase
       .from('evt_signups')
       .select('event_id')
-      .eq('user_id', userId);
+      .eq('user_id', userId)
+      .eq('status', 'active');
 
     if (error) {
       console.error('Error getting user signups:', error);
@@ -104,13 +112,15 @@ export async function getUserSignups(userId: string): Promise<Map<string, boolea
 
 /**
  * 获取某个活动的报名人数
+ * 只计算 active 状态的报名
  */
 export async function getEventSignupCount(eventId: string): Promise<number> {
   try {
     const { count, error } = await supabase
       .from('evt_signups')
       .select('*', { count: 'exact', head: true })
-      .eq('event_id', eventId);
+      .eq('event_id', eventId)
+      .eq('status', 'active');
 
     if (error) {
       console.error('Error getting signup count:', error);
