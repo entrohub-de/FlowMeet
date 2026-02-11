@@ -100,7 +100,68 @@ BEGIN
   END LOOP;
 END $$;
 
--- 2. 创建额外的活动（在现有4个活动基础上再加6个）
+-- 2. 创建Host测试账号
+DO $$
+DECLARE
+  host_user_id UUID;
+BEGIN
+  host_user_id := gen_random_uuid();
+
+  -- 创建host账号
+  INSERT INTO auth.users (
+    id,
+    instance_id,
+    email,
+    encrypted_password,
+    email_confirmed_at,
+    created_at,
+    updated_at,
+    raw_app_meta_data,
+    raw_user_meta_data,
+    is_super_admin,
+    role,
+    aud,
+    confirmation_token,
+    recovery_token,
+    email_change_token_new,
+    email_change
+  ) VALUES (
+    host_user_id,
+    '00000000-0000-0000-0000-000000000000',
+    'host@flowmeet.test',
+    crypt('host123', gen_salt('bf')), -- 密码: host123
+    NOW(),
+    NOW(),
+    NOW(),
+    '{"provider":"email","providers":["email"]}',
+    jsonb_build_object('name', 'Host Admin'),
+    FALSE,
+    'authenticated',
+    'authenticated',
+    '',
+    '',
+    '',
+    ''
+  );
+
+  -- 分配host角色
+  INSERT INTO public.evt_event_roles (user_id, role)
+  VALUES (host_user_id, 'host')
+  ON CONFLICT (user_id) DO UPDATE SET role = 'host';
+
+  -- 创建host用户资料
+  INSERT INTO public.usr_profiles (user_id, nickname, gender, age_group)
+  VALUES (
+    host_user_id,
+    'Host Admin',
+    'male',
+    '25-34'
+  );
+
+  RAISE NOTICE '✅ Host账号已创建: host@flowmeet.test / host123';
+END $$;
+
+-- 3. 创建额外的活动（在现有4个活动基础上再加6个）
 INSERT INTO public.evt_events (event_id, venue_id, name, description, start_time, end_time, checkin_qr_enabled) VALUES
   (
     gen_random_uuid(),
@@ -157,7 +218,7 @@ INSERT INTO public.evt_events (event_id, venue_id, name, description, start_time
     true
   );
 
--- 3. 为每个用户创建期待（平均每人1-2个期待）
+-- 4. 为每个用户创建期待（平均每人1-2个期待）
 DO $$
 DECLARE
   user_record RECORD;
@@ -215,7 +276,7 @@ BEGIN
   END LOOP;
 END $$;
 
--- 4. 为所有活动生成签到码
+-- 5. 为所有活动生成签到码
 UPDATE public.evt_events
 SET checkin_code = LPAD(FLOOR(RANDOM() * 1000000)::TEXT, 6, '0')
 WHERE checkin_code IS NULL;
@@ -238,7 +299,7 @@ BEGIN
   RAISE NOTICE '   - 期待总数：%', expectation_count;
 END $$;
 
--- 5. 创建配对测试数据（展示不同的配对状态和位置场景）
+-- 6. 创建配对测试数据（展示不同的配对状态和位置场景）
 DO $$
 DECLARE
   test_event_id UUID;
