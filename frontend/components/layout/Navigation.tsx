@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useRef } from 'react';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 interface NavItem {
   label: string;
@@ -23,7 +23,6 @@ interface NavigationProps {
 export default function Navigation({ items, rightSlot, logoHref }: NavigationProps) {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({});
   const menuRef = useRef<HTMLDivElement>(null);
 
   const isItemActive = (item: NavItem): boolean => {
@@ -34,13 +33,6 @@ export default function Navigation({ items, rightSlot, logoHref }: NavigationPro
       return item.children.some(child => isItemActive(child));
     }
     return false;
-  };
-
-  const toggleDropdown = (label: string) => {
-    setOpenDropdowns(prev => ({
-      ...prev,
-      [label]: !prev[label]
-    }));
   };
 
   // Close menu when clicking outside
@@ -60,23 +52,9 @@ export default function Navigation({ items, rightSlot, logoHref }: NavigationPro
     };
   }, [isMenuOpen]);
 
-  // Open all dropdowns when menu opens
-  useEffect(() => {
-    if (isMenuOpen) {
-      const allDropdowns: Record<string, boolean> = {};
-      items.forEach(item => {
-        if (item.children && item.children.length > 0) {
-          allDropdowns[item.label] = true;
-        }
-      });
-      setOpenDropdowns(allDropdowns);
-    }
-  }, [isMenuOpen, items]);
-
   // Close menu when route changes
   useEffect(() => {
     setIsMenuOpen(false);
-    setOpenDropdowns({});
   }, [pathname]);
 
   return (
@@ -182,53 +160,43 @@ export default function Navigation({ items, rightSlot, logoHref }: NavigationPro
           {items.map((item) => {
             const isActive = isItemActive(item);
             const hasChildren = item.children && item.children.length > 0;
-            const isOpen = !!openDropdowns[item.label];
 
             if (hasChildren) {
               return (
                 <div key={item.label}>
-                  <button
-                    onClick={() => toggleDropdown(item.label)}
+                  <div
                     className={cn(
-                      "w-full flex items-center justify-between px-button h-button rounded-button text-sm font-medium transition-colors",
+                      "w-full flex items-center px-button h-button text-sm font-medium",
                       isActive
-                        ? "text-primary bg-primary/10"
-                        : "text-foreground hover:bg-secondary"
+                        ? "text-primary"
+                        : "text-foreground"
                     )}
                   >
                     <span className="flex items-center gap-2">
                       {item.icon && <span className="text-base">{item.icon}</span>}
                       {item.label}
                     </span>
-                    <ChevronDown
-                      className={cn(
-                        "w-4 h-4 transition-transform",
-                        isOpen && "rotate-180"
-                      )}
-                    />
-                  </button>
+                  </div>
 
-                  {isOpen && item.children && (
-                    <div className="ml-3 mt-1 space-y-1">
-                      {item.children.map((child) => {
-                        const isChildActive = isItemActive(child);
-                        return (
-                          <Link
-                            key={child.href}
-                            href={child.href || '#'}
-                            className={cn(
-                              "block px-button h-button rounded-button text-sm transition-colors flex items-center",
-                              isChildActive
-                                ? "text-primary bg-primary/10 font-medium"
-                                : "text-muted-foreground hover:bg-secondary"
-                            )}
-                          >
-                            {child.label}
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  )}
+                  <div className="ml-3 mt-1 space-y-1">
+                    {item.children.map((child) => {
+                      const isChildActive = isItemActive(child);
+                      return (
+                        <Link
+                          key={child.href}
+                          href={child.href || '#'}
+                          className={cn(
+                            "block px-button h-button rounded-button text-sm transition-colors flex items-center",
+                            isChildActive
+                              ? "text-primary bg-primary/10 font-medium"
+                              : "text-muted-foreground hover:bg-secondary"
+                          )}
+                        >
+                          {child.label}
+                        </Link>
+                      );
+                    })}
+                  </div>
                 </div>
               );
             }
