@@ -59,6 +59,7 @@
     "venuePage": "场地信息页面",
     "matching": "1v1配对",
     "matchingPage": "在活动现场寻找志同道合的伙伴，进行一对一深度交流",
+    "matchingPageDesc": "在活动现场寻找志同道合的伙伴，进行一对一深度交流",
     "myMatches": "我的配对",
     "findPartners": "寻找伙伴",
     "noMatches": "还没有配对记录",
@@ -114,7 +115,8 @@
     "groupsGenerated": "小组已生成！",
     "groupsGenerateFailed": "生成小组失败，请重试",
     "rating": "活动评分",
-    "ratingPage": "活动评分页面"
+    "ratingPage": "活动评分页面",
+    "ratingPageDesc": "分享你的反馈，帮助我们改进未来的活动"
   },
   "host": {
     "eventManagement": "活动管理",

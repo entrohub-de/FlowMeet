@@ -63,7 +63,7 @@ export default function UserHomePage() {
         </div>
 
         {/* Quick Links Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {quickLinks.map((link) => {
             const Icon = link.icon;
             return (
@@ -73,8 +73,8 @@ export default function UserHomePage() {
                 className="group relative bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-all duration-200 hover:-translate-y-1"
               >
                 <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/40 flex items-center justify-center">
-                    <Icon className="w-5 h-5 text-primary" />
+                  <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-secondary border border-border flex items-center justify-center">
+                    <Icon className="w-5 h-5 text-muted-foreground" />
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">

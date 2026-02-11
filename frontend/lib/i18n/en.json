@@ -59,6 +59,7 @@
     "venuePage": "Venue info page",
     "matching": "1v1 Matching",
     "matchingPage": "Find like-minded partners at the event for one-on-one deep conversations",
+    "matchingPageDesc": "Find like-minded partners at the event for one-on-one deep conversations",
     "myMatches": "My Matches",
     "findPartners": "Find Partners",
     "noMatches": "No matches yet",
@@ -114,7 +115,8 @@
     "groupsGenerated": "Groups generated successfully!",
     "groupsGenerateFailed": "Failed to generate groups, please try again",
     "rating": "Event Rating",
-    "ratingPage": "Event rating page"
+    "ratingPage": "Event rating page",
+    "ratingPageDesc": "Share your feedback to help us improve future events"
   },
   "host": {
     "eventManagement": "Event Management",
