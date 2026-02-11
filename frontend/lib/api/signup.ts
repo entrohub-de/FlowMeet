@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase/client';
+import type { Event } from '@/types/domain';
 
 /**
  * 报名参加活动
@@ -138,7 +139,7 @@ export async function getEventSignupCount(eventId: string): Promise<number> {
  * 获取用户已报名的活动详情列表
  * 只返回 active 状态的报名
  */
-export async function getUserSignedUpEvents(userId: string): Promise<any[]> {
+export async function getUserSignedUpEvents(userId: string): Promise<Event[]> {
   try {
     const { data, error } = await supabase
       .from('evt_signups')
@@ -151,7 +152,12 @@ export async function getUserSignedUpEvents(userId: string): Promise<any[]> {
       return [];
     }
 
-    return (data?.map((item: any) => item.event).filter(Boolean) || []) as any[];
+    // Supabase returns nested data structure, extract events
+    const events = (data || [])
+      .map((item) => (item as unknown as { event: Event }).event)
+      .filter((event): event is Event => Boolean(event));
+
+    return events;
   } catch (error) {
     console.error('Error getting user signed up events:', error);
     return [];
