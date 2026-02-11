@@ -1,33 +1,46 @@
 -- 种子数据：创建测试用户、活动和期待
 -- 此脚本用于本地开发环境
 
--- 1. 创建20个测试用户
+-- 1. 创建100个测试用户
 DO $$
 DECLARE
   new_user_id UUID;
   i INTEGER;
-  user_names TEXT[] := ARRAY[
+  user_name TEXT;
+  email_prefix TEXT;
+  gender TEXT;
+  base_names TEXT[] := ARRAY[
     '张伟 (David)', 'Lisa Wang', '王芳 (Fiona)', 'Alex Liu', 'Emily Chen',
     'Kevin Yang', 'Sophia Zhao', '黄磊 (Leo)', 'Jason Zhou', 'Michelle Wu',
     '徐涛 (Tony)', 'Sarah Sun', 'Mary Ma', 'Frank Zhu', 'Helen Hu',
     'Ryan Lin', 'Grace He', 'Michael Guo', 'Lucy Luo', 'Daniel Liang'
   ];
-  email_prefixes TEXT[] := ARRAY[
+  base_emails TEXT[] := ARRAY[
     'david.zhang', 'lisa.wang', 'fiona.wang', 'alex.liu', 'emily.chen',
     'kevin.yang', 'sophia.zhao', 'leo.huang', 'jason.zhou', 'michelle.wu',
     'tony.xu', 'sarah.sun', 'mary.ma', 'frank.zhu', 'helen.hu',
     'ryan.lin', 'grace.he', 'michael.guo', 'lucy.luo', 'daniel.liang'
   ];
-  genders TEXT[] := ARRAY[
-    'male', 'female', 'female', 'male', 'female',
-    'male', 'female', 'male', 'male', 'female',
-    'male', 'female', 'female', 'male', 'female',
-    'male', 'female', 'male', 'female', 'male'
-  ];
 BEGIN
-  FOR i IN 1..20 LOOP
+  FOR i IN 1..100 LOOP
     -- 生成用户ID
     new_user_id := gen_random_uuid();
+
+    -- 生成用户名和邮箱（前20个使用预定义名字，后80个使用生成的名字）
+    IF i <= 20 THEN
+      user_name := base_names[i];
+      email_prefix := base_emails[i];
+    ELSE
+      user_name := 'User ' || i::TEXT;
+      email_prefix := 'user' || i::TEXT;
+    END IF;
+
+    -- 性别交替分配
+    IF i % 2 = 0 THEN
+      gender := 'female';
+    ELSE
+      gender := 'male';
+    END IF;
 
     -- 插入到 auth.users 表
     INSERT INTO auth.users (
@@ -50,13 +63,13 @@ BEGIN
     ) VALUES (
       new_user_id,
       '00000000-0000-0000-0000-000000000000',
-      email_prefixes[i] || '@flowmeet.com',
+      email_prefix || '@flowmeet.com',
       crypt('password123', gen_salt('bf')), -- 密码: password123
       NOW(),
       NOW(),
       NOW(),
       '{"provider":"email","providers":["email"]}',
-      jsonb_build_object('name', user_names[i]),
+      jsonb_build_object('name', user_name),
       FALSE,
       'authenticated',
       'authenticated',
@@ -75,8 +88,8 @@ BEGIN
     INSERT INTO public.usr_profiles (user_id, nickname, gender, age_group)
     VALUES (
       new_user_id,
-      user_names[i],
-      genders[i],
+      user_name,
+      gender,
       CASE (i % 4)
         WHEN 0 THEN '18-24'
         WHEN 1 THEN '25-34'
