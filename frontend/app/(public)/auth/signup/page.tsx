@@ -61,7 +61,7 @@ export default function SignupPage() {
 
       if (authData?.user) {
         const { error: roleError } = await supabase
-          .from('evt_event_roles')
+          .from('usr_role')
           .upsert(
             {
               user_id: authData.user.id,

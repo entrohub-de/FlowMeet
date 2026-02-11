@@ -50,7 +50,7 @@ BEGIN
   END IF;
 
   -- 设置角色为host
-  INSERT INTO public.evt_event_roles (user_id, role)
+  INSERT INTO public.usr_role (user_id, role)
   VALUES (host_user_id, 'host')
   ON CONFLICT (user_id) DO UPDATE SET role = 'host';
 

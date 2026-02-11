@@ -65,7 +65,7 @@ export default function LoginPage() {
       }
 
       const { data: roleData, error: roleError } = await supabase
-        .from('evt_event_roles')
+        .from('usr_role')
         .select('role')
         .eq('user_id', authData.user.id)
         .maybeSingle();
@@ -77,7 +77,7 @@ export default function LoginPage() {
 
       if (!roleData) {
         const { error: upsertError } = await supabase
-          .from('evt_event_roles')
+          .from('usr_role')
           .upsert(
             {
               user_id: authData.user.id,

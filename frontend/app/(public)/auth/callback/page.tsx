@@ -37,7 +37,7 @@ function AuthCallbackContent() {
 
           // Check user role
           const { data: roleData, error: roleError } = await supabase
-            .from('evt_event_roles')
+            .from('usr_role')
             .select('role')
             .eq('user_id', sessionData.user.id)
             .maybeSingle();
@@ -49,7 +49,7 @@ function AuthCallbackContent() {
           // If no role exists, create default user role
           if (!roleData) {
             const { error: upsertError } = await supabase
-              .from('evt_event_roles')
+              .from('usr_role')
               .upsert(
                 {
                   user_id: sessionData.user.id,

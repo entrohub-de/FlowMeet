@@ -80,7 +80,7 @@ BEGIN
     );
 
     -- 创建用户角色
-    INSERT INTO public.evt_event_roles (user_id, role)
+    INSERT INTO public.usr_role (user_id, role)
     VALUES (new_user_id, 'user')
     ON CONFLICT (user_id) DO NOTHING;
 
@@ -145,7 +145,7 @@ BEGIN
   );
 
   -- 分配host角色
-  INSERT INTO public.evt_event_roles (user_id, role)
+  INSERT INTO public.usr_role (user_id, role)
   VALUES (host_user_id, 'host')
   ON CONFLICT (user_id) DO UPDATE SET role = 'host';
 
