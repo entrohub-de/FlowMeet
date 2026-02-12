@@ -111,8 +111,9 @@ export default function HostRatingStatsPage() {
         setEventRatings((eventRatingsRes.data || []) as EventRatingRow[]);
         setMatchQualityRatings((matchQualityRes.data || []) as MatchQualityRow[]);
         setMatchRatings(matchRatingsData);
-      } catch (err: any) {
-        setError(err?.message || 'Failed to load rating stats');
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Failed to load rating stats';
+        setError(message);
       } finally {
         setLoading(false);
       }
