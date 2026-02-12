@@ -12,7 +12,7 @@ export default function UserHomePage() {
     {
       title: t('nav.user.signup'),
       description: t('pages.signup.description'),
-      href: '/user/signup',
+      href: '/user/event',
       icon: Calendar,
     },
     {
