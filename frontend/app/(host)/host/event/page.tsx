@@ -18,7 +18,15 @@ export default function HostEventPage() {
     try {
       setLoading(true);
       const data = await getEvents();
-      setEvents(data);
+
+      // Sort events by start time (earliest first)
+      const sortedEvents = data.sort((a, b) => {
+        const timeA = new Date(a.start_time).getTime();
+        const timeB = new Date(b.start_time).getTime();
+        return timeA - timeB;
+      });
+
+      setEvents(sortedEvents);
     } catch (error) {
       console.error('Failed to load events:', error);
     } finally {
