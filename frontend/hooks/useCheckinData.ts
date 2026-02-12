@@ -12,6 +12,16 @@ export function useCheckinData() {
   const [userId, setUserId] = useState<string | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
+  // 加载签到状态的函数（可复用）
+  const loadCheckinStatuses = async (currentUserId: string) => {
+    try {
+      const statusMap = await getAllUserCheckinStatuses(currentUserId);
+      setCheckedInEvents(statusMap);
+    } catch (error) {
+      console.error('Failed to load checkin status:', error);
+    }
+  };
+
   useEffect(() => {
     async function loadData() {
       try {
@@ -36,12 +46,31 @@ export function useCheckinData() {
           setEvents(signedUpEvents);
 
           // 加载签到状态
-          try {
-            const statusMap = await getAllUserCheckinStatuses(user.id);
-            setCheckedInEvents(statusMap);
-          } catch (error) {
-            console.error('Failed to load checkin status:', error);
-          }
+          await loadCheckinStatuses(user.id);
+
+          // 订阅 evt_signups 表的实时更新
+          const channel = supabase
+            .channel('checkin-updates')
+            .on(
+              'postgres_changes',
+              {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'evt_signups',
+                filter: `user_id=eq.${user.id}`,
+              },
+              (payload) => {
+                console.log('[Realtime] 签到状态更新:', payload);
+                // 重新加载签到状态
+                loadCheckinStatuses(user.id);
+              }
+            )
+            .subscribe();
+
+          // 清理订阅
+          return () => {
+            channel.unsubscribe();
+          };
         } else {
           // 未登录用户不显示任何活动
           setEvents([]);

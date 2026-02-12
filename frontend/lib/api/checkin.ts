@@ -96,6 +96,8 @@ export async function checkInParticipant(
   userId: string
 ): Promise<{ success: boolean; message: string }> {
   try {
+    console.log('[checkInParticipant] 开始签到:', { eventId, userId });
+
     // 检查用户是否已报名并获取签到状态
     const { data: signup, error: signupError } = await supabase
       .from('evt_signups')
@@ -105,30 +107,45 @@ export async function checkInParticipant(
       .eq('status', 'active')
       .maybeSingle();
 
-    if (signupError) throw signupError;
+    console.log('[checkInParticipant] 查询报名结果:', { signup, signupError });
+
+    if (signupError) {
+      console.error('[checkInParticipant] 查询报名错误:', signupError);
+      throw signupError;
+    }
     if (!signup) {
+      console.warn('[checkInParticipant] 用户未报名');
       return { success: false, message: '用户未报名此活动' };
     }
 
     if (signup.checked_in) {
+      console.warn('[checkInParticipant] 用户已签到');
       return { success: false, message: '该用户已签到' };
     }
 
     // 执行签到 - 直接更新 evt_signups
-    const { error: updateError } = await supabase
+    console.log('[checkInParticipant] 执行签到更新...');
+    const { data: updateData, error: updateError } = await supabase
       .from('evt_signups')
       .update({
         checked_in: true,
         checked_in_at: new Date().toISOString()
       })
       .eq('event_id', eventId)
-      .eq('user_id', userId);
+      .eq('user_id', userId)
+      .select();
 
-    if (updateError) throw updateError;
+    console.log('[checkInParticipant] 更新结果:', { updateData, updateError });
 
+    if (updateError) {
+      console.error('[checkInParticipant] 更新错误:', updateError);
+      throw updateError;
+    }
+
+    console.log('[checkInParticipant] 签到成功!');
     return { success: true, message: '签到成功' };
   } catch (error) {
-    console.error('Error checking in participant:', error);
+    console.error('[checkInParticipant] 捕获异常:', error);
     return { success: false, message: '签到失败，请重试' };
   }
 }
