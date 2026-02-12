@@ -145,7 +145,7 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
       } else {
         setMessage({ type: 'error', text: result.message });
       }
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: '签到失败，请重试' });
     } finally {
       setLoading(false);

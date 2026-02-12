@@ -3,8 +3,17 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
+interface TestResult {
+  success: boolean;
+  session?: string;
+  error?: string | null;
+  supabaseUrl?: string;
+  timestamp?: string;
+  errorType?: string;
+}
+
 export default function TestConnectionPage() {
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<TestResult | null>(null);
   const [loading, setLoading] = useState(false);
 
   const testConnection = async () => {

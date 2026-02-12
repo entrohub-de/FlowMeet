@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { Event } from '@/types/domain';
-import { Calendar, MapPin, Clock, Users, Settings, Trash2, AlertTriangle, X } from 'lucide-react';
+import { Calendar, MapPin, Clock, Settings, Trash2, AlertTriangle, X } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 import { useRouter } from 'next/navigation';
 import { deleteEvent } from '@/lib/api/events';

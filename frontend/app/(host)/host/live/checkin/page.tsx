@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from '@/lib/i18n/context';
 import { getEvents } from '@/lib/api/events';
 import { getEventSignups } from '@/lib/api/signup';
@@ -35,7 +35,7 @@ export default function CheckinPage() {
     loadEvents();
   }, []);
 
-  const loadSignupsForEvent = async () => {
+  const loadSignupsForEvent = useCallback(async () => {
     if (!selectedEventId) return;
 
     try {
@@ -44,11 +44,11 @@ export default function CheckinPage() {
     } catch (error) {
       console.error('Failed to load signups:', error);
     }
-  };
+  }, [selectedEventId]);
 
   useEffect(() => {
     loadSignupsForEvent();
-  }, [selectedEventId]);
+  }, [loadSignupsForEvent]);
 
   const handleCheckinSuccess = () => {
     loadSignupsForEvent();
@@ -146,10 +146,10 @@ export default function CheckinPage() {
                       </div>
                       <div>
                         <div className="font-medium text-foreground">
-                          {signup.profile?.nickname || signup.profile?.email || '匿名用户'}
+                          {signup.profile?.nickname || '匿名用户'}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          {new Date(signup.signup_timestamp).toLocaleString('zh-CN')}
+                          {new Date(signup.signup_timestamp || signup.created_at).toLocaleString('zh-CN')}
                         </div>
                       </div>
                     </div>

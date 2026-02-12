@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from '@/lib/i18n/context';
 import { createEvent } from '@/lib/api/events';
 import { supabase } from '@/lib/supabase/client';
-import type { Event, Venue } from '@/types/domain';
+import type { Venue } from '@/types/domain';
 import { X } from 'lucide-react';
 
 interface CreateEventDialogProps {

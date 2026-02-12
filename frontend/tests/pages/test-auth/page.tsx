@@ -59,7 +59,7 @@ export default function TestAuthPage() {
       addLog(`测试 3: 尝试登录 (${testEmail})...`);
 
       try {
-        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        const { error: signInError } = await supabase.auth.signInWithPassword({
           email: testEmail,
           password: 'wrongpassword',
         });
