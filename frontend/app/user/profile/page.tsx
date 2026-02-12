@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/features/auth/useAuth';
 import { useTranslation } from '@/lib/i18n/context';
 import { getProfile, upsertProfile, getPreferences, upsertPreferences } from '@/lib/api/profile';
+import { getUserRole, upgradeToHost, type UserRole } from '@/lib/api/role';
+import { Crown } from 'lucide-react';
 
 const GENDER_OPTIONS = ['male', 'female', 'other'] as const;
 const AGE_GROUP_OPTIONS = ['18-24', '25-34', '35-44', '45+'] as const;
@@ -24,11 +26,18 @@ export default function ProfilePage() {
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saved'>('idle');
   const [loading, setLoading] = useState(true);
 
+  // Role upgrade states
+  const [userRole, setUserRole] = useState<UserRole>('user');
+  const [upgrading, setUpgrading] = useState(false);
+  const [upgradeStatus, setUpgradeStatus] = useState<'idle' | 'success' | 'error' | 'already-host'>('idle');
+  const [upgradeError, setUpgradeError] = useState<string | null>(null);
+
   const loadData = useCallback(async (userId: string) => {
     try {
-      const [profile, prefs] = await Promise.all([
+      const [profile, prefs, role] = await Promise.all([
         getProfile(userId),
         getPreferences(userId),
+        getUserRole(userId),
       ]);
       if (profile) {
         setNickname(profile.nickname ?? '');
@@ -41,6 +50,7 @@ export default function ProfilePage() {
         setPurpose(prefs.purpose ?? '');
         setIndustryBackground(prefs.industry_background ?? '');
       }
+      setUserRole(role);
     } finally {
       setLoading(false);
     }
@@ -72,6 +82,38 @@ export default function ProfilePage() {
       setTimeout(() => setSaveStatus('idle'), 2000);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleUpgradeToHost = async () => {
+    if (!user?.id) return;
+    setUpgrading(true);
+    setUpgradeStatus('idle');
+    setUpgradeError(null);
+
+    try {
+      const result = await upgradeToHost(user.id);
+
+      if (result.success) {
+        setUpgradeStatus('success');
+        setUserRole('host');
+        setTimeout(() => {
+          // Redirect to host dashboard after successful upgrade
+          window.location.href = '/host';
+        }, 1500);
+      } else {
+        if (result.error?.includes('already')) {
+          setUpgradeStatus('already-host');
+        } else {
+          setUpgradeStatus('error');
+          setUpgradeError(result.error || t('profile.roleUpgrade.error'));
+        }
+      }
+    } catch {
+      setUpgradeStatus('error');
+      setUpgradeError(t('profile.roleUpgrade.error'));
+    } finally {
+      setUpgrading(false);
     }
   };
 
@@ -203,6 +245,118 @@ export default function ProfilePage() {
             />
           </div>
         </section>
+
+        {/* Role Upgrade Section */}
+        {userRole === 'user' && (
+          <section className="space-y-4 border-t border-border pt-8">
+            <h2 className="text-lg font-medium text-foreground border-b border-border pb-2">
+              {t('profile.roleUpgrade.title')}
+            </h2>
+
+            <div className="bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg p-6 space-y-4">
+              <div className="flex items-start gap-3">
+                <Crown className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
+                <div className="flex-1 space-y-3">
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">
+                      {t('profile.roleUpgrade.currentRole')}
+                    </div>
+                    <div className="text-base font-medium text-foreground">
+                      {t(`profile.roleUpgrade.roles.${userRole}`)}
+                    </div>
+                  </div>
+
+                  <p className="text-sm text-foreground">
+                    {t('profile.roleUpgrade.upgradeDescription')}
+                  </p>
+
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium text-foreground">
+                      {t('profile.roleUpgrade.benefits.title')}
+                    </div>
+                    <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                        {t('profile.roleUpgrade.benefits.createEvents')}
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                        {t('profile.roleUpgrade.benefits.manageSignups')}
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                        {t('profile.roleUpgrade.benefits.checkin')}
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                        {t('profile.roleUpgrade.benefits.viewStats')}
+                      </li>
+                    </ul>
+                  </div>
+
+                  {upgradeStatus === 'success' && (
+                    <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg">
+                      <p className="text-sm text-foreground">
+                        {t('profile.roleUpgrade.upgraded')}
+                      </p>
+                    </div>
+                  )}
+
+                  {upgradeStatus === 'already-host' && (
+                    <div className="p-3 bg-secondary border border-border rounded-lg">
+                      <p className="text-sm text-foreground">
+                        {t('profile.roleUpgrade.alreadyHost')}
+                      </p>
+                    </div>
+                  )}
+
+                  {upgradeStatus === 'error' && (
+                    <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                      <p className="text-sm text-destructive">
+                        {upgradeError || t('profile.roleUpgrade.error')}
+                      </p>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={handleUpgradeToHost}
+                    disabled={upgrading || upgradeStatus === 'success'}
+                    className="w-full px-button h-button bg-primary text-primary-foreground rounded-button font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    <Crown className="w-4 h-4" />
+                    {upgrading
+                      ? t('profile.roleUpgrade.upgrading')
+                      : upgradeStatus === 'success'
+                      ? t('profile.roleUpgrade.upgraded')
+                      : t('profile.roleUpgrade.upgradeToHost')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Current Role Display for Hosts/Admins */}
+        {(userRole === 'host' || userRole === 'admin') && (
+          <section className="space-y-4 border-t border-border pt-8">
+            <h2 className="text-lg font-medium text-foreground border-b border-border pb-2">
+              {t('profile.roleUpgrade.title')}
+            </h2>
+            <div className="bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg p-6">
+              <div className="flex items-center gap-3">
+                <Crown className="w-6 h-6 text-primary" />
+                <div>
+                  <div className="text-sm text-muted-foreground">
+                    {t('profile.roleUpgrade.currentRole')}
+                  </div>
+                  <div className="text-lg font-medium text-foreground">
+                    {t(`profile.roleUpgrade.roles.${userRole}`)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Save Button */}
         <button

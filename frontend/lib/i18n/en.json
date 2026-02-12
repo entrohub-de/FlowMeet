@@ -228,7 +228,29 @@
     "industryBackgroundPlaceholder": "e.g. Internet, Finance, Education",
     "save": "Save",
     "saving": "Saving...",
-    "saved": "Saved"
+    "saved": "Saved",
+    "roleUpgrade": {
+      "title": "Account Role",
+      "currentRole": "Current Role",
+      "roles": {
+        "user": "User",
+        "host": "Host",
+        "admin": "Admin"
+      },
+      "upgradeToHost": "Become a Host",
+      "upgradeDescription": "As a host, you'll be able to create and manage events, view registration data, manage check-ins, and more.",
+      "benefits": {
+        "title": "Host permissions include:",
+        "createEvents": "Create and manage events",
+        "manageSignups": "Manage participant registrations",
+        "checkin": "On-site check-in management",
+        "viewStats": "View event statistics"
+      },
+      "upgrading": "Upgrading...",
+      "upgraded": "Successfully upgraded to host!",
+      "alreadyHost": "You are already a host",
+      "error": "Upgrade failed, please try again"
+    }
   },
   "home": {
     "headline": "Discover your next FlowMeet",

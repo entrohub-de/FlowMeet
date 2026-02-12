@@ -230,7 +230,29 @@
     "industryBackgroundPlaceholder": "如：互联网、金融、教育",
     "save": "保存",
     "saving": "保存中...",
-    "saved": "已保存"
+    "saved": "已保存",
+    "roleUpgrade": {
+      "title": "账户角色",
+      "currentRole": "当前角色",
+      "roles": {
+        "user": "普通用户",
+        "host": "主办方",
+        "admin": "管理员"
+      },
+      "upgradeToHost": "升级为主办方",
+      "upgradeDescription": "成为主办方后，你将可以创建和管理活动、查看报名数据、管理签到等功能。",
+      "benefits": {
+        "title": "主办方权限包括：",
+        "createEvents": "创建和管理活动",
+        "manageSignups": "管理参与者报名",
+        "checkin": "现场签到管理",
+        "viewStats": "查看活动数据统计"
+      },
+      "upgrading": "升级中...",
+      "upgraded": "已成功升级为主办方！",
+      "alreadyHost": "你已经是主办方了",
+      "error": "升级失败，请重试"
+    }
   },
   "home": {
     "headline": "发现你的下一场 FlowMeet",
