@@ -88,7 +88,7 @@ export default function CheckinPage() {
           {selectedEventId && (
             <button
               onClick={() => setShowCheckinDialog(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
             >
               <Plus className="w-5 h-5" />
               {t('checkin.checkinParticipant')}
@@ -98,19 +98,24 @@ export default function CheckinPage() {
 
         {/* Stats Cards */}
         {selectedEvent && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-              <div className="text-sm text-muted-foreground mb-2">{t('host.events.totalSignups')}</div>
-              <div className="text-3xl font-bold text-foreground">{signups.length}</div>
-            </div>
+          <div className="space-y-4 mb-6">
+            {/* First Row - Checked In */}
             <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
               <div className="text-sm text-muted-foreground mb-2">{t('user.checkedIn')}</div>
               <div className="text-3xl font-bold text-primary">{checkedInCount}</div>
             </div>
-            <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-              <div className="text-sm text-muted-foreground mb-2">{t('checkin.checkinRate')}</div>
-              <div className="text-3xl font-bold text-foreground">
-                {signups.length > 0 ? Math.round((checkedInCount / signups.length) * 100) : 0}%
+
+            {/* Second Row - Total Signups and Check-in Rate */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+                <div className="text-sm text-muted-foreground mb-2">{t('host.events.totalSignups')}</div>
+                <div className="text-3xl font-bold text-foreground">{signups.length}</div>
+              </div>
+              <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+                <div className="text-sm text-muted-foreground mb-2">{t('checkin.checkinRate')}</div>
+                <div className="text-3xl font-bold text-foreground">
+                  {signups.length > 0 ? Math.round((checkedInCount / signups.length) * 100) : 0}%
+                </div>
               </div>
             </div>
           </div>
