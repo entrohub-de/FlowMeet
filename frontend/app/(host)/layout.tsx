@@ -2,6 +2,7 @@
 
 import Navigation from '@/components/layout/Navigation';
 import ProfileAvatar from '@/components/layout/ProfileAvatar';
+import RoleRouteGuard from '@/components/auth/RoleRouteGuard';
 import { useTranslation } from '@/lib/i18n/context';
 
 export default function HostLayout({
@@ -31,9 +32,11 @@ export default function HostLayout({
   ];
 
   return (
-    <div>
-      <Navigation items={navItems} rightSlot={<ProfileAvatar />} />
-      {children}
-    </div>
+    <RoleRouteGuard area="host">
+      <div>
+        <Navigation items={navItems} rightSlot={<ProfileAvatar />} />
+        {children}
+      </div>
+    </RoleRouteGuard>
   );
 }

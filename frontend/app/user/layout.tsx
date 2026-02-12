@@ -2,6 +2,7 @@
 
 import Navigation from '@/components/layout/Navigation';
 import ProfileAvatar from '@/components/layout/ProfileAvatar';
+import RoleRouteGuard from '@/components/auth/RoleRouteGuard';
 import { useTranslation } from '@/lib/i18n/context';
 
 export default function UserLayout({
@@ -32,9 +33,11 @@ export default function UserLayout({
   ];
 
   return (
-    <div>
-      <Navigation items={navItems} rightSlot={<ProfileAvatar />} logoHref="/user" />
-      {children}
-    </div>
+    <RoleRouteGuard area="user">
+      <div>
+        <Navigation items={navItems} rightSlot={<ProfileAvatar />} logoHref="/user" />
+        {children}
+      </div>
+    </RoleRouteGuard>
   );
 }
