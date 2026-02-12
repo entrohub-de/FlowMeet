@@ -13,6 +13,13 @@ export default function HostLayout({
 
   const navItems = [
     {
+      label: t('nav.host.eventLive'),
+      children: [
+        { label: t('nav.host.eventLiveCheckin'), href: '/host/live/checkin' },
+        { label: t('nav.host.eventLiveFlow'), href: '/host/live/flow' },
+      ],
+    },
+    {
       label: t('nav.host.eventManagement'),
       children: [
         { label: t('nav.host.eventManagement'), href: '/host/event' },
@@ -21,13 +28,6 @@ export default function HostLayout({
       ],
     },
     { label: t('pages.rating.title'), href: '/host/rating' },
-    {
-      label: t('nav.host.eventLive'),
-      children: [
-        { label: t('nav.host.eventLiveCheckin'), href: '/host/live/checkin' },
-        { label: t('nav.host.eventLiveFlow'), href: '/host/live/flow' },
-      ],
-    },
   ];
 
   return (
