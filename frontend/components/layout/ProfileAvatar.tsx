@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/features/auth/useAuth';
 import { supabase } from '@/lib/supabase/client';
 import { useTranslation } from '@/lib/i18n/context';
@@ -10,6 +10,7 @@ export default function ProfileAvatar() {
   const { user } = useAuth();
   const { t, locale, setLocale } = useTranslation();
   const router = useRouter();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -32,6 +33,8 @@ export default function ProfileAvatar() {
     router.push('/');
   };
 
+  const profileHref = pathname?.startsWith('/host') ? '/host/profile' : '/user/profile';
+
   return (
     <div ref={menuRef} className="relative ml-auto">
       <button
@@ -44,7 +47,7 @@ export default function ProfileAvatar() {
       {open && (
         <div className="absolute right-0 top-full mt-1 bg-popover border border-border rounded-lg shadow-lg p-2 z-50 flex flex-col gap-2 min-w-[180px]">
           <button
-            onClick={() => { setOpen(false); router.push('/user/profile'); }}
+            onClick={() => { setOpen(false); router.push(profileHref); }}
             className="w-full px-button h-button text-sm text-muted-foreground hover:bg-secondary transition-colors cursor-pointer rounded-button text-left"
           >
             {t('profile.title')}
