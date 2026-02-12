@@ -3,16 +3,13 @@
 import { useState } from 'react';
 import { useTranslation } from '@/lib/i18n/context';
 import { useGroups } from '@/hooks/useGroups';
-import { EventSelector } from '@/components/expectations/EventSelector';
 import { GroupCard } from '@/components/groups';
 import { Users, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function GroupsPage() {
   const { t } = useTranslation();
   const {
-    events,
     selectedEventId,
-    setSelectedEventId,
     groups,
     userGroup,
     userId,
@@ -48,18 +45,6 @@ export default function GroupsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">{t('user.groups')}</h1>
-        <p className="text-muted-foreground">{t('user.groupsPageDesc')}</p>
-      </div>
-
-      {/* Event Selector */}
-      <EventSelector
-        events={events}
-        selectedEventId={selectedEventId}
-        onEventChange={setSelectedEventId}
-      />
-
       {selectedEventId && (
         <>
           {/* 我的小组 */}
@@ -135,4 +120,3 @@ export default function GroupsPage() {
     </div>
   );
 }
-
