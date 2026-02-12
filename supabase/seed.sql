@@ -370,10 +370,12 @@ BEGIN
     purpose = EXCLUDED.purpose,
     industry_background = EXCLUDED.industry_background;
 
-  -- 让所有用户签到
-  INSERT INTO public.evt_assignments (session_id, user_id, checked_in)
-  SELECT test_session_id, unnest(user_ids), true
-  ON CONFLICT (session_id, user_id) DO UPDATE SET checked_in = true;
+  -- 让所有用户签到 - 更新 evt_signups 表
+  UPDATE public.evt_signups
+  SET checked_in = true, checked_in_at = NOW()
+  WHERE event_id = test_event_id
+    AND user_id = ANY(user_ids)
+    AND status = 'active';
 
   -- 场景1: 完美场景 - 双方都设置了位置（刚刚更新）
   INSERT INTO public.evt_matches (

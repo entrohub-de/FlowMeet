@@ -208,6 +208,9 @@ export interface Signup {
   user_id: string;
   status: 'active' | 'cancelled';
   created_at: string;
+  checked_in: boolean;
+  checked_in_at?: string;
+  signup_timestamp?: string;
   profile?: Profile;
   expectation?: Expectation;
 }

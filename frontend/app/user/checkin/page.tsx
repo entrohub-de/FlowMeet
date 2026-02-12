@@ -18,7 +18,7 @@ function isToday(dateString: string): boolean {
 
 export default function CheckinPage() {
   const { t } = useTranslation();
-  const { events, loading, checkedInEvents, error } = useCheckinData();
+  const { events, loading, checkedInEvents, userId, error } = useCheckinData();
   const [showOtherEvents, setShowOtherEvents] = useState(false);
 
   const { todayEvents, otherEvents } = useMemo(() => {
@@ -68,6 +68,7 @@ export default function CheckinPage() {
                   <EventCheckinCard
                     key={event.event_id}
                     event={event}
+                    userId={userId || ''}
                     isCheckedIn={checkedInEvents.get(event.event_id) || false}
                   />
                 ))}
@@ -91,6 +92,7 @@ export default function CheckinPage() {
                     <EventCheckinCard
                       key={event.event_id}
                       event={event}
+                      userId={userId || ''}
                       isCheckedIn={checkedInEvents.get(event.event_id) || false}
                     />
                   ))}

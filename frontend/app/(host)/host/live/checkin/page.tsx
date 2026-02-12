@@ -5,8 +5,9 @@ import { useTranslation } from '@/lib/i18n/context';
 import { getEvents } from '@/lib/api/events';
 import { getEventSignups } from '@/lib/api/signup';
 import type { Event, Signup } from '@/types/domain';
-import { UserCheck } from 'lucide-react';
+import { UserCheck, Plus } from 'lucide-react';
 import CustomSelect from '@/components/ui/CustomSelect';
+import { CheckinDialog } from '@/components/checkin/CheckinDialog';
 
 export default function CheckinPage() {
   const { t } = useTranslation();
@@ -14,6 +15,7 @@ export default function CheckinPage() {
   const [selectedEventId, setSelectedEventId] = useState<string>('');
   const [signups, setSignups] = useState<Signup[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCheckinDialog, setShowCheckinDialog] = useState(false);
 
   useEffect(() => {
     const loadEvents = async () => {
@@ -33,20 +35,24 @@ export default function CheckinPage() {
     loadEvents();
   }, []);
 
-  useEffect(() => {
+  const loadSignupsForEvent = async () => {
     if (!selectedEventId) return;
 
-    const loadSignups = async () => {
-      try {
-        const signupsData = await getEventSignups(selectedEventId);
-        setSignups(signupsData);
-      } catch (error) {
-        console.error('Failed to load signups:', error);
-      }
-    };
+    try {
+      const signupsData = await getEventSignups(selectedEventId);
+      setSignups(signupsData);
+    } catch (error) {
+      console.error('Failed to load signups:', error);
+    }
+  };
 
-    loadSignups();
+  useEffect(() => {
+    loadSignupsForEvent();
   }, [selectedEventId]);
+
+  const handleCheckinSuccess = () => {
+    loadSignupsForEvent();
+  };
 
   if (loading) {
     return (
@@ -64,9 +70,21 @@ export default function CheckinPage() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <div className="flex items-center gap-3 mb-4">
-            <UserCheck className="w-8 h-8 text-primary" />
-            <h1 className="text-3xl font-bold text-foreground">签到管理</h1>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <UserCheck className="w-8 h-8 text-primary" />
+              <h1 className="text-3xl font-bold text-foreground">签到管理</h1>
+            </div>
+
+            {selectedEventId && (
+              <button
+                onClick={() => setShowCheckinDialog(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
+              >
+                <Plus className="w-5 h-5" />
+                签到参与者
+              </button>
+            )}
           </div>
 
           {/* Event Selector */}
@@ -153,6 +171,15 @@ export default function CheckinPage() {
           </div>
         </div>
       </div>
+
+      {/* Checkin Dialog */}
+      {showCheckinDialog && (
+        <CheckinDialog
+          eventId={selectedEventId}
+          onClose={() => setShowCheckinDialog(false)}
+          onSuccess={handleCheckinSuccess}
+        />
+      )}
     </div>
   );
 }

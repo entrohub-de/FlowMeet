@@ -106,6 +106,20 @@ const config: Config = {
       padding: {
         button: "var(--button-padding)",
       },
+      animation: {
+        'scan-line': 'scan-line 2s linear infinite',
+        'scale-in': 'scale-in 0.3s ease-out',
+      },
+      keyframes: {
+        'scan-line': {
+          '0%': { top: '0%' },
+          '100%': { top: '100%' },
+        },
+        'scale-in': {
+          '0%': { transform: 'scale(0)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

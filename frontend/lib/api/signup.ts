@@ -171,10 +171,10 @@ export async function getUserSignedUpEvents(userId: string): Promise<Event[]> {
  */
 export async function getEventSignups(eventId: string): Promise<Signup[]> {
   try {
-    // First, get all signups for the event
+    // First, get all signups for the event (including checkin status)
     const { data: signupsData, error: signupsError } = await supabase
       .from('evt_signups')
-      .select('signup_id, event_id, user_id, status, created_at')
+      .select('signup_id, event_id, user_id, status, created_at, checked_in, checked_in_at')
       .eq('event_id', eventId)
       .eq('status', 'active')
       .order('created_at', { ascending: false });
@@ -213,13 +213,16 @@ export async function getEventSignups(eventId: string): Promise<Signup[]> {
       (expectationsData || []).map(e => [e.user_id, e])
     );
 
-    // Combine the data
+    // Combine the data - checked_in now comes directly from evt_signups
     const signups: Signup[] = signupsData.map(signup => ({
       signup_id: signup.signup_id,
       event_id: signup.event_id,
       user_id: signup.user_id,
       status: signup.status,
       created_at: signup.created_at,
+      signup_timestamp: signup.created_at,
+      checked_in: signup.checked_in || false,
+      checked_in_at: signup.checked_in_at,
       profile: profilesMap.get(signup.user_id),
       expectation: expectationsMap.get(signup.user_id),
     }));
