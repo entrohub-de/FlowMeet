@@ -68,25 +68,8 @@ export default function CheckinPage() {
   return (
     <div className="min-h-[calc(100vh-60px)] p-4 bg-muted/30">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <UserCheck className="w-8 h-8 text-primary" />
-              <h1 className="text-3xl font-bold text-foreground">签到管理</h1>
-            </div>
-
-            {selectedEventId && (
-              <button
-                onClick={() => setShowCheckinDialog(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
-              >
-                <Plus className="w-5 h-5" />
-                签到参与者
-              </button>
-            )}
-          </div>
-
+        {/* Event Selection */}
+        <div className="mb-6 space-y-4">
           {/* Event Selector */}
           {events.length > 0 && (
             <CustomSelect
@@ -96,9 +79,20 @@ export default function CheckinPage() {
               }))}
               value={selectedEventId}
               onChange={setSelectedEventId}
-              placeholder="选择活动"
-              className="w-full md:w-auto md:min-w-[300px]"
+              placeholder={t('checkin.selectEvent')}
+              className="w-full md:w-auto md:min-w-[300px] shadow-sm"
             />
+          )}
+
+          {/* Checkin Button */}
+          {selectedEventId && (
+            <button
+              onClick={() => setShowCheckinDialog(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
+            >
+              <Plus className="w-5 h-5" />
+              {t('checkin.checkinParticipant')}
+            </button>
           )}
         </div>
 
@@ -106,15 +100,15 @@ export default function CheckinPage() {
         {selectedEvent && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-              <div className="text-sm text-muted-foreground mb-2">总报名人数</div>
+              <div className="text-sm text-muted-foreground mb-2">{t('host.events.totalSignups')}</div>
               <div className="text-3xl font-bold text-foreground">{signups.length}</div>
             </div>
             <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-              <div className="text-sm text-muted-foreground mb-2">已签到</div>
+              <div className="text-sm text-muted-foreground mb-2">{t('user.checkedIn')}</div>
               <div className="text-3xl font-bold text-primary">{checkedInCount}</div>
             </div>
             <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-              <div className="text-sm text-muted-foreground mb-2">签到率</div>
+              <div className="text-sm text-muted-foreground mb-2">{t('checkin.checkinRate')}</div>
               <div className="text-3xl font-bold text-foreground">
                 {signups.length > 0 ? Math.round((checkedInCount / signups.length) * 100) : 0}%
               </div>
@@ -125,13 +119,13 @@ export default function CheckinPage() {
         {/* Participants List */}
         <div className="bg-card border border-border rounded-xl shadow-sm">
           <div className="p-6 border-b border-border">
-            <h2 className="text-xl font-semibold text-foreground">参与者列表</h2>
+            <h2 className="text-xl font-semibold text-foreground">{t('host.events.participantsList')}</h2>
           </div>
           <div className="p-6">
             {signups.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <UserCheck className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>暂无报名参与者</p>
+                <p>{t('checkin.noParticipants')}</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -146,7 +140,7 @@ export default function CheckinPage() {
                       </div>
                       <div>
                         <div className="font-medium text-foreground">
-                          {signup.profile?.nickname || '匿名用户'}
+                          {signup.profile?.nickname || t('user.anonymous')}
                         </div>
                         <div className="text-sm text-muted-foreground">
                           {new Date(signup.signup_timestamp || signup.created_at).toLocaleString('zh-CN')}
@@ -156,11 +150,11 @@ export default function CheckinPage() {
                     <div>
                       {signup.checked_in ? (
                         <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-medium">
-                          已签到
+                          {t('user.checkedIn')}
                         </span>
                       ) : (
                         <span className="px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-sm font-medium">
-                          未签到
+                          {t('user.notCheckedIn')}
                         </span>
                       )}
                     </div>

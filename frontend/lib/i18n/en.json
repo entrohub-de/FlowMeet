@@ -348,5 +348,32 @@
   "metadata": {
     "title": "FlowMeet - Organize & Join Events Easily",
     "description": "FlowMeet helps you create events, manage attendance, and enjoy a clear workflow."
+  },
+  "checkin": {
+    "selectEvent": "Select Event",
+    "checkinParticipant": "Check In Participant",
+    "checkinRate": "Check-in Rate",
+    "noParticipants": "No participants yet",
+    "dialog": {
+      "title": "Participant Check-in",
+      "manualTab": "Manual Input",
+      "scanTab": "Scan QR Code",
+      "codeLabel": "Check-in Code",
+      "codePlaceholder": "Enter check-in code",
+      "codeHint": "Enter participant's check-in code (scan QR or manual input)",
+      "confirmButton": "Confirm Check-in",
+      "processing": "Processing...",
+      "startCameraButton": "Start Camera",
+      "startCameraHint": "Click button to start camera and scan QR code",
+      "stopScanButton": "Stop Scanning",
+      "alignQrCode": "Align QR code with scan frame",
+      "scanning": "Scanning...",
+      "qrDetected": "✓ QR code detected!",
+      "cameraError": "Unable to start camera, please check permissions",
+      "enterCodeError": "Please enter check-in code",
+      "checkinSuccess": "{userName} checked in successfully!",
+      "checkinError": "Check-in failed, please retry",
+      "defaultUser": "User"
+    }
   }
 }

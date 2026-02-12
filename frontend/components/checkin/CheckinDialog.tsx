@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { X, QrCode, Keyboard, Camera, CheckCircle } from 'lucide-react';
 import { checkInByCode } from '@/lib/api/checkin';
+import { useTranslation } from '@/lib/i18n/context';
 import jsQR from 'jsqr';
 
 interface CheckinDialogProps {
@@ -14,6 +15,7 @@ interface CheckinDialogProps {
 type TabType = 'scan' | 'manual';
 
 export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProps) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<TabType>('manual');
   const [manualCode, setManualCode] = useState('');
   const [loading, setLoading] = useState(false);
@@ -73,7 +75,7 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
       }
     } catch (error) {
       console.error('Failed to start camera:', error);
-      setMessage({ type: 'error', text: '无法启动摄像头，请检查权限' });
+      setMessage({ type: 'error', text: t('checkin.dialog.cameraError') });
     }
   };
 
@@ -122,7 +124,7 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
   // 处理签到
   const handleCheckin = async (code: string) => {
     if (!code.trim()) {
-      setMessage({ type: 'error', text: '请输入签到码' });
+      setMessage({ type: 'error', text: t('checkin.dialog.enterCodeError') });
       return;
     }
 
@@ -135,7 +137,7 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
       if (result.success) {
         setMessage({
           type: 'success',
-          text: `${result.userName || '用户'} 签到成功！`
+          text: t('checkin.dialog.checkinSuccess', { userName: result.userName || t('checkin.dialog.defaultUser') })
         });
         setManualCode('');
         setTimeout(() => {
@@ -146,7 +148,7 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
         setMessage({ type: 'error', text: result.message });
       }
     } catch {
-      setMessage({ type: 'error', text: '签到失败，请重试' });
+      setMessage({ type: 'error', text: t('checkin.dialog.checkinError') });
     } finally {
       setLoading(false);
     }
@@ -162,7 +164,7 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
       <div className="bg-card border border-border rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border">
-          <h2 className="text-xl font-semibold text-foreground">参与者签到</h2>
+          <h2 className="text-xl font-semibold text-foreground">{t('checkin.dialog.title')}</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-muted rounded-lg transition-colors"
@@ -185,7 +187,7 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
             }`}
           >
             <Keyboard className="w-5 h-5" />
-            手动输入
+            {t('checkin.dialog.manualTab')}
           </button>
           <button
             onClick={() => {
@@ -199,7 +201,7 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
             }`}
           >
             <QrCode className="w-5 h-5" />
-            扫描二维码
+            {t('checkin.dialog.scanTab')}
           </button>
         </div>
 
@@ -209,18 +211,18 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
             <form onSubmit={handleManualSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
-                  签到码
+                  {t('checkin.dialog.codeLabel')}
                 </label>
                 <input
                   type="text"
                   value={manualCode}
                   onChange={(e) => setManualCode(e.target.value)}
-                  placeholder="请输入签到码"
+                  placeholder={t('checkin.dialog.codePlaceholder')}
                   className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   disabled={loading}
                 />
                 <p className="mt-2 text-xs text-muted-foreground">
-                  请输入参与者的签到码（扫描二维码或手动输入）
+                  {t('checkin.dialog.codeHint')}
                 </p>
               </div>
 
@@ -229,7 +231,7 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
                 disabled={loading}
                 className="w-full px-4 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {loading ? '处理中...' : '确认签到'}
+                {loading ? t('checkin.dialog.processing') : t('checkin.dialog.confirmButton')}
               </button>
             </form>
           ) : (
@@ -238,14 +240,14 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
                 <div className="text-center py-8">
                   <QrCode className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
                   <p className="text-muted-foreground mb-4">
-                    点击按钮启动摄像头扫描二维码
+                    {t('checkin.dialog.startCameraHint')}
                   </p>
                   <button
                     onClick={startCamera}
                     className="px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors inline-flex items-center gap-2"
                   >
                     <Camera className="w-5 h-5" />
-                    启动摄像头
+                    {t('checkin.dialog.startCameraButton')}
                   </button>
                 </div>
               ) : (
@@ -295,15 +297,15 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
                         scanStatus === 'processing' ? 'bg-yellow-500/80 text-white' :
                         'bg-gray-500/80 text-white'
                       }`}>
-                        {scanStatus === 'scanning' && '正在扫描...'}
-                        {scanStatus === 'detected' && '✓ 检测到二维码！'}
-                        {scanStatus === 'processing' && '处理中...'}
+                        {scanStatus === 'scanning' && t('checkin.dialog.scanning')}
+                        {scanStatus === 'detected' && t('checkin.dialog.qrDetected')}
+                        {scanStatus === 'processing' && t('checkin.dialog.processing')}
                       </div>
                     </div>
                   </div>
 
                   <p className="text-sm text-muted-foreground text-center">
-                    将二维码对准扫描框
+                    {t('checkin.dialog.alignQrCode')}
                   </p>
 
                   <button
@@ -311,7 +313,7 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
                     disabled={loading}
                     className="w-full px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors disabled:opacity-50"
                   >
-                    停止扫描
+                    {t('checkin.dialog.stopScanButton')}
                   </button>
                 </div>
               )}

@@ -350,5 +350,32 @@
   "metadata": {
     "title": "FlowMeet - 轻松组织与参与活动",
     "description": "FlowMeet 帮你快速创建活动、管理参会，并提供清晰的流程体验。"
+  },
+  "checkin": {
+    "selectEvent": "选择活动",
+    "checkinParticipant": "签到参与者",
+    "checkinRate": "签到率",
+    "noParticipants": "暂无报名参与者",
+    "dialog": {
+      "title": "参与者签到",
+      "manualTab": "手动输入",
+      "scanTab": "扫描二维码",
+      "codeLabel": "签到码",
+      "codePlaceholder": "请输入签到码",
+      "codeHint": "请输入参与者的签到码（扫描二维码或手动输入）",
+      "confirmButton": "确认签到",
+      "processing": "处理中...",
+      "startCameraButton": "启动摄像头",
+      "startCameraHint": "点击按钮启动摄像头扫描二维码",
+      "stopScanButton": "停止扫描",
+      "alignQrCode": "将二维码对准扫描框",
+      "scanning": "正在扫描...",
+      "qrDetected": "✓ 检测到二维码！",
+      "cameraError": "无法启动摄像头，请检查权限",
+      "enterCodeError": "请输入签到码",
+      "checkinSuccess": "{userName} 签到成功！",
+      "checkinError": "签到失败，请重试",
+      "defaultUser": "用户"
+    }
   }
 }

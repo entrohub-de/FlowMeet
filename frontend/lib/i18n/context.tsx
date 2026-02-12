@@ -23,7 +23,7 @@ function getNestedValue(obj: Record<string, unknown>, path: string): string {
 interface I18nContextValue {
   locale: Locale;
   setLocale: (locale: Locale) => void;
-  t: (key: string) => string;
+  t: (key: string, params?: Record<string, string | number>) => string;
 }
 
 const I18nContext = createContext<I18nContextValue | null>(null);
@@ -44,7 +44,17 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const t = useCallback(
-    (key: string) => getNestedValue(translations[locale], key),
+    (key: string, params?: Record<string, string | number>) => {
+      let result = getNestedValue(translations[locale], key);
+
+      if (params) {
+        Object.entries(params).forEach(([paramKey, paramValue]) => {
+          result = result.replace(new RegExp(`\\{${paramKey}\\}`, 'g'), String(paramValue));
+        });
+      }
+
+      return result;
+    },
     [locale]
   );
 
