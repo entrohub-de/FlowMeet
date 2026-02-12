@@ -88,7 +88,7 @@ export default function CheckinPage() {
           {selectedEventId && (
             <button
               onClick={() => setShowCheckinDialog(true)}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
+              className="w-full flex items-center justify-center gap-2 px-4 h-12 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
             >
               <Plus className="w-5 h-5" />
               {t('checkin.checkinParticipant')}
