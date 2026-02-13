@@ -1,5 +1,7 @@
 import { supabase } from '@/lib/supabase/client';
-import type { WorkflowModule, WorkflowModuleCategory } from '@/features/host-console/workflowModules';
+import type { ModuleDefinition, WorkflowModule, WorkflowModuleCategory } from '@/features/host-console/workflowModules';
+
+const COLUMNS = 'module_id, module_key, name, description, module_type, default_duration_minutes, definition';
 
 interface WorkflowModuleRow {
   module_id: string;
@@ -8,15 +10,21 @@ interface WorkflowModuleRow {
   description: string;
   module_type: string;
   default_duration_minutes: number;
+  definition: Record<string, unknown> | null;
 }
 
 function rowToModule(row: WorkflowModuleRow): WorkflowModule {
+  const def = (row.definition ?? {}) as ModuleDefinition;
   return {
     id: row.module_key,
     title: row.name,
     description: row.description ?? '',
     durationMinutes: row.default_duration_minutes,
     category: row.module_type as WorkflowModuleCategory,
+    definition: {
+      pairingMode: def.pairingMode,
+      enableTopics: def.enableTopics,
+    },
   };
 }
 
@@ -24,30 +32,25 @@ function rowToModule(row: WorkflowModuleRow): WorkflowModule {
 export async function getAllWorkflowModules(): Promise<WorkflowModule[]> {
   const { data: { user } } = await supabase.auth.getUser();
 
-  // System modules: created_by is null, is_active = true (covered by public RLS policy)
-  const systemQuery = supabase
+  const { data: systemData, error: systemError } = await supabase
     .from('workflow_modules')
-    .select('module_id, module_key, name, description, module_type, default_duration_minutes')
+    .select(COLUMNS)
     .is('created_by', null)
     .eq('is_active', true)
     .order('display_order', { ascending: true });
 
-  const { data: systemData, error: systemError } = await systemQuery;
   if (systemError) throw systemError;
-
   const systemModules = (systemData as WorkflowModuleRow[]).map(rowToModule);
 
   if (!user) return systemModules;
 
-  // Custom modules: created_by = current user
   const { data: customData, error: customError } = await supabase
     .from('workflow_modules')
-    .select('module_id, module_key, name, description, module_type, default_duration_minutes')
+    .select(COLUMNS)
     .eq('created_by', user.id)
     .order('created_at', { ascending: false });
 
   if (customError) throw customError;
-
   const customModules = (customData as WorkflowModuleRow[]).map(rowToModule);
 
   return [...systemModules, ...customModules];
@@ -70,15 +73,16 @@ export async function createCustomWorkflowModule(
       description: module.description,
       module_type: module.category,
       default_duration_minutes: module.durationMinutes,
+      definition: module.definition,
     }])
-    .select('module_id, module_key, name, description, module_type, default_duration_minutes')
+    .select(COLUMNS)
     .single();
 
   if (error) throw error;
   return rowToModule(data as WorkflowModuleRow);
 }
 
-export async function updateCustomWorkflowModule(
+export async function updateWorkflowModule(
   moduleKey: string,
   updates: Partial<Omit<WorkflowModule, 'id'>>
 ): Promise<void> {
@@ -87,6 +91,7 @@ export async function updateCustomWorkflowModule(
   if (updates.description !== undefined) row.description = updates.description;
   if (updates.category !== undefined) row.module_type = updates.category;
   if (updates.durationMinutes !== undefined) row.default_duration_minutes = updates.durationMinutes;
+  if (updates.definition !== undefined) row.definition = updates.definition;
 
   const { error } = await supabase
     .from('workflow_modules')
@@ -96,7 +101,7 @@ export async function updateCustomWorkflowModule(
   if (error) throw error;
 }
 
-export async function deleteCustomWorkflowModule(moduleKey: string): Promise<void> {
+export async function deleteWorkflowModule(moduleKey: string): Promise<void> {
   const { error } = await supabase
     .from('workflow_modules')
     .delete()

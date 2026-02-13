@@ -248,7 +248,7 @@
         "minutesLabel": "{minutes} 分钟"
       },
       "custom": {
-        "title": "新建自定义模块",
+        "title": "新建模块",
         "namePlaceholder": "模块名称，例如：破冰小游戏",
         "durationPlaceholder": "时长（分钟）",
         "descriptionPlaceholder": "模块说明（可选）",
@@ -266,7 +266,13 @@
         "customBadge": "自定义",
         "defaultDuration": "默认时长：{minutes} 分钟",
         "add": "添加",
-        "deleteCustomAria": "删除自定义模块"
+        "deleteCustomAria": "删除自定义模块",
+        "deleteModuleAria": "删除模块",
+        "pairingMode": "配对方式",
+        "pairingModeGroup": "小组",
+        "pairingMode1v1": "1v1",
+        "pairingModeNone": "无",
+        "enableTopics": "启用话题生成"
       },
       "picker": {
         "title": "选择要添加的模块",

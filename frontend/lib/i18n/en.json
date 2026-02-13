@@ -246,7 +246,7 @@
         "minutesLabel": "{minutes} min"
       },
       "custom": {
-        "title": "Create Custom Module",
+        "title": "Create Module",
         "namePlaceholder": "Module name, e.g. Icebreaker game",
         "durationPlaceholder": "Duration (min)",
         "descriptionPlaceholder": "Module description (optional)",
@@ -264,7 +264,13 @@
         "customBadge": "Custom",
         "defaultDuration": "Default duration: {minutes} min",
         "add": "Add",
-        "deleteCustomAria": "Delete custom module"
+        "deleteCustomAria": "Delete custom module",
+        "deleteModuleAria": "Delete module",
+        "pairingMode": "Pairing Mode",
+        "pairingModeGroup": "Group",
+        "pairingMode1v1": "1v1",
+        "pairingModeNone": "None",
+        "enableTopics": "Enable Topic Generation"
       },
       "picker": {
         "title": "Select a module to add",

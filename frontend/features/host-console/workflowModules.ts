@@ -5,12 +5,18 @@ export type WorkflowModuleCategory =
   | 'industry'
   | 'closing';
 
+export interface ModuleDefinition {
+  pairingMode?: 'group' | '1v1';
+  enableTopics?: boolean;
+}
+
 export interface WorkflowModule {
   id: string;
   title: string;
   description: string;
   durationMinutes: number;
   category: WorkflowModuleCategory;
+  definition: ModuleDefinition;
 }
 
 export interface WorkflowStepConfig {
