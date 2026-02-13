@@ -21,7 +21,7 @@ import {
   type WorkflowModuleCategory,
   type WorkflowStepConfig,
 } from '@/features/host-console/workflowModules';
-import { Plus, Save, ArrowUp, ArrowDown, Trash2, GripVertical, X } from 'lucide-react';
+import { Plus, Save, ArrowUp, ArrowDown, Trash2, GripVertical, X, ChevronDown, Pencil } from 'lucide-react';
 
 type ActiveTab = 'templates' | 'modules';
 
@@ -54,12 +54,14 @@ export default function HostWorkflowsPage() {
   const [customDescription, setCustomDescription] = useState('');
   const [customDuration, setCustomDuration] = useState<number>(15);
   const [customCategory, setCustomCategory] = useState<WorkflowModuleCategory>('networking');
+  const [isCustomFormOpen, setIsCustomFormOpen] = useState(false);
 
   const [draggingStepId, setDraggingStepId] = useState<string | null>(null);
   const [dragOverStepId, setDragOverStepId] = useState<string | null>(null);
 
   const [isModulePickerOpen, setIsModulePickerOpen] = useState(false);
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
+  const [editingModule, setEditingModule] = useState<WorkflowModule | null>(null);
 
   useEffect(() => {
     setCustomModules(loadCustomWorkflowModules());
@@ -236,6 +238,7 @@ export default function HostWorkflowsPage() {
     setCustomDuration(15);
     setCustomCategory('networking');
     setCustomError('');
+    setIsCustomFormOpen(false);
   };
 
   const removeCustomModule = (moduleId: string) => {
@@ -244,6 +247,24 @@ export default function HostWorkflowsPage() {
       saveCustomWorkflowModules(next);
       return next;
     });
+  };
+
+  const updateCustomModule = (updated: WorkflowModule) => {
+    const safeTitle = updated.title.trim();
+    if (!safeTitle) return;
+    const safeDuration = Number.isFinite(updated.durationMinutes)
+      ? Math.max(1, Math.round(updated.durationMinutes))
+      : 1;
+    setCustomModules((prev) => {
+      const next = prev.map((item) =>
+        item.id === updated.id
+          ? { ...updated, title: safeTitle, durationMinutes: safeDuration, description: updated.description.trim() }
+          : item
+      );
+      saveCustomWorkflowModules(next);
+      return next;
+    });
+    setEditingModule(null);
   };
 
   const saveCurrentAsTemplate = async () => {
@@ -570,54 +591,7 @@ export default function HostWorkflowsPage() {
 
         {activeTab === 'modules' && (
           <section className="space-y-4">
-            <div className="rounded-xl border border-dashed border-border bg-card p-4 space-y-3">
-              <div className="text-sm font-medium text-foreground">{t('host.workflows.custom.title')}</div>
-              <input
-                type="text"
-                value={customTitle}
-                onChange={(event) => setCustomTitle(event.target.value)}
-                placeholder={t('host.workflows.custom.namePlaceholder')}
-                className="h-10 w-full rounded-button border border-border px-3 bg-background"
-              />
-              <input
-                type="number"
-                min={1}
-                value={customDuration}
-                onChange={(event) => setCustomDuration(Number(event.target.value))}
-                placeholder={t('host.workflows.custom.durationPlaceholder')}
-                className="h-10 w-full rounded-button border border-border px-3 bg-background"
-              />
-              <textarea
-                value={customDescription}
-                onChange={(event) => setCustomDescription(event.target.value)}
-                placeholder={t('host.workflows.custom.descriptionPlaceholder')}
-                className="w-full min-h-[72px] rounded-button border border-border px-3 py-2 bg-background text-sm"
-              />
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground shrink-0">{t('host.workflows.custom.category')}</span>
-                <select
-                  value={customCategory}
-                  onChange={(event) => setCustomCategory(event.target.value as WorkflowModuleCategory)}
-                  className="h-10 flex-1 rounded-button border border-border px-2 bg-background"
-                >
-                  <option value="opening">{t('host.workflows.custom.categories.opening')}</option>
-                  <option value="networking">{t('host.workflows.custom.categories.networking')}</option>
-                  <option value="group">{t('host.workflows.custom.categories.group')}</option>
-                  <option value="industry">{t('host.workflows.custom.categories.industry')}</option>
-                  <option value="closing">{t('host.workflows.custom.categories.closing')}</option>
-                </select>
-              </div>
-              <button
-                type="button"
-                onClick={createCustomModule}
-                className="h-10 w-full inline-flex items-center justify-center gap-1 rounded-button bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-                {t('host.workflows.custom.save')}
-              </button>
-              {customError && <p className="text-xs text-red-600">{customError}</p>}
-            </div>
-
+            {/* Module Library (primary content, shown first) */}
             <div className="rounded-xl border border-border bg-card p-4">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-base font-semibold text-foreground">{t('host.workflows.custom.libraryTitle')}</h2>
@@ -625,50 +599,128 @@ export default function HostWorkflowsPage() {
                   {t('host.workflows.custom.total', { count: availableModules.length })}
                 </span>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {availableModules.map((item) => (
-                  <div key={item.id} className="rounded-lg border border-border p-3 bg-background">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="font-medium text-foreground flex items-center gap-2">
-                          {item.title}
-                          {item.id.startsWith('custom-') && (
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                              {t('host.workflows.custom.customBadge')}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground mt-1">{item.description}</p>
-                        <div className="text-xs text-muted-foreground mt-2">
-                          {t('host.workflows.custom.defaultDuration', {
-                            minutes: item.durationMinutes,
-                          })}
-                        </div>
+                  <div key={item.id} className="rounded-lg border border-border p-2.5 bg-background flex items-center gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-medium text-sm text-foreground truncate">{item.title}</span>
+                        {item.id.startsWith('custom-') && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 shrink-0">
+                            {t('host.workflows.custom.customBadge')}
+                          </span>
+                        )}
+                        <span className="text-xs text-muted-foreground shrink-0">
+                          {t('host.workflows.current.minutesLabel', { minutes: item.durationMinutes })}
+                        </span>
                       </div>
-                      <div className="flex flex-col items-center gap-2 shrink-0">
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{item.description}</p>
+                    </div>
+                    {item.id.startsWith('custom-') && (
+                      <div className="flex items-center gap-1 shrink-0">
                         <button
                           type="button"
-                          onClick={() => addModuleToWorkflow(item.id)}
-                          className="h-9 px-3 inline-flex items-center gap-1 rounded-button bg-primary text-primary-foreground hover:bg-primary/90 whitespace-nowrap"
+                          onClick={() => setEditingModule(item)}
+                          className="h-8 px-2.5 inline-flex items-center gap-1 rounded-button border border-border text-foreground hover:bg-muted text-xs whitespace-nowrap"
                         >
-                          <Plus className="w-4 h-4" />
-                          {t('host.workflows.custom.add')}
+                          <Pencil className="w-3.5 h-3.5" />
+                          {t('common.edit')}
                         </button>
-                        {item.id.startsWith('custom-') && (
-                          <button
-                            type="button"
-                            onClick={() => removeCustomModule(item.id)}
-                            className="h-8 w-8 inline-flex items-center justify-center rounded-button border border-red-200 text-red-600 hover:bg-red-50"
-                            aria-label={t('host.workflows.custom.deleteCustomAria')}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
+                        <button
+                          type="button"
+                          onClick={() => removeCustomModule(item.id)}
+                          className="h-8 px-2.5 inline-flex items-center gap-1 rounded-button border border-red-200 text-red-600 hover:bg-red-50 text-xs whitespace-nowrap"
+                          aria-label={t('host.workflows.custom.deleteCustomAria')}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          {t('common.delete')}
+                        </button>
                       </div>
-                    </div>
+                    )}
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Collapsible Custom Module Creation Form */}
+            <div className="rounded-xl border border-dashed border-border bg-card overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setIsCustomFormOpen((prev) => !prev)}
+                aria-expanded={isCustomFormOpen}
+                className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <Plus className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium text-foreground">{t('host.workflows.custom.title')}</span>
+                </div>
+                <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${isCustomFormOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {isCustomFormOpen && (
+                <div className="px-4 pb-4 space-y-3 border-t border-border">
+                  {/* Name + Duration on one row */}
+                  <div className="flex items-center gap-2 pt-3">
+                    <input
+                      type="text"
+                      value={customTitle}
+                      onChange={(event) => setCustomTitle(event.target.value)}
+                      placeholder={t('host.workflows.custom.namePlaceholder')}
+                      className="h-9 flex-1 min-w-0 rounded-button border border-border px-3 bg-background text-sm"
+                    />
+                    <div className="flex items-center gap-1 shrink-0">
+                      <input
+                        type="number"
+                        min={1}
+                        value={customDuration}
+                        onChange={(event) => setCustomDuration(Number(event.target.value))}
+                        className="h-9 w-16 rounded-button border border-border px-2 bg-background text-sm text-center"
+                      />
+                      <span className="text-xs text-muted-foreground">{t('host.workflows.current.minuteUnit')}</span>
+                    </div>
+                  </div>
+
+                  {/* Category chips */}
+                  <div className="space-y-1">
+                    <span className="text-xs text-muted-foreground">{t('host.workflows.custom.category')}</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {(['opening', 'networking', 'group', 'industry', 'closing'] as const).map((cat) => (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => setCustomCategory(cat)}
+                          className={`h-7 px-3 rounded-full text-xs font-medium transition-colors ${
+                            customCategory === cat
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                          }`}
+                        >
+                          {t(`host.workflows.custom.categories.${cat}`)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <textarea
+                    value={customDescription}
+                    onChange={(event) => setCustomDescription(event.target.value)}
+                    placeholder={t('host.workflows.custom.descriptionPlaceholder')}
+                    rows={2}
+                    className="w-full rounded-button border border-border px-3 py-2 bg-background text-sm resize-none"
+                  />
+
+                  {/* Save button */}
+                  <button
+                    type="button"
+                    onClick={createCustomModule}
+                    className="h-9 w-full inline-flex items-center justify-center gap-1 rounded-button bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm"
+                  >
+                    <Plus className="w-4 h-4" />
+                    {t('host.workflows.custom.save')}
+                  </button>
+                  {customError && <p className="text-xs text-red-600">{customError}</p>}
+                </div>
+              )}
             </div>
           </section>
         )}
@@ -733,6 +785,78 @@ export default function HostWorkflowsPage() {
                 className="h-10 w-full rounded-button border border-border hover:bg-muted text-sm font-medium"
               >
                 {t('host.workflows.picker.goToModuleManagement')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editingModule && (
+        <div className="fixed inset-0 z-20 bg-black/40 backdrop-blur-[1px] p-4 flex items-end sm:items-center sm:justify-center">
+          <div className="w-full sm:max-w-md rounded-xl border border-border bg-card shadow-lg">
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <h3 className="text-base font-semibold text-foreground">{t('common.edit')}</h3>
+              <button
+                type="button"
+                onClick={() => setEditingModule(null)}
+                className="h-8 w-8 inline-flex items-center justify-center rounded-button border border-border hover:bg-muted"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={editingModule.title}
+                  onChange={(event) => setEditingModule({ ...editingModule, title: event.target.value })}
+                  placeholder={t('host.workflows.custom.namePlaceholder')}
+                  className="h-9 flex-1 min-w-0 rounded-button border border-border px-3 bg-background text-sm"
+                />
+                <div className="flex items-center gap-1 shrink-0">
+                  <input
+                    type="number"
+                    min={1}
+                    value={editingModule.durationMinutes}
+                    onChange={(event) => setEditingModule({ ...editingModule, durationMinutes: Number(event.target.value) })}
+                    className="h-9 w-16 rounded-button border border-border px-2 bg-background text-sm text-center"
+                  />
+                  <span className="text-xs text-muted-foreground">{t('host.workflows.current.minuteUnit')}</span>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <span className="text-xs text-muted-foreground">{t('host.workflows.custom.category')}</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {(['opening', 'networking', 'group', 'industry', 'closing'] as const).map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setEditingModule({ ...editingModule, category: cat })}
+                      className={`h-7 px-3 rounded-full text-xs font-medium transition-colors ${
+                        editingModule.category === cat
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                      }`}
+                    >
+                      {t(`host.workflows.custom.categories.${cat}`)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <textarea
+                value={editingModule.description}
+                onChange={(event) => setEditingModule({ ...editingModule, description: event.target.value })}
+                placeholder={t('host.workflows.custom.descriptionPlaceholder')}
+                rows={2}
+                className="w-full rounded-button border border-border px-3 py-2 bg-background text-sm resize-none"
+              />
+              <button
+                type="button"
+                onClick={() => updateCustomModule(editingModule)}
+                disabled={!editingModule.title.trim()}
+                className="h-9 w-full rounded-button bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm disabled:opacity-50"
+              >
+                {t('common.save')}
               </button>
             </div>
           </div>
