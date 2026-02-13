@@ -619,6 +619,47 @@
     "modalTitle": "Set Your Matching Preferences",
     "modalHint": "Fill in the following to help us find better matches for you"
   },
+  "expectations": {
+    "sectionTitle": "Expectations",
+    "sectionHint": "Select what you hope to get from this event to help us recommend better matches",
+    "selectTags": "Select your expectations",
+    "customText": "Additional notes (optional)",
+    "editExpectations": "Edit my expectations",
+    "tags": {
+      "meetFriends": "Meet new friends",
+      "learnSkills": "Learn new skills",
+      "findCollaborators": "Find collaborators",
+      "expandNetwork": "Expand network",
+      "getInspiration": "Get inspiration",
+      "industryExchange": "Industry exchange",
+      "findMentors": "Find mentors",
+      "shareExperience": "Share experience"
+    },
+    "tpl": {
+      "pageTitle": "My Expectation Templates",
+      "pageHint": "Save your social goals as templates and apply them when signing up for events",
+      "myTemplates": "My Templates",
+      "add": "Add Template",
+      "empty": "No templates yet, create your first one",
+      "createFirst": "Create your first template",
+      "createTitle": "Create Template",
+      "editTitle": "Edit Template",
+      "name": "Template Name",
+      "namePlaceholder": "e.g., Networking, Learning, Finding Partners...",
+      "created": "Template created",
+      "updated": "Template updated",
+      "deleted": "Template deleted",
+      "applyToEvent": "Apply to Event",
+      "selectEventFirst": "Please select an event first",
+      "selectEventBelow": "Select an event below first",
+      "applied": "Expectation applied to event",
+      "applyFailed": "Failed to apply, please try again",
+      "applySection": "Apply to Event",
+      "applySectionHint": "Select an event, then click 'Apply to Event' on a template above",
+      "quickApply": "Quick apply from my templates",
+      "templateLoaded": "Template loaded"
+    }
+  },
   "profileCompletion": {
     "title": "Complete Your Profile",
     "subtitle": "Fill in your info to help us find better matches for you",

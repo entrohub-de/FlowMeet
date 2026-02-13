@@ -224,7 +224,7 @@ BEGIN
 
   -- 创建期待数据
   IF ARRAY_LENGTH(participant_ids, 1) >= 4 THEN
-    INSERT INTO public.evt_expectations (event_id, user_id, content)
+    INSERT INTO public.expctn_event (event_id, user_id, content)
     VALUES
       (event1_id, participant_ids[1], '希望认识更多技术领域的朋友'),
       (event1_id, participant_ids[2], '期待了解最新的行业动态'),

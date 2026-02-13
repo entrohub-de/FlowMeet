@@ -1,10 +1,20 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Save, SkipForward, Sparkles } from 'lucide-react';
+import { X, Save, SkipForward, Sparkles, BookmarkCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { getMatchPreference, saveMatchPreference } from '@/lib/api/matching';
 import { getPreferences, upsertPreferences } from '@/lib/api/profile';
+import { getUserExpectation, upsertExpectation } from '@/lib/api/expectations';
+import {
+  parseExpectationContent,
+  serializeExpectationContent,
+  saveLastUsedTags,
+  getLastUsedTags,
+} from '@/lib/expectation-templates';
+import { getTemplates } from '@/lib/api/expectation-templates';
+import type { ExpectationTemplate } from '@/types/domain';
+import { ExpectationTagSelector } from '@/components/expectations/ExpectationTagSelector';
 
 interface PreferencesModalProps {
   eventId: string;
@@ -22,6 +32,11 @@ export default function PreferencesModal({ eventId, userId, t, onClose }: Prefer
   const [availability, setAvailability] = useState('');
   const [notes, setNotes] = useState('');
 
+  // Expectations (tag-based)
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [expectationText, setExpectationText] = useState('');
+  const [userTemplates, setUserTemplates] = useState<ExpectationTemplate[]>([]);
+
   // Global preferences
   const [languages, setLanguages] = useState('');
   const [interests, setInterests] = useState('');
@@ -32,9 +47,14 @@ export default function PreferencesModal({ eventId, userId, t, onClose }: Prefer
   useEffect(() => {
     const load = async () => {
       try {
-        const [matchPref, globalPrefs] = await Promise.all([
+        const tpls = await getTemplates(userId);
+        setUserTemplates(tpls);
+      } catch { /* ignore */ }
+      try {
+        const [matchPref, globalPrefs, existingExpectation] = await Promise.all([
           getMatchPreference(eventId, userId),
           getPreferences(userId),
+          getUserExpectation(eventId, userId),
         ]);
 
         if (matchPref) {
@@ -52,6 +72,15 @@ export default function PreferencesModal({ eventId, userId, t, onClose }: Prefer
             !!(globalPrefs.languages || globalPrefs.interests || globalPrefs.purpose || globalPrefs.industry_background)
           );
         }
+
+        if (existingExpectation) {
+          const data = parseExpectationContent(existingExpectation.content);
+          setSelectedTags(data.tags);
+          setExpectationText(data.text);
+        } else {
+          // Auto-populate with last-used tags for reuse
+          setSelectedTags(getLastUsedTags());
+        }
       } finally {
         setLoading(false);
       }
@@ -59,15 +88,39 @@ export default function PreferencesModal({ eventId, userId, t, onClose }: Prefer
     load();
   }, [eventId, userId]);
 
+  const handleToggleTag = (tag: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const handleApplyTemplate = (tpl: ExpectationTemplate) => {
+    setSelectedTags(tpl.tags);
+    setExpectationText(tpl.text);
+    toast.success(t('expectations.tpl.templateLoaded'));
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
+      // Save match preferences
       await saveMatchPreference(eventId, userId, {
         preferred_topics: preferredTopics || undefined,
         availability: availability || undefined,
         notes: notes || undefined,
       });
 
+      // Save expectations if any tags or text provided
+      if (selectedTags.length > 0 || expectationText.trim()) {
+        const content = serializeExpectationContent({
+          tags: selectedTags,
+          text: expectationText.trim(),
+        });
+        await upsertExpectation(eventId, userId, content);
+        saveLastUsedTags(selectedTags);
+      }
+
+      // Save global preferences if new
       if (!hasGlobalPrefs && (languages || interests || purpose || industryBackground)) {
         await upsertPreferences(userId, {
           languages: languages || null,
@@ -122,8 +175,54 @@ export default function PreferencesModal({ eventId, userId, t, onClose }: Prefer
               {t('eventPreferences.modalHint')}
             </p>
 
-            {/* Event-specific preferences */}
+            {/* Expectations section — tag-based */}
             <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">
+                {t('expectations.sectionTitle')}
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                {t('expectations.sectionHint')}
+              </p>
+
+              {/* Quick-apply from saved templates */}
+              {userTemplates.length > 0 && (
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <BookmarkCheck className="w-3 h-3" />
+                    {t('expectations.tpl.quickApply')}
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {userTemplates.map((tpl) => (
+                      <button
+                        key={tpl.template_id}
+                        type="button"
+                        onClick={() => handleApplyTemplate(tpl)}
+                        className="px-2.5 py-1 rounded-lg text-xs font-medium border border-primary/30 text-primary hover:bg-primary/5 transition-colors"
+                      >
+                        {tpl.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <ExpectationTagSelector
+                selectedTags={selectedTags}
+                onToggleTag={handleToggleTag}
+                t={t}
+              />
+
+              <textarea
+                className={`${inputClass} resize-none`}
+                rows={2}
+                value={expectationText}
+                onChange={(e) => setExpectationText(e.target.value)}
+                placeholder={t('user.expectationPlaceholder')}
+              />
+            </div>
+
+            {/* Event-specific preferences */}
+            <div className="space-y-3 pt-2 border-t border-border">
               <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">
                 {t('eventPreferences.eventSpecific')}
               </h3>

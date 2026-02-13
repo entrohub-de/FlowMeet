@@ -117,6 +117,16 @@ export interface Expectation {
   updated_at: string;
 }
 
+export interface ExpectationTemplate {
+  template_id: string;
+  user_id: string;
+  name: string;
+  tags: string[];
+  text: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Match {
   match_id: string;
   event_id: string;

@@ -345,7 +345,7 @@ BEGIN
       selected_event_id := event_ids[1 + FLOOR(RANDOM() * ARRAY_LENGTH(event_ids, 1))];
 
       -- 创建期待（使用 ON CONFLICT 避免重复）
-      INSERT INTO public.evt_expectations (event_id, user_id, content)
+      INSERT INTO public.expctn_event (event_id, user_id, content)
       VALUES (
         selected_event_id,
         user_record.id,
@@ -370,7 +370,7 @@ DECLARE
 BEGIN
   SELECT COUNT(*) INTO user_count FROM auth.users WHERE email LIKE '%@flowmeet.com';
   SELECT COUNT(*) INTO event_count FROM public.evt_events;
-  SELECT COUNT(*) INTO expectation_count FROM public.evt_expectations;
+  SELECT COUNT(*) INTO expectation_count FROM public.expctn_event;
 
   RAISE NOTICE '✅ 种子数据创建完成！';
   RAISE NOTICE '📊 统计信息：';

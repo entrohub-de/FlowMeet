@@ -131,7 +131,8 @@ export default function EventCard({ event, locale, t }: EventCardProps) {
               : t('user.signupBtn')}
       </button>
 
-      {/* Preferences Modal - shown after signup */}
+
+      {/* Preferences Modal - shown after signup or when editing */}
       {showPreferencesModal && userId && (
         <PreferencesModal
           eventId={event.event_id}

@@ -7,7 +7,7 @@ import type { Expectation } from '@/types/domain';
  */
 export async function getEventExpectations(eventId: string): Promise<Expectation[]> {
   const { data, error } = await supabase
-    .from('evt_expectations')
+    .from('expctn_event')
     .select('*')
     .eq('event_id', eventId)
     .eq('status', 'active')
@@ -26,7 +26,7 @@ export async function getUserExpectation(
   userId: string
 ): Promise<Expectation | null> {
   const { data, error } = await supabase
-    .from('evt_expectations')
+    .from('expctn_event')
     .select('*')
     .eq('event_id', eventId)
     .eq('user_id', userId)
@@ -53,7 +53,7 @@ export async function upsertExpectation(
   content: string
 ): Promise<Expectation> {
   const { data, error } = await supabase
-    .from('evt_expectations')
+    .from('expctn_event')
     .upsert(
       {
         event_id: eventId,
@@ -79,7 +79,7 @@ export async function upsertExpectation(
  */
 export async function deleteExpectation(expectationId: string): Promise<void> {
   const { error } = await supabase
-    .from('evt_expectations')
+    .from('expctn_event')
     .update({
       status: 'deleted',
       updated_at: new Date().toISOString(),

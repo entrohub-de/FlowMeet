@@ -224,7 +224,7 @@ export async function getEventSignups(eventId: string): Promise<Signup[]> {
 
     // Fetch all expectations for these users and this event
     const { data: expectationsData } = await supabase
-      .from('evt_expectations')
+      .from('expctn_event')
       .select('*')
       .eq('event_id', eventId)
       .in('user_id', userIds)

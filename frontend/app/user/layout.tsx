@@ -23,6 +23,7 @@ export default function UserLayout({
       children: [
         { label: t('nav.user.signup'), href: '/user/event' },
         { label: t('nav.user.checkin'), href: '/user/checkin' },
+        { label: t('nav.user.expectations'), href: '/user/expectations' },
       ]
     },
     {
