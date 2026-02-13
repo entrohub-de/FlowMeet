@@ -5,6 +5,7 @@ import ProfileAvatar from '@/components/layout/ProfileAvatar';
 import RoleRouteGuard from '@/components/auth/RoleRouteGuard';
 import ProfileCompletionGuard from '@/components/auth/ProfileCompletionGuard';
 import { useTranslation } from '@/lib/i18n/context';
+import { useFlowRedirect } from '@/hooks/useFlowRedirect';
 
 export default function UserLayout({
   children,
@@ -12,6 +13,9 @@ export default function UserLayout({
   children: React.ReactNode;
 }) {
   const { t } = useTranslation();
+
+  // Auto-redirect to /user/flow when host starts the event flow
+  useFlowRedirect();
 
   const navItems = [
     {

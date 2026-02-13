@@ -16,6 +16,14 @@ export const metadata: Metadata = {
   description: 'FlowMeet - Organize & join events easily.',
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover' as const,
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -23,6 +31,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="zh-CN" className={plusJakartaSans.variable}>
+      <head>
+        {/* PWA-like mobile experience */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="mobile-web-app-capable" content="yes" />
+      </head>
       <body>
         <LocaleProvider>
           <main>{children}</main>

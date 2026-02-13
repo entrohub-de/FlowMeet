@@ -44,7 +44,10 @@
     "templateName": "Flow Template",
     "flowCompleted": "All steps completed",
     "viewAllSteps": "View all steps",
-    "hideSteps": "Hide steps"
+    "hideSteps": "Hide steps",
+    "notCheckedIn": "You haven't checked in yet",
+    "notCheckedInHint": "Please check in first to join the event flow and matching",
+    "goCheckin": "Check In"
   },
   "flowMatching": {
     "readyToMatch": "Ready to match?",
@@ -391,6 +394,9 @@
     "save": "Save",
     "saving": "Saving...",
     "saved": "Saved",
+    "saveFailed": "Save failed, please try again",
+    "basicInfo": "Basic Info",
+    "unnamed": "No nickname set",
     "roleUpgrade": {
       "title": "Account Role",
       "currentRole": "Current Role",
@@ -576,7 +582,10 @@
     "globalPrefsHint": "This info improves matching accuracy across all events",
     "skip": "Skip",
     "save": "Save Preferences",
-    "saved": "Preferences saved"
+    "saved": "Preferences saved",
+    "saveFailed": "Save failed, please try again",
+    "modalTitle": "Set Your Matching Preferences",
+    "modalHint": "Fill in the following to help us find better matches for you"
   },
   "profileCompletion": {
     "title": "Complete Your Profile",

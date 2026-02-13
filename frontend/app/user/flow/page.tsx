@@ -1,9 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { ListChecks, PauseCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ListChecks, PauseCircle, ChevronDown, ChevronUp, TicketCheck } from 'lucide-react';
+import Link from 'next/link';
 import { useTranslation } from '@/lib/i18n/context';
 import { useActiveFlow } from '@/hooks/useActiveFlow';
+import { supabase } from '@/lib/supabase/client';
+import { getUserCheckinStatus } from '@/lib/api/checkin';
 import ActiveStepCard from '@/components/workflow/flow-control/ActiveStepCard';
 import FlowStepCardReadOnly from '@/components/workflow/flow-control/FlowStepCardReadOnly';
 import MatchingStepCard from '@/components/workflow/flow-control/MatchingStepCard';
@@ -13,6 +16,8 @@ import { FlowStepSkeleton } from '@/components/ui/skeleton';
 export default function UserFlowPage() {
   const { t } = useTranslation();
   const [showAllSteps, setShowAllSteps] = useState(false);
+  const [checkinChecked, setCheckinChecked] = useState(false);
+  const [isCheckedIn, setIsCheckedIn] = useState(false);
   const {
     loading,
     selectedEventId,
@@ -22,6 +27,29 @@ export default function UserFlowPage() {
     isGloballyPaused,
     globalPauseMessage,
   } = useActiveFlow();
+
+  // Check if user has checked in for the selected event
+  useEffect(() => {
+    if (!selectedEventId) return;
+    let cancelled = false;
+
+    const checkCheckin = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user || cancelled) return;
+        const statuses = await getUserCheckinStatus(user.id, selectedEventId);
+        if (!cancelled) {
+          setIsCheckedIn(statuses.some(s => s.checked_in));
+          setCheckinChecked(true);
+        }
+      } catch {
+        if (!cancelled) setCheckinChecked(true);
+      }
+    };
+
+    checkCheckin();
+    return () => { cancelled = true; };
+  }, [selectedEventId]);
 
   if (loading) {
     return (
@@ -67,6 +95,26 @@ export default function UserFlowPage() {
           </div>
           <p className="text-muted-foreground">{t('userFlow.description')}</p>
         </div>
+
+        {/* Not checked in prompt */}
+        {checkinChecked && !isCheckedIn && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-6 text-center mb-6">
+            <TicketCheck className="w-12 h-12 mx-auto text-amber-500 mb-3" />
+            <p className="text-amber-800 font-medium text-lg mb-1">
+              {t('userFlow.notCheckedIn')}
+            </p>
+            <p className="text-amber-600 text-sm mb-4">
+              {t('userFlow.notCheckedInHint')}
+            </p>
+            <Link
+              href="/user/checkin"
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-full font-medium hover:opacity-90 transition-opacity touch-feedback"
+            >
+              <TicketCheck className="w-4 h-4" />
+              {t('userFlow.goCheckin')}
+            </Link>
+          </div>
+        )}
 
         {!flowState ? (
           <div className="rounded-lg border border-dashed border-border p-12 text-center">

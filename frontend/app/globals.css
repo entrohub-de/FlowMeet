@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* App-like mobile experience: prevent zoom & bounce */
+html {
+  touch-action: manipulation; /* disable double-tap zoom */
+  -webkit-text-size-adjust: 100%;
+  overscroll-behavior: none; /* prevent pull-to-refresh bounce */
+}
+
+body {
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent; /* remove tap highlight */
+}
+
 @layer base {
   :root {
     /* Color Tokens - Light Mode */

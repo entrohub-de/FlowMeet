@@ -46,7 +46,10 @@
     "templateName": "流程模板",
     "flowCompleted": "流程已全部完成",
     "viewAllSteps": "查看全部流程",
-    "hideSteps": "收起流程"
+    "hideSteps": "收起流程",
+    "notCheckedIn": "你还没有签到",
+    "notCheckedInHint": "请先完成签到，才能参与活动流程和匹配",
+    "goCheckin": "去签到"
   },
   "flowMatching": {
     "readyToMatch": "准备配对？",
@@ -393,6 +396,9 @@
     "save": "保存",
     "saving": "保存中...",
     "saved": "已保存",
+    "saveFailed": "保存失败，请重试",
+    "basicInfo": "基本信息",
+    "unnamed": "未设置昵称",
     "roleUpgrade": {
       "title": "账户角色",
       "currentRole": "当前角色",
@@ -578,7 +584,10 @@
     "globalPrefsHint": "这些信息将用于提升所有活动的配对精准度",
     "skip": "跳过",
     "save": "保存偏好",
-    "saved": "偏好已保存"
+    "saved": "偏好已保存",
+    "saveFailed": "保存失败，请重试",
+    "modalTitle": "完善你的配对偏好",
+    "modalHint": "填写以下信息，帮助我们为你匹配更合适的伙伴"
   },
   "profileCompletion": {
     "title": "完善个人资料",

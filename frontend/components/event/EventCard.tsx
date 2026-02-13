@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import type { Event } from '@/types/domain';
 import { Calendar, MapPin, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { signupForEvent, cancelSignup, getUserSignupStatus } from '@/lib/api/signup';
 import { supabase } from '@/lib/supabase/client';
+import PreferencesModal from './PreferencesModal';
 
 function formatDateTime(dateStr: string, locale: string): string {
   const date = new Date(dateStr);
@@ -26,11 +26,11 @@ interface EventCardProps {
 }
 
 export default function EventCard({ event, locale, t }: EventCardProps) {
-  const router = useRouter();
   const [signingUp, setSigningUp] = useState(false);
   const [signedUp, setSignedUp] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showPreferencesModal, setShowPreferencesModal] = useState(false);
 
   useEffect(() => {
     // Get current user
@@ -69,7 +69,8 @@ export default function EventCard({ event, locale, t }: EventCardProps) {
       const success = await signupForEvent(event.event_id, userId);
       if (success) {
         setSignedUp(true);
-        router.push(`/user/event/${event.event_id}/preferences`);
+        setShowPreferencesModal(true);
+        setSigningUp(false);
         return;
       }
     }
@@ -129,6 +130,16 @@ export default function EventCard({ event, locale, t }: EventCardProps) {
               ? t('user.signedUp')
               : t('user.signupBtn')}
       </button>
+
+      {/* Preferences Modal - shown after signup */}
+      {showPreferencesModal && userId && (
+        <PreferencesModal
+          eventId={event.event_id}
+          userId={userId}
+          t={t}
+          onClose={() => setShowPreferencesModal(false)}
+        />
+      )}
     </div>
   );
 }

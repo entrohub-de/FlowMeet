@@ -7,7 +7,8 @@ import type { Event } from '@/types/domain';
 export async function getEvents(): Promise<Event[]> {
   const { data, error } = await supabase
     .from('evt_events')
-    .select('*, venue:evt_venues(venue_id, name, capacity, created_at)');
+    .select('*, venue:evt_venues(venue_id, name, capacity, created_at)')
+    .order('start_time', { ascending: true });
 
   if (error) throw error;
   return data || [];
