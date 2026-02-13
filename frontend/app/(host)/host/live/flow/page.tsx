@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { ListChecks, Clock, Play, Pause, CheckCircle, ArrowLeft } from 'lucide-react';
+import { ListChecks, Clock, Play, Pause, CheckCircle, RefreshCw } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 import { getEvents } from '@/lib/api/events';
 import type { Event } from '@/types/domain';
@@ -162,9 +162,27 @@ export default function FlowControlPage() {
           </div>
         </div>
 
-        {!confirmed ? (
-          /* ── Selection Stage ── */
-          <div className="bg-card border border-border rounded-xl shadow-sm p-6">
+        {/* ── Template Selection / Summary ── */}
+        {confirmed ? (
+          <div className="bg-card border border-border rounded-xl shadow-sm p-4 mb-6 flex items-center justify-between">
+            <div className="flex items-center gap-3 text-sm">
+              <span className="text-muted-foreground">当前模板：</span>
+              <span className="font-medium text-foreground">{selectedTemplate?.name}</span>
+              <span className="text-muted-foreground">
+                · {flowSteps.length} 个环节 · {totalDuration}分钟
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleBack}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-button border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              更换模板
+            </button>
+          </div>
+        ) : (
+          <div className="bg-card border border-border rounded-xl shadow-sm p-6 mb-6">
             <h2 className="text-xl font-semibold text-foreground mb-6">选择流程模板</h2>
 
             <div className="space-y-5">
@@ -263,23 +281,11 @@ export default function FlowControlPage() {
               </div>
             </div>
           </div>
-        ) : (
-          /* ── Execution Stage ── */
-          <>
-            <div className="mb-6">
-              <button
-                type="button"
-                onClick={handleBack}
-                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-3"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                返回选择模板
-              </button>
-              <div className="text-sm text-muted-foreground">
-                当前模板：<span className="font-medium text-foreground">{selectedTemplate?.name}</span>
-              </div>
-            </div>
+        )}
 
+        {/* ── Execution Stage ── */}
+        {confirmed && (
+          <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
                 <div className="text-sm text-muted-foreground mb-2">当前环节</div>
