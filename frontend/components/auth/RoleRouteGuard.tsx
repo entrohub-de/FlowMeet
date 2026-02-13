@@ -49,14 +49,15 @@ export default function RoleRouteGuard({ area, children }: RoleRouteGuardProps) 
         .eq('user_id', sessionUser.id)
         .maybeSingle();
 
-      if (roleError) {
+      if (roleError || !roleData) {
+        // 无角色数据时重定向到登录页，不默认当 user 处理
         if (!cancelled) {
           routerRef.current.replace('/login');
         }
         return;
       }
 
-      const role = normalizeRole(roleData?.role);
+      const role = normalizeRole(roleData.role);
       const allowed =
         (area === 'host' && (role === 'host' || role === 'admin')) ||
         (area === 'user' && role === 'user');
