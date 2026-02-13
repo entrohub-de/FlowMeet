@@ -109,7 +109,7 @@ export default function HostVenuesPage() {
     loadVenues();
   };
 
-  const openCreateArea = (_venueId: string) => {
+  const openCreateArea = () => {
     setEditingArea(null);
     setAreaName('');
     setAreaType('general');
@@ -253,7 +253,7 @@ export default function HostVenuesPage() {
                     <div className="flex items-center justify-between">
                       <h4 className="text-sm font-medium text-foreground">{t('venue.areas')}</h4>
                       <button
-                        onClick={() => openCreateArea(venue.venue_id)}
+                        onClick={() => openCreateArea()}
                         className="px-3 py-1 text-xs bg-primary text-primary-foreground rounded-md hover:bg-primary/90 flex items-center gap-1"
                       >
                         <Plus className="w-3 h-3" />

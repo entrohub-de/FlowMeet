@@ -59,7 +59,7 @@ export default function MatchingStepCard({
           if (data) setIsUser1(data.user1_id === session.user.id);
         });
     });
-  }, [state.partner?.matchId]);
+  }, [state.partner?.matchId, state.partner]);
 
   const handleUpdateLocation = useCallback(async (location: string, areaId: string | null) => {
     if (!state.partner?.matchId) return;

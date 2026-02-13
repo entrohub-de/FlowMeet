@@ -44,7 +44,7 @@ export async function getTestUsers(eventId?: string): Promise<TestUser[]> {
 
   const sessionId = sessions?.[0]?.session_id;
 
-  let checkinMap = new Map<string, boolean>();
+  const checkinMap = new Map<string, boolean>();
   if (sessionId) {
     const { data: assignments } = await supabase
       .from('evt_assignments')
