@@ -11,7 +11,9 @@ import {
   getDefaultWorkflowConfig,
   loadEventWorkflow,
   resolveWorkflow,
+  type WorkflowModule,
 } from '@/features/host-console/workflowModules';
+import { getAllWorkflowModules } from '@/lib/api/workflow-modules';
 
 type FlowStatus = 'pending' | 'active' | 'completed';
 
@@ -27,32 +29,37 @@ export default function FlowControlPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedEventId, setSelectedEventId] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [modules, setModules] = useState<WorkflowModule[]>([]);
   const [flowSteps, setFlowSteps] = useState<FlowStep[]>([]);
 
   useEffect(() => {
-    const loadEvents = async () => {
+    const init = async () => {
       try {
-        const eventsData = await getEvents();
+        const [eventsData, modulesData] = await Promise.all([
+          getEvents(),
+          getAllWorkflowModules(),
+        ]);
         setEvents(eventsData);
+        setModules(modulesData);
         if (eventsData.length > 0) {
           setSelectedEventId(eventsData[0].event_id);
         }
       } catch (error) {
-        console.error('Failed to load events:', error);
+        console.error('Failed to load data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    loadEvents();
+    init();
   }, []);
 
   useEffect(() => {
     if (!selectedEventId) return;
 
     const existing = loadEventWorkflow(selectedEventId);
-    const config = existing ?? getDefaultWorkflowConfig();
-    const resolved = resolveWorkflow(config);
+    const config = existing ?? getDefaultWorkflowConfig(modules);
+    const resolved = resolveWorkflow(config, modules);
     const nextSteps: FlowStep[] = resolved.map((step) => ({
       id: step.stepId,
       title: step.title,

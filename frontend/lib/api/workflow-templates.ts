@@ -36,6 +36,15 @@ export async function createWorkflowTemplate(
   return data as WorkflowTemplateRecord;
 }
 
+export async function renameWorkflowTemplate(templateId: string, name: string): Promise<void> {
+  const { error } = await supabase
+    .from('workflow_templates')
+    .update({ name })
+    .eq('template_id', templateId);
+
+  if (error) throw error;
+}
+
 export async function deleteWorkflowTemplate(templateId: string): Promise<void> {
   const { error } = await supabase
     .from('workflow_templates')

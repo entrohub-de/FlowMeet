@@ -13,7 +13,8 @@
     "cancel": "取消",
     "deleting": "删除中...",
     "confirmDelete": "确认删除",
-    "save": "保存"
+    "save": "保存",
+    "saved": "已保存"
   },
   "nav": {
     "host": {

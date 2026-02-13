@@ -13,7 +13,8 @@
     "cancel": "Cancel",
     "deleting": "Deleting...",
     "confirmDelete": "Confirm Delete",
-    "save": "Save"
+    "save": "Save",
+    "saved": "Saved"
   },
   "nav": {
     "host": {
