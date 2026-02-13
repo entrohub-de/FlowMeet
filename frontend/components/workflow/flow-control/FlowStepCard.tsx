@@ -21,6 +21,12 @@ interface FlowStepCardProps {
   onTriggerMatching?: (stepId: string) => void;
   isMatching?: boolean;
   matchingError?: string | null;
+  // Group matching props
+  groupReadyCount?: number;
+  groupTotalCount?: number;
+  groupedCount?: number;
+  onTriggerGrouping?: (groupSize: number) => void;
+  isGrouping?: boolean;
 }
 
 const cardStyles: Record<FlowStatus, string> = {
@@ -53,10 +59,16 @@ export default function FlowStepCard({
   onTriggerMatching,
   isMatching,
   matchingError,
+  groupReadyCount,
+  groupTotalCount,
+  groupedCount,
+  onTriggerGrouping,
+  isGrouping,
 }: FlowStepCardProps) {
   const { t } = useTranslation();
 
   const is1v1Active = pairingMode === '1v1' && (status === 'active' || status === 'paused');
+  const isGroupActive = pairingMode === 'group' && (status === 'active' || status === 'paused');
 
   return (
     <div className={`p-4 rounded-lg border transition-all ${cardStyles[status]}`}>
@@ -77,6 +89,11 @@ export default function FlowStepCard({
               {pairingMode === '1v1' && (
                 <span className="px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 text-xs font-medium">
                   1v1
+                </span>
+              )}
+              {pairingMode === 'group' && (
+                <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-medium">
+                  {t('flowGroupMatching.badge')}
                 </span>
               )}
             </div>
@@ -205,6 +222,35 @@ export default function FlowStepCard({
           {matchingError && (
             <p className="w-full text-sm text-red-600">{matchingError}</p>
           )}
+        </div>
+      )}
+
+      {/* Group Matching controls for host */}
+      {isGroupActive && (
+        <div className="mt-3 pt-3 border-t border-border flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Users className="w-4 h-4" />
+            <span>
+              {t('flowMatching.readyCount', {
+                ready: groupReadyCount ?? 0,
+                total: groupTotalCount ?? 0,
+              })}
+            </span>
+          </div>
+          {(groupedCount ?? 0) > 0 && (
+            <span className="text-sm text-emerald-600 font-medium">
+              {t('flowGroupMatching.groupedCount', { count: groupedCount ?? 0 })}
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={() => onTriggerGrouping?.(4)}
+            disabled={isGrouping || (groupReadyCount ?? 0) < 2}
+            className="ml-auto px-4 py-2 rounded-button bg-emerald-600 text-white hover:bg-emerald-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Zap className="w-4 h-4" />
+            {isGrouping ? t('flowGroupMatching.grouping') : t('flowGroupMatching.groupNow')}
+          </button>
         </div>
       )}
     </div>

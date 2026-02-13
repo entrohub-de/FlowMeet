@@ -1,6 +1,17 @@
 import { supabase } from '@/lib/supabase/client';
 import type { Profile, Preferences } from '@/types/domain';
 
+export async function isProfileComplete(userId: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('usr_profiles')
+    .select('nickname')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error || !data) return false;
+  return !!data.nickname && data.nickname.trim().length > 0;
+}
+
 export async function getProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase
     .from('usr_profiles')

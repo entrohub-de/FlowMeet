@@ -13,9 +13,16 @@ export interface MatchAssignmentPayload {
   timestamp: string;
 }
 
+export interface GroupAssignmentPayload {
+  groups: Array<{ groupId: string; memberIds: string[] }>;
+  ungrouped?: string[];
+  timestamp: string;
+}
+
 export interface MatchingQueueCallbacks {
   onPresenceSync: (readyUsers: MatchingPresenceState[], allUsers: MatchingPresenceState[]) => void;
   onMatchAssigned?: (payload: MatchAssignmentPayload) => void;
+  onGroupAssigned?: (payload: GroupAssignmentPayload) => void;
 }
 
 const MATCHING_CHANNEL = (eventId: string, stepId: string) =>
@@ -51,6 +58,9 @@ export function joinMatchingQueue(
     })
     .on('broadcast', { event: 'match_assigned' }, ({ payload }) => {
       callbacks.onMatchAssigned?.(payload as MatchAssignmentPayload);
+    })
+    .on('broadcast', { event: 'group_assigned' }, ({ payload }) => {
+      callbacks.onGroupAssigned?.(payload as GroupAssignmentPayload);
     })
     .subscribe(async (status) => {
       if (status === 'SUBSCRIBED') {
@@ -107,9 +117,34 @@ export function observeMatchingQueue(
     .on('broadcast', { event: 'match_assigned' }, ({ payload }) => {
       callbacks.onMatchAssigned?.(payload as MatchAssignmentPayload);
     })
+    .on('broadcast', { event: 'group_assigned' }, ({ payload }) => {
+      callbacks.onGroupAssigned?.(payload as GroupAssignmentPayload);
+    })
     .subscribe();
 
   return channel;
+}
+
+/**
+ * Host: broadcast group assignments to all participants.
+ */
+export function broadcastGroupAssignments(
+  eventId: string,
+  stepId: string,
+  payload: GroupAssignmentPayload
+): void {
+  const channelName = MATCHING_CHANNEL(eventId, stepId);
+  const channel = supabase.channel(channelName);
+  channel.subscribe((status) => {
+    if (status === 'SUBSCRIBED') {
+      channel.send({
+        type: 'broadcast',
+        event: 'group_assigned',
+        payload,
+      });
+      setTimeout(() => supabase.removeChannel(channel), 500);
+    }
+  });
 }
 
 /**

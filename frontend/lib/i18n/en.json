@@ -60,6 +60,22 @@
     "pairedCount": "{count} paired",
     "stepBadge1v1": "1v1 Matching"
   },
+  "flowGroupMatching": {
+    "badge": "Group",
+    "readyToGroup": "Ready to be grouped?",
+    "readyButton": "I'm Ready",
+    "waitingForGroup": "Waiting for group assignment...",
+    "cancelReady": "Cancel",
+    "ungrouped": "You haven't been assigned to a group yet. Wait for the next round.",
+    "groupAssigned": "Group Assigned!",
+    "yourGroup": "Your Group",
+    "groupedCount": "{count} grouped",
+    "grouping": "Grouping...",
+    "groupNow": "Group Now"
+  },
+  "locationFinding": {
+    "selectArea": "Select area (optional)"
+  },
   "pages": {
     "signup": {
       "title": "Event Signup",
@@ -515,6 +531,61 @@
     "title": "FlowMeet - Organize & Join Events Easily",
     "description": "FlowMeet helps you create events, manage attendance, and enjoy a clear workflow."
   },
+  "venue": {
+    "title": "Venue Management",
+    "subtitle": "Manage event venues and areas",
+    "createVenue": "Create Venue",
+    "editVenue": "Edit Venue",
+    "editArea": "Edit Area",
+    "name": "Venue Name",
+    "address": "Address",
+    "capacity": "Capacity",
+    "description": "Description",
+    "areas": "Areas",
+    "createArea": "Add Area",
+    "areaName": "Area Name",
+    "areaType": "Area Type",
+    "areaTypes": {
+      "meeting_room": "Meeting Room",
+      "lounge": "Lounge",
+      "cafe": "Cafe",
+      "stage": "Stage",
+      "general": "General"
+    },
+    "maxPeople": "Max People",
+    "minPeople": "Min People",
+    "people": "people",
+    "noVenues": "No venues yet",
+    "noAreas": "No areas yet",
+    "noVenueForEvent": "No venue associated with this event",
+    "deleteConfirm": "Are you sure you want to delete this venue?"
+  },
+  "eventPreferences": {
+    "title": "Matching Preferences",
+    "subtitle": "Help us find better matches for you",
+    "eventSpecific": "Event Preferences",
+    "preferredTopics": "Preferred Topics",
+    "topicsPlaceholder": "What topics would you like to discuss? e.g., startup experience, tech trends...",
+    "availability": "Availability",
+    "availabilityPlaceholder": "e.g., Full event, Morning only",
+    "notes": "Additional Notes",
+    "notesPlaceholder": "Anything you'd like the matching system to know?",
+    "globalPrefs": "Personal Preferences",
+    "globalPrefsHint": "This info improves matching accuracy across all events",
+    "skip": "Skip",
+    "save": "Save Preferences",
+    "saved": "Preferences saved"
+  },
+  "profileCompletion": {
+    "title": "Complete Your Profile",
+    "subtitle": "Fill in your info to help us find better matches for you",
+    "step1Title": "Basic Info",
+    "step2Title": "Preferences",
+    "step2Subtitle": "Preferences help improve matching accuracy (optional)",
+    "next": "Next",
+    "complete": "Complete",
+    "skipPreferences": "Skip for now"
+  },
   "checkin": {
     "selectEvent": "Select Event",
     "checkinParticipant": "Check In Participant",
@@ -541,5 +612,23 @@
       "checkinError": "Check-in failed, please retry",
       "defaultUser": "User"
     }
+  },
+  "testPanel": {
+    "title": "Test Panel",
+    "selectEvent": "Select Event",
+    "actions": "Actions",
+    "refresh": "Refresh",
+    "batchCheckin": "Batch Check-in",
+    "cleanup": "Cleanup Test Data",
+    "scriptHint": "Tip: Use node scripts/create-test-users.mjs --count 10 --event <eventId> to create test users",
+    "usersTitle": "Participants",
+    "checkedIn": "Checked In",
+    "notCheckedIn": "Not Checked In",
+    "checkedInCount": "{count}/{total} checked in",
+    "noUsers": "No users signed up for this event",
+    "allCheckedIn": "All users already checked in",
+    "checkinSuccess": "Successfully checked in {count} users",
+    "checkinFailed": "Batch check-in failed",
+    "cleanupDone": "Cleaned up: {matches} matches, {groups} groups"
   }
 }

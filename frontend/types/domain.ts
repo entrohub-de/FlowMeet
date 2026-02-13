@@ -19,6 +19,23 @@ export interface Venue {
   venue_id: string;
   name: string;
   capacity: number;
+  address: string | null;
+  description: string | null;
+  created_by: string | null;
+  created_at: string;
+}
+
+export type AreaType = 'meeting_room' | 'lounge' | 'cafe' | 'stage' | 'general';
+
+export interface Area {
+  area_id: string;
+  event_id: string;
+  name: string;
+  description: string | null;
+  max_people: number;
+  min_people: number;
+  area_order: number;
+  area_type: AreaType;
   created_at: string;
 }
 
@@ -112,6 +129,8 @@ export interface Match {
   user2_location: string | null;
   location_updated_by_user1_at: string | null;
   location_updated_by_user2_at: string | null;
+  user1_area_id: string | null;
+  user2_area_id: string | null;
   user1_profile?: Profile;
   user2_profile?: Profile;
 }

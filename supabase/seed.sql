@@ -158,7 +158,40 @@ BEGIN
     '25-34'
   );
 
+  -- 创建两个全局模板
+  -- 模板1: 标准社交流程（不含话题）
+  INSERT INTO public.workflow_templates (event_id, name, steps, created_by)
+  VALUES (
+    NULL,
+    '标准社交流程',
+    '[
+      {"stepId":"tpl1-s1","moduleId":"opening-checkin","durationMinutes":20},
+      {"stepId":"tpl1-s2","moduleId":"opening-intro","durationMinutes":10},
+      {"stepId":"tpl1-s3","moduleId":"networking-free-talk","durationMinutes":25},
+      {"stepId":"tpl1-s4","moduleId":"group-small","durationMinutes":35},
+      {"stepId":"tpl1-s5","moduleId":"industry-peer","durationMinutes":30},
+      {"stepId":"tpl1-s6","moduleId":"closing-share","durationMinutes":15}
+    ]'::jsonb,
+    host_user_id
+  );
+
+  -- 模板2: 深度交流流程（含话题引导）
+  INSERT INTO public.workflow_templates (event_id, name, steps, created_by)
+  VALUES (
+    NULL,
+    '深度交流流程（含话题）',
+    '[
+      {"stepId":"tpl2-s1","moduleId":"opening-checkin","durationMinutes":15},
+      {"stepId":"tpl2-s2","moduleId":"opening-intro","durationMinutes":10},
+      {"stepId":"tpl2-s3","moduleId":"networking-1v1-topics","durationMinutes":25},
+      {"stepId":"tpl2-s4","moduleId":"group-small-topics","durationMinutes":35},
+      {"stepId":"tpl2-s5","moduleId":"closing-share","durationMinutes":15}
+    ]'::jsonb,
+    host_user_id
+  );
+
   RAISE NOTICE '✅ Host账号已创建: host@flowmeet.test / host123';
+  RAISE NOTICE '📋 已创建2个模板: 标准社交流程 / 深度交流流程（含话题）';
 END $$;
 
 -- 3. 创建额外的活动（在现有4个活动基础上再加6个）

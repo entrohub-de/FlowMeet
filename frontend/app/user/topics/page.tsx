@@ -20,6 +20,8 @@ const DEMO_MATCHES: Match[] = [
     user2_location: null,
     location_updated_by_user1_at: null,
     location_updated_by_user2_at: null,
+    user1_area_id: null,
+    user2_area_id: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     user1_profile: {
@@ -49,6 +51,8 @@ const DEMO_MATCHES: Match[] = [
     user2_location: null,
     location_updated_by_user1_at: null,
     location_updated_by_user2_at: null,
+    user1_area_id: null,
+    user2_area_id: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     user1_profile: {
@@ -78,6 +82,8 @@ const DEMO_MATCHES: Match[] = [
     user2_location: null,
     location_updated_by_user1_at: null,
     location_updated_by_user2_at: null,
+    user1_area_id: null,
+    user2_area_id: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     user1_profile: {

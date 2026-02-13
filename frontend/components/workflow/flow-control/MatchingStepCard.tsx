@@ -1,10 +1,15 @@
 'use client';
 
-import { useState } from 'react';
-import { Clock, Users, MapPin, Loader2, UserCheck } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { Clock, Users, Loader2, UserCheck } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 import { useFlowMatching } from '@/hooks/useFlowMatching';
 import { updateMatchLocation } from '@/lib/api/matching';
+import { getEventVenueAreas } from '@/lib/api/venues';
+import { supabase } from '@/lib/supabase/client';
+import LocationSharing from '@/components/matching/LocationSharing';
+import PartnerLocationCard from '@/components/matching/PartnerLocationCard';
+import type { Area } from '@/types/domain';
 
 type FlowStatus = 'pending' | 'active' | 'paused' | 'completed';
 
@@ -30,23 +35,43 @@ export default function MatchingStepCard({
   const { t } = useTranslation();
   const { state, toggleReady } = useFlowMatching(eventId, stepId, status, '1v1');
 
-  const [myLocation, setMyLocation] = useState('');
+  const [areas, setAreas] = useState<Area[]>([]);
   const [isUpdatingLocation, setIsUpdatingLocation] = useState(false);
+  const [isUser1, setIsUser1] = useState(true);
 
-  const handleUpdateLocation = async () => {
-    if (!myLocation.trim() || isUpdatingLocation || !state.partner?.matchId) return;
+  // Load venue areas for area selection
+  useEffect(() => {
+    if (!eventId) return;
+    getEventVenueAreas(eventId).then(setAreas);
+  }, [eventId]);
+
+  // Determine if current user is user1 in the match
+  useEffect(() => {
+    if (!state.partner?.matchId) return;
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session?.user) return;
+      supabase
+        .from('evt_matches')
+        .select('user1_id')
+        .eq('match_id', state.partner!.matchId)
+        .single()
+        .then(({ data }) => {
+          if (data) setIsUser1(data.user1_id === session.user.id);
+        });
+    });
+  }, [state.partner?.matchId]);
+
+  const handleUpdateLocation = useCallback(async (location: string, areaId: string | null) => {
+    if (!state.partner?.matchId) return;
     setIsUpdatingLocation(true);
     try {
-      const success = await updateMatchLocation(state.partner.matchId, myLocation.trim());
-      if (success) {
-        setMyLocation('');
-      }
+      await updateMatchLocation(state.partner.matchId, location, areaId);
     } catch (error) {
       console.error('Error updating location:', error);
     } finally {
       setIsUpdatingLocation(false);
     }
-  };
+  }, [state.partner?.matchId]);
 
   return (
     <div className="rounded-xl border-2 border-primary bg-primary/5 overflow-hidden">
@@ -165,34 +190,18 @@ export default function MatchingStepCard({
               </div>
             </div>
 
-            {/* Location sharing */}
+            {/* Partner location (real-time) */}
             <div className="pt-3 border-t border-border space-y-3">
-              <div className="space-y-2">
-                <label className="text-xs text-muted-foreground">
-                  {t('user.matchLocation.myLocation')}
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={myLocation}
-                    onChange={(e) => setMyLocation(e.target.value)}
-                    placeholder={t('user.matchLocation.locationPlaceholder')}
-                    maxLength={100}
-                    className="flex-1 px-3 py-2 text-sm bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    disabled={isUpdatingLocation}
-                  />
-                  <button
-                    onClick={handleUpdateLocation}
-                    disabled={!myLocation.trim() || isUpdatingLocation}
-                    className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
-                  >
-                    <MapPin className="w-4 h-4" />
-                    {isUpdatingLocation
-                      ? t('user.matchLocation.updating')
-                      : t('user.matchLocation.updateLocation')}
-                  </button>
-                </div>
-              </div>
+              <PartnerLocationCard
+                matchId={state.partner.matchId}
+                isUser1={isUser1}
+                areas={areas}
+              />
+              <LocationSharing
+                areas={areas}
+                onUpdateLocation={handleUpdateLocation}
+                isUpdating={isUpdatingLocation}
+              />
             </div>
           </div>
         )}

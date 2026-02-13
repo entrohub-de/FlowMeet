@@ -6,6 +6,7 @@ import { useActiveFlow } from '@/hooks/useActiveFlow';
 import FlowStatusCards from '@/components/workflow/flow-control/FlowStatusCards';
 import FlowStepCardReadOnly from '@/components/workflow/flow-control/FlowStepCardReadOnly';
 import MatchingStepCard from '@/components/workflow/flow-control/MatchingStepCard';
+import GroupMatchingStepCard from '@/components/workflow/flow-control/GroupMatchingStepCard';
 
 export default function UserFlowPage() {
   const { t } = useTranslation();
@@ -70,22 +71,41 @@ export default function UserFlowPage() {
               <div className="p-6">
                 <div className="space-y-3">
                   {flowState.steps.map((step, index) => {
-                    const isActiveMatching =
-                      step.pairingMode === '1v1' &&
-                      (step.status === 'active' || step.status === 'paused');
+                    const isActive = step.status === 'active' || step.status === 'paused';
+                    const isActive1v1 = step.pairingMode === '1v1' && isActive;
+                    const isActiveGroup = step.pairingMode === 'group' && isActive;
 
-                    return isActiveMatching ? (
-                      <MatchingStepCard
-                        key={step.id}
-                        index={index}
-                        stepId={step.id}
-                        title={step.title}
-                        status={step.status}
-                        remainingSeconds={step.remainingSeconds}
-                        formatTime={formatTime}
-                        eventId={selectedEventId}
-                      />
-                    ) : (
+                    if (isActive1v1) {
+                      return (
+                        <MatchingStepCard
+                          key={step.id}
+                          index={index}
+                          stepId={step.id}
+                          title={step.title}
+                          status={step.status}
+                          remainingSeconds={step.remainingSeconds}
+                          formatTime={formatTime}
+                          eventId={selectedEventId}
+                        />
+                      );
+                    }
+
+                    if (isActiveGroup) {
+                      return (
+                        <GroupMatchingStepCard
+                          key={step.id}
+                          index={index}
+                          stepId={step.id}
+                          title={step.title}
+                          status={step.status}
+                          remainingSeconds={step.remainingSeconds}
+                          formatTime={formatTime}
+                          eventId={selectedEventId}
+                        />
+                      );
+                    }
+
+                    return (
                       <FlowStepCardReadOnly
                         key={step.id}
                         index={index}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import type { Event } from '@/types/domain';
 import { Calendar, MapPin, Clock } from 'lucide-react';
 import { signupForEvent, cancelSignup, getUserSignupStatus } from '@/lib/api/signup';
@@ -24,6 +25,7 @@ interface EventCardProps {
 }
 
 export default function EventCard({ event, locale, t }: EventCardProps) {
+  const router = useRouter();
   const [signingUp, setSigningUp] = useState(false);
   const [signedUp, setSignedUp] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
@@ -67,6 +69,8 @@ export default function EventCard({ event, locale, t }: EventCardProps) {
       const success = await signupForEvent(event.event_id, userId);
       if (success) {
         setSignedUp(true);
+        router.push(`/user/event/${event.event_id}/preferences`);
+        return;
       }
     }
 

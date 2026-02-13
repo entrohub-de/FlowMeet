@@ -21,6 +21,7 @@ import TemplateSummaryBar from '@/components/workflow/flow-control/TemplateSumma
 import FlowStatusCards from '@/components/workflow/flow-control/FlowStatusCards';
 import FlowStepCard from '@/components/workflow/flow-control/FlowStepCard';
 import { useHostFlowMatching } from '@/hooks/useHostFlowMatching';
+import { useHostFlowGroupMatching } from '@/hooks/useHostFlowGroupMatching';
 
 type FlowStatus = 'pending' | 'active' | 'paused' | 'completed';
 
@@ -309,6 +310,18 @@ export default function FlowControlPage() {
     activeStepForMatching?.pairingMode
   );
 
+  const {
+    readyCount: groupReadyCount,
+    totalPresent: groupTotalPresent,
+    groupedCount,
+    isGrouping,
+    triggerGrouping,
+  } = useHostFlowGroupMatching(
+    selectedEventId,
+    activeStepForMatching?.id ?? null,
+    activeStepForMatching?.pairingMode
+  );
+
   const selectedTemplate = templates.find((tpl) => tpl.template_id === selectedTemplateId);
 
   if (loading) {
@@ -397,6 +410,11 @@ export default function FlowControlPage() {
                     onTriggerMatching={triggerMatching}
                     isMatching={isMatching}
                     matchingError={step.id === activeStepForMatching?.id ? matchingError : undefined}
+                    groupReadyCount={step.id === activeStepForMatching?.id ? groupReadyCount : undefined}
+                    groupTotalCount={step.id === activeStepForMatching?.id ? groupTotalPresent : undefined}
+                    groupedCount={step.id === activeStepForMatching?.id ? groupedCount : undefined}
+                    onTriggerGrouping={triggerGrouping}
+                    isGrouping={isGrouping}
                   />
                 ))}
               </div>

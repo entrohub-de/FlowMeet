@@ -441,11 +441,12 @@ export async function getCurrentUserWithPreferences(userId: string): Promise<Use
 }
 
 /**
- * 更新配对中当前用户的位置描述
+ * 更新配对中当前用户的位置描述（可选区域）
  */
 export async function updateMatchLocation(
   matchId: string,
-  location: string
+  location: string,
+  areaId?: string | null
 ): Promise<boolean> {
   try {
     // 获取当前用户ID
@@ -470,16 +471,18 @@ export async function updateMatchLocation(
     }
 
     // 确定要更新的字段
-    let updateData: Record<string, string> = {};
+    let updateData: Record<string, string | null> = {};
     if (match.user1_id === userId) {
       updateData = {
         user1_location: location,
         location_updated_by_user1_at: new Date().toISOString(),
+        ...(areaId !== undefined ? { user1_area_id: areaId ?? null } : {}),
       };
     } else if (match.user2_id === userId) {
       updateData = {
         user2_location: location,
         location_updated_by_user2_at: new Date().toISOString(),
+        ...(areaId !== undefined ? { user2_area_id: areaId ?? null } : {}),
       };
     } else {
       console.error('User is not part of this match');
@@ -502,4 +505,45 @@ export async function updateMatchLocation(
     console.error('Unexpected error updating match location:', error);
     return false;
   }
+}
+
+/**
+ * 订阅配对位置变更（实时）
+ */
+export function subscribeToMatchLocation(
+  matchId: string,
+  callback: (match: {
+    user1_location: string | null;
+    user2_location: string | null;
+    user1_area_id: string | null;
+    user2_area_id: string | null;
+    location_updated_by_user1_at: string | null;
+    location_updated_by_user2_at: string | null;
+  }) => void
+) {
+  const channel = supabase
+    .channel(`match-location:${matchId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'evt_matches',
+        filter: `match_id=eq.${matchId}`,
+      },
+      (payload) => {
+        const row = payload.new as Record<string, unknown>;
+        callback({
+          user1_location: (row.user1_location as string) ?? null,
+          user2_location: (row.user2_location as string) ?? null,
+          user1_area_id: (row.user1_area_id as string) ?? null,
+          user2_area_id: (row.user2_area_id as string) ?? null,
+          location_updated_by_user1_at: (row.location_updated_by_user1_at as string) ?? null,
+          location_updated_by_user2_at: (row.location_updated_by_user2_at as string) ?? null,
+        });
+      }
+    )
+    .subscribe();
+
+  return channel;
 }

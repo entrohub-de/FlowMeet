@@ -17,7 +17,9 @@ VALUES
   ('opening-intro',        '开场与规则说明', '主持人说明目标、流程、时间规则。',         'opening',    10, '{}'::jsonb, 20),
   ('networking-free-talk', '自由交流',       '开放走动交流，适合快速建立连接。',         'networking', 25, '{}'::jsonb, 30),
   ('networking-speed',     '快速轮转交流',   '短时多轮对话，提升触达人数。',             'networking', 20, '{}'::jsonb, 35),
+  ('networking-1v1-topics', '1v1深度对话',    '一对一配对，搭配话题引导深度交流。',       'networking', 25, '{"pairingMode":"1v1","enableTopics":true}'::jsonb, 36),
   ('group-small',          '小组交流',       '按主题分组讨论，每组输出结论。',           'group',      35, '{}'::jsonb, 40),
+  ('group-small-topics',   '小组话题讨论',   '小组配对并推荐话题，促进有方向的讨论。',   'group',      35, '{"pairingMode":"group","enableTopics":true}'::jsonb, 41),
   ('industry-peer',        '同行业交流',     '同赛道交流，聚焦行业资源与合作。',         'industry',   30, '{}'::jsonb, 50),
   ('industry-cross',       '跨行业交流',     '不同背景交叉讨论，提升视角多样性。',       'industry',   30, '{}'::jsonb, 55),
   ('closing-share',        '总结分享',       '代表发言与关键收获回顾。',                 'closing',    15, '{}'::jsonb, 60)
@@ -26,4 +28,5 @@ ON CONFLICT (module_key) DO UPDATE SET
   description             = EXCLUDED.description,
   module_type             = EXCLUDED.module_type,
   default_duration_minutes = EXCLUDED.default_duration_minutes,
+  definition              = EXCLUDED.definition,
   display_order           = EXCLUDED.display_order;
