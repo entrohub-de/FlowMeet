@@ -221,6 +221,8 @@
       },
       "templates": {
         "sectionTitle": "模板管理",
+        "libraryTitle": "模板库",
+        "total": "共 {count} 个",
         "newTemplate": "新建模板",
         "inputPlaceholder": "模板名称，例如：90分钟标准社交流程",
         "saveCurrentAsTemplate": "保存当前流程为模板",
@@ -230,8 +232,11 @@
         "apply": "应用模板",
         "delete": "删除",
         "deleteAria": "删除模板",
-        "deleteConfirm": "确定删除模板“{name}”吗？",
-        "empty": "还没有模板，先保存一个模板。"
+        "deleteConfirm": "确定删除模板「{name}」吗？",
+        "empty": "还没有模板，点击下方按钮新建。",
+        "backToList": "返回模板列表",
+        "editTemplate": "编辑模板",
+        "stepsAndDuration": "{count}个环节 · {minutes}分钟"
       },
       "current": {
         "title": "当前流程",

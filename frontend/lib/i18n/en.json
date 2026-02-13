@@ -219,6 +219,8 @@
       },
       "templates": {
         "sectionTitle": "Template Management",
+        "libraryTitle": "Template Library",
+        "total": "Total {count}",
         "newTemplate": "New Template",
         "inputPlaceholder": "Template name, e.g. 90-minute standard social flow",
         "saveCurrentAsTemplate": "Save Current Workflow as Template",
@@ -229,7 +231,10 @@
         "delete": "Delete",
         "deleteAria": "Delete template",
         "deleteConfirm": "Delete template \"{name}\"?",
-        "empty": "No templates yet. Save one first."
+        "empty": "No templates yet. Click below to create one.",
+        "backToList": "Back to templates",
+        "editTemplate": "Edit Template",
+        "stepsAndDuration": "{count} steps · {minutes} min"
       },
       "current": {
         "title": "Current Workflow",
