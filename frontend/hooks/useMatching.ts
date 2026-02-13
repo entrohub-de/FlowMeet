@@ -61,7 +61,7 @@ export function useMatching() {
 
         // 2. 通过session获取event
         const { data: sessions, error: sessionError } = await supabase
-          .from('evt_sessions')
+          .from('session_flows')
           .select('event_id, event:evt_events(*)')
           .in('session_id', sessionIds);
 

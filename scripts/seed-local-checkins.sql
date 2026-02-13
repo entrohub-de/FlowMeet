@@ -3,7 +3,7 @@
 -- 1. 获取第一个活动的所有session
 WITH event_sessions AS (
   SELECT s.session_id, s.event_id
-  FROM evt_sessions s
+  FROM session_flows s
   JOIN evt_events e ON s.event_id = e.event_id
   ORDER BY e.created_at DESC
   LIMIT 5

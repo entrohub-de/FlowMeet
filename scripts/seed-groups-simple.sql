@@ -27,7 +27,7 @@ WITH
   users_checked_in AS (
     SELECT DISTINCT a.user_id, ROW_NUMBER() OVER (ORDER BY a.user_id) - 1 as user_num
     FROM evt_assignments a
-    JOIN evt_sessions s ON a.session_id = s.session_id
+    JOIN session_flows s ON a.session_id = s.session_id
     WHERE s.event_id = (SELECT event_id FROM event_info)
     AND a.checked_in = true
   )

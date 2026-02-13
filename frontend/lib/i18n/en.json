@@ -32,8 +32,17 @@
       "matching": "1v1 Matching",
       "groups": "Groups",
       "topics": "Topics",
-      "rating": "Rating"
+      "rating": "Rating",
+      "flow": "Event Flow"
     }
+  },
+  "userFlow": {
+    "title": "Event Flow",
+    "description": "See which step the event is currently on",
+    "noActiveFlow": "No active flow",
+    "noActiveFlowHint": "The host has not started the event flow yet",
+    "templateName": "Flow Template",
+    "flowCompleted": "All steps completed"
   },
   "pages": {
     "signup": {

@@ -34,7 +34,7 @@ BEGIN
   RAISE NOTICE '✅ 创建活动: %', v_event_id;
 
   -- 创建session
-  INSERT INTO evt_sessions (event_id, name, start_time, end_time)
+  INSERT INTO session_flows (event_id, name, start_time, end_time)
   VALUES (
     v_event_id,
     '主会场',
@@ -56,7 +56,7 @@ BEGIN
     RAISE NOTICE '✅ 创建area: %', v_area_id;
 
     -- 关联session和area
-    INSERT INTO evt_session_areas (session_id, area_id)
+    INSERT INTO session_areas (session_id, area_id)
     VALUES (v_session_id, v_area_id);
 
   -- 获取所有用户ID

@@ -328,7 +328,7 @@ BEGIN
   );
 
   -- 创建场次
-  INSERT INTO public.evt_sessions (session_id, event_id, name, start_time, end_time)
+  INSERT INTO public.session_flows (session_id, event_id, name, start_time, end_time)
   VALUES (
     test_session_id,
     test_event_id,

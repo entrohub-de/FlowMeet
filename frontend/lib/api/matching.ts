@@ -202,7 +202,7 @@ export async function getAvailableUsers(
 ): Promise<UserProfile[]> {
   // 获取该活动的所有session
   const { data: sessions, error: sessionError } = await supabase
-    .from('evt_sessions')
+    .from('session_flows')
     .select('session_id')
     .eq('event_id', eventId);
 
@@ -315,7 +315,7 @@ export async function getAvailableUsersWithPreferences(
 ): Promise<UserWithPreferences[]> {
   // 获取该活动的所有session
   const { data: sessions, error: sessionError } = await supabase
-    .from('evt_sessions')
+    .from('session_flows')
     .select('session_id')
     .eq('event_id', eventId);
 

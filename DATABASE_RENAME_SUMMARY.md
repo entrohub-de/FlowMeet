@@ -10,10 +10,10 @@
 | 旧表名 | 新表名 | 说明 |
 |--------|--------|------|
 | `event` | `evt_events` | 活动/事件主表 |
-| `session` | `evt_sessions` | 会话表 |
+| `session` | `session_flows` | 会话/流程表 |
 | `area` | `evt_areas` | 区域表 |
 | `venue` | `evt_venues` | 场地表 |
-| `session_area` | `evt_session_areas` | 会话-区域关联表 |
+| `session_area` | `session_areas` | 会话-区域关联表 |
 | `session_assignment` | `evt_assignments` | 会话分配表 |
 | `user_roles` | `evt_event_roles` | 活动角色表 |
 

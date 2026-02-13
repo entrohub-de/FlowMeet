@@ -53,7 +53,7 @@ BEGIN
   RETURNING area_id INTO v_area_id;
 
   -- 5. 创建测试session
-  INSERT INTO public.evt_sessions (event_id, name, start_time, end_time)
+  INSERT INTO public.session_flows (event_id, name, start_time, end_time)
   VALUES (
     v_event_id,
     'Matching Test Session - 200 Users',
@@ -63,7 +63,7 @@ BEGIN
   RETURNING session_id INTO v_session_id;
 
   -- 6. 关联session和area
-  INSERT INTO public.evt_session_areas (session_id, area_id)
+  INSERT INTO public.session_areas (session_id, area_id)
   VALUES (v_session_id, v_area_id);
 
   -- 7. 为每个auth用户创建profile和preference
@@ -177,7 +177,7 @@ SELECT
   COUNT(DISTINCT a.user_id) as count
 FROM public.evt_assignments a
 INNER JOIN public.usr_profiles prof ON a.user_id = prof.user_id
-INNER JOIN public.evt_sessions s ON a.session_id = s.session_id
+INNER JOIN public.session_flows s ON a.session_id = s.session_id
 INNER JOIN public.evt_events e ON s.event_id = e.event_id
 WHERE
   a.checked_in = TRUE

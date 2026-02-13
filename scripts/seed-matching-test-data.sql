@@ -61,7 +61,7 @@ BEGIN
   RETURNING area_id INTO v_area_id;
 
   -- 创建测试session
-  INSERT INTO public.evt_sessions (
+  INSERT INTO public.session_flows (
     event_id,
     name,
     start_time,
@@ -76,7 +76,7 @@ BEGIN
   RETURNING session_id INTO v_session_id;
 
   -- 关联session和area
-  INSERT INTO public.evt_session_areas (session_id, area_id)
+  INSERT INTO public.session_areas (session_id, area_id)
   VALUES (v_session_id, v_area_id);
 
   -- 生成200个测试用户
@@ -224,7 +224,7 @@ SELECT
   COUNT(*) as count
 FROM public.evt_assignments a
 INNER JOIN public.usr_profiles prof ON a.user_id = prof.user_id
-INNER JOIN public.evt_sessions s ON a.session_id = s.session_id
+INNER JOIN public.session_flows s ON a.session_id = s.session_id
 INNER JOIN public.evt_events e ON s.event_id = e.event_id
 WHERE
   a.checked_in = TRUE

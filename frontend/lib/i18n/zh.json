@@ -34,8 +34,17 @@
       "matching": "1v1配对",
       "groups": "小组配对",
       "topics": "对话话题",
-      "rating": "活动评分"
+      "rating": "活动评分",
+      "flow": "活动流程"
     }
+  },
+  "userFlow": {
+    "title": "活动流程",
+    "description": "查看当前活动进行到哪个环节",
+    "noActiveFlow": "暂无活动流程",
+    "noActiveFlowHint": "主办方尚未启动流程",
+    "templateName": "流程模板",
+    "flowCompleted": "流程已全部完成"
   },
   "pages": {
     "signup": {

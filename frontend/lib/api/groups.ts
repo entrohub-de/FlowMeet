@@ -114,7 +114,7 @@ export async function autoGenerateGroups(
   try {
     // 1. 获取活动的所有 session
     const { data: sessions, error: sessionError } = await supabase
-      .from('evt_sessions')
+      .from('session_flows')
       .select('session_id')
       .eq('event_id', eventId);
 

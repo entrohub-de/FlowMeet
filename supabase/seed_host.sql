@@ -99,7 +99,7 @@ BEGIN
     NOW() - INTERVAL '2 days'
   );
 
-  INSERT INTO public.evt_sessions (session_id, event_id, name, start_time, end_time)
+  INSERT INTO public.session_flows (session_id, event_id, name, start_time, end_time)
   VALUES (
     session1_id, event1_id, '第一场',
     NOW() - INTERVAL '30 minutes', NOW() + INTERVAL '1.5 hours'
@@ -120,7 +120,7 @@ BEGIN
     NOW() - INTERVAL '1 day'
   );
 
-  INSERT INTO public.evt_sessions (session_id, event_id, name, start_time, end_time)
+  INSERT INTO public.session_flows (session_id, event_id, name, start_time, end_time)
   VALUES (
     session2_id, event2_id, '第一场',
     NOW() + INTERVAL '1 day', NOW() + INTERVAL '1 day 2 hours'
@@ -141,7 +141,7 @@ BEGIN
     NOW() - INTERVAL '3 days'
   );
 
-  INSERT INTO public.evt_sessions (session_id, event_id, name, start_time, end_time)
+  INSERT INTO public.session_flows (session_id, event_id, name, start_time, end_time)
   VALUES (
     session3_id, event3_id, '第一场',
     NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days' + INTERVAL '2 hours'

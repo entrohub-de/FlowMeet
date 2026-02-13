@@ -202,6 +202,32 @@ export interface TopicRating {
   created_at: string;
 }
 
+export type FlowStepStatus = 'pending' | 'active' | 'paused' | 'completed';
+
+export interface ActiveFlowStep {
+  id: string;
+  title: string;
+  duration: number;
+  status: FlowStepStatus;
+  remainingSeconds: number;
+}
+
+export interface ActiveFlow {
+  id: string;
+  event_id: string;
+  template_id: string | null;
+  template_name: string;
+  flow_status: 'idle' | 'running' | 'paused' | 'completed';
+  steps: ActiveFlowStep[];
+  active_step_id: string | null;
+  active_step_started_at: string | null;
+  active_step_remaining_seconds: number | null;
+  started_at: string | null;
+  completed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Signup {
   signup_id: string;
   event_id: string;

@@ -174,7 +174,7 @@ serve(async (req) => {
     // 2. Get checked-in users for this event
     // First get all sessions for this event
     const { data: sessions } = await supabaseClient
-      .from('evt_sessions')
+      .from('session_flows')
       .select('session_id')
       .eq('event_id', eventId)
 

@@ -7,6 +7,7 @@ export const CHANNEL_NAMES = {
   event: (eventId: string) => `event:${eventId}`,
   stage: (eventId: string, stageId: string) => `event:${eventId}:stage:${stageId}`,
   presence: (eventId: string) => `event:${eventId}:presence`,
+  flow: (eventId: string) => `event:${eventId}:flow`,
 } as const;
 
 /**

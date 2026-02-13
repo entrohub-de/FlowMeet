@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ListChecks } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 import { getEvents } from '@/lib/api/events';
-import type { Event } from '@/types/domain';
+import type { Event, ActiveFlowStep } from '@/types/domain';
 import {
   resolveWorkflow,
   type WorkflowModule,
@@ -14,6 +14,8 @@ import {
   getAllWorkflowTemplates,
   type WorkflowTemplateRecord,
 } from '@/lib/api/workflow-templates';
+import { getActiveFlow, upsertActiveFlow } from '@/lib/api/active-flows';
+import { broadcastFlowUpdate } from '@/lib/realtime/flow-broadcast';
 import TemplateSelectionPanel from '@/components/workflow/flow-control/TemplateSelectionPanel';
 import TemplateSummaryBar from '@/components/workflow/flow-control/TemplateSummaryBar';
 import FlowStatusCards from '@/components/workflow/flow-control/FlowStatusCards';
@@ -91,9 +93,55 @@ export default function FlowControlPage() {
     return () => { cancelled = true; };
   }, []);
 
+  // Restore active flow from DB on event change
+  const restoredRef = useRef(false);
+  useEffect(() => {
+    if (!selectedEventId || restoredRef.current) return;
+    let cancelled = false;
+
+    const restore = async () => {
+      try {
+        const activeFlow = await getActiveFlow(selectedEventId);
+        if (cancelled || !activeFlow || activeFlow.flow_status === 'idle') return;
+
+        // Restore flow steps from DB
+        const dbSteps = activeFlow.steps as ActiveFlowStep[];
+        if (dbSteps.length > 0) {
+          // Recompute remaining seconds for active step based on time elapsed
+          const restored: FlowStep[] = dbSteps.map((step) => {
+            if (
+              step.status === 'active' &&
+              activeFlow.active_step_started_at &&
+              activeFlow.active_step_remaining_seconds != null
+            ) {
+              const elapsed = Math.floor(
+                (Date.now() - new Date(activeFlow.active_step_started_at).getTime()) / 1000
+              );
+              return {
+                ...step,
+                remainingSeconds: activeFlow.active_step_remaining_seconds - elapsed,
+              };
+            }
+            return step;
+          });
+          setFlowSteps(restored);
+          if (activeFlow.template_id) {
+            setSelectedTemplateId(activeFlow.template_id);
+          }
+          restoredRef.current = true;
+        }
+      } catch (error) {
+        console.error('Failed to restore active flow:', error);
+      }
+    };
+
+    restore();
+    return () => { cancelled = true; };
+  }, [selectedEventId]);
+
   // Build flow steps from a template (by id)
   const applyTemplate = useCallback(
-    (templateId: string) => {
+    async (templateId: string) => {
       const template = templates.find((tpl) => tpl.template_id === templateId);
       if (!template) return;
 
@@ -102,24 +150,50 @@ export default function FlowControlPage() {
         id: step.stepId,
         title: step.title,
         duration: step.durationMinutes,
-        status: 'pending',
+        status: 'pending' as FlowStatus,
         remainingSeconds: step.durationMinutes * 60,
       }));
 
-      if (nextSteps[0]) {
-        nextSteps[0].status = 'active';
-      }
-
       setFlowSteps(nextSteps);
       setSelectedTemplateId(templateId);
+
+      // Persist + broadcast
+      if (selectedEventId) {
+        const now = new Date().toISOString();
+        try {
+          await upsertActiveFlow(selectedEventId, {
+            template_id: templateId,
+            template_name: template.name,
+            flow_status: 'idle',
+            steps: nextSteps,
+            active_step_id: null,
+            active_step_started_at: null,
+            active_step_remaining_seconds: null,
+            started_at: null,
+            completed_at: null,
+          });
+          broadcastFlowUpdate(selectedEventId, 'flow_applied', {
+            flowStatus: 'idle',
+            templateId,
+            templateName: template.name,
+            steps: nextSteps,
+            activeStepId: null,
+            activeStepStartedAt: null,
+            activeStepRemainingSeconds: null,
+            timestamp: now,
+          });
+        } catch (error) {
+          console.error('Failed to persist flow:', error);
+        }
+      }
     },
-    [templates, modules]
+    [templates, modules, selectedEventId]
   );
 
-  // Auto-apply first template once templates and modules are loaded
+  // Auto-apply first template once templates and modules are loaded (only if no restored flow)
   const autoApplied = useRef(false);
   useEffect(() => {
-    if (!autoApplied.current && templates.length > 0 && modules.length > 0 && flowSteps.length === 0) {
+    if (!autoApplied.current && !restoredRef.current && templates.length > 0 && modules.length > 0 && flowSteps.length === 0) {
       autoApplied.current = true;
       applyTemplate(templates[0].template_id);
     }
@@ -131,22 +205,58 @@ export default function FlowControlPage() {
     setShowTemplateSelector(false);
   };
 
-  const handleStepStatusChange = (stepId: string, newStatus: FlowStatus) => {
-    setFlowSteps((prev) => {
-      if (newStatus !== 'active') {
-        return prev.map((step) => (step.id === stepId ? { ...step, status: newStatus } : step));
-      }
-
-      return prev.map((step) => {
-        if (step.id === stepId) {
-          return { ...step, status: 'active' };
-        }
-        if (step.status === 'active') {
-          return { ...step, status: 'paused' };
-        }
+  const handleStepStatusChange = async (stepId: string, newStatus: FlowStatus) => {
+    // Compute new steps from current flowSteps
+    let updatedSteps: FlowStep[];
+    if (newStatus !== 'active') {
+      updatedSteps = flowSteps.map((step) =>
+        step.id === stepId ? { ...step, status: newStatus } : step
+      );
+    } else {
+      updatedSteps = flowSteps.map((step) => {
+        if (step.id === stepId) return { ...step, status: 'active' as FlowStatus };
+        if (step.status === 'active') return { ...step, status: 'paused' as FlowStatus };
         return step;
       });
-    });
+    }
+
+    setFlowSteps(updatedSteps);
+
+    // Persist + broadcast
+    if (selectedEventId) {
+      const now = new Date().toISOString();
+      const newActiveStep = updatedSteps.find((s) => s.status === 'active');
+      const allCompleted = updatedSteps.every((s) => s.status === 'completed');
+      const hasPaused = updatedSteps.some((s) => s.status === 'paused');
+      const flowStatus = newActiveStep ? 'running' : allCompleted ? 'completed' : hasPaused ? 'paused' : 'idle';
+
+      // Set started_at when flow first transitions to running
+      const isFirstStart = flowStatus === 'running' && flowSteps.every((s) => s.status === 'pending');
+
+      try {
+        await upsertActiveFlow(selectedEventId, {
+          flow_status: flowStatus,
+          steps: updatedSteps,
+          active_step_id: newActiveStep?.id ?? null,
+          active_step_started_at: newActiveStep ? now : null,
+          active_step_remaining_seconds: newActiveStep?.remainingSeconds ?? null,
+          ...(isFirstStart ? { started_at: now } : {}),
+          completed_at: allCompleted ? now : null,
+        });
+        broadcastFlowUpdate(selectedEventId, 'step_changed', {
+          flowStatus,
+          steps: updatedSteps,
+          activeStepId: newActiveStep?.id ?? null,
+          activeStepStartedAt: newActiveStep ? now : null,
+          activeStepRemainingSeconds: newActiveStep?.remainingSeconds ?? null,
+          changedStepId: stepId,
+          changedStepNewStatus: newStatus,
+          timestamp: now,
+        });
+      } catch (error) {
+        console.error('Failed to persist step change:', error);
+      }
+    }
   };
 
   // Countdown timer for active step
@@ -161,7 +271,7 @@ export default function FlowControlPage() {
     timerRef.current = setInterval(() => {
       setFlowSteps((prev) =>
         prev.map((step) =>
-          step.status === 'active' && step.remainingSeconds > 0
+          step.status === 'active'
             ? { ...step, remainingSeconds: step.remainingSeconds - 1 }
             : step
         )

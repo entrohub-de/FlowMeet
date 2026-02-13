@@ -52,7 +52,7 @@ BEGIN
   SELECT array_agg(DISTINCT user_id) INTO v_user_ids
   FROM evt_assignments
   WHERE session_id IN (
-    SELECT session_id FROM evt_sessions WHERE event_id = v_event_id
+    SELECT session_id FROM session_flows WHERE event_id = v_event_id
   )
   AND checked_in = true;
 

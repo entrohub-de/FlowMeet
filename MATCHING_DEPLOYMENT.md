@@ -165,7 +165,7 @@ supabase functions logs get-match-recommendations
 
 **解决方案：**
 1. 检查数据库中是否有 evt_assignments 记录（checked_in = true）
-2. 检查 evt_sessions 和 evt_events 表数据
+2. 检查 session_flows 和 evt_events 表数据
 3. 检查 usr_profiles 表是否有数据
 4. 查看函数日志
 
