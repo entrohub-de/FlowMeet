@@ -3,6 +3,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { MapPin, Plus, Pencil, Trash2, ChevronDown, ChevronUp, Building2 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { getVenues, createVenue, updateVenue, deleteVenue, getVenueAreas, createArea, updateArea, deleteArea } from '@/lib/api/venues';
 import type { Venue, Area, AreaType } from '@/types/domain';
 
@@ -21,6 +31,9 @@ export default function HostVenuesPage() {
   const [formAddress, setFormAddress] = useState('');
   const [formDescription, setFormDescription] = useState('');
   const [saving, setSaving] = useState(false);
+
+  // Delete confirmation
+  const [deletingVenueId, setDeletingVenueId] = useState<string | null>(null);
 
   // Area management
   const [expandedVenueId, setExpandedVenueId] = useState<string | null>(null);
@@ -104,8 +117,8 @@ export default function HostVenuesPage() {
   };
 
   const handleDeleteVenue = async (venueId: string) => {
-    if (!confirm(t('venue.deleteConfirm'))) return;
     await deleteVenue(venueId);
+    setDeletingVenueId(null);
     loadVenues();
   };
 
@@ -229,7 +242,7 @@ export default function HostVenuesPage() {
                       <Pencil className="w-4 h-4" />
                     </button>
                     <button
-                      onClick={() => handleDeleteVenue(venue.venue_id)}
+                      onClick={() => setDeletingVenueId(venue.venue_id)}
                       className="p-2 text-muted-foreground hover:text-destructive transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -352,6 +365,27 @@ export default function HostVenuesPage() {
             </div>
           </div>
         )}
+
+        {/* Delete venue confirmation */}
+        <AlertDialog open={!!deletingVenueId} onOpenChange={(open) => { if (!open) setDeletingVenueId(null); }}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t('common.confirmDelete')}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t('venue.deleteConfirm')}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => { if (deletingVenueId) handleDeleteVenue(deletingVenueId); }}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {t('common.delete')}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {/* Area form dialog */}
         {showAreaForm && (

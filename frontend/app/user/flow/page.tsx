@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ListChecks, PauseCircle, ChevronDown, ChevronUp, TicketCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslation } from '@/lib/i18n/context';
@@ -27,6 +27,17 @@ export default function UserFlowPage() {
     isGloballyPaused,
     globalPauseMessage,
   } = useActiveFlow();
+
+  // Compute intermission info for ActiveStepCard
+  const completedCount = useMemo(
+    () => flowState?.steps.filter((s) => s.status === 'completed').length ?? 0,
+    [flowState?.steps]
+  );
+  const totalCount = flowState?.steps.length ?? 0;
+  const nextPendingStep = useMemo(
+    () => flowState?.steps.find((s) => s.status === 'pending'),
+    [flowState?.steps]
+  );
 
   // Check if user has checked in for the selected event
   useEffect(() => {
@@ -136,6 +147,10 @@ export default function UserFlowPage() {
                 remainingSeconds={activeStep?.remainingSeconds}
                 status={activeStep?.status as 'active' | 'paused' | undefined}
                 formatTime={formatTime}
+                completedCount={completedCount}
+                totalCount={totalCount}
+                nextStepTitle={nextPendingStep?.title}
+                flowCompleted={flowState.flowStatus === 'completed'}
               />
             </div>
 
@@ -233,11 +248,6 @@ export default function UserFlowPage() {
               </div>
             )}
 
-            {flowState.flowStatus === 'completed' && (
-              <div className="mt-4 p-4 rounded-lg bg-green-50 border border-green-200 text-center text-green-700 font-medium">
-                {t('userFlow.flowCompleted')}
-              </div>
-            )}
           </>
         )}
       </div>

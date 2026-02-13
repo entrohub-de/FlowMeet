@@ -144,6 +144,12 @@ BEGIN
     ''
   );
 
+  -- 创建 identity 记录（Supabase 登录必需）
+  INSERT INTO auth.identities (id, user_id, provider_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
+  VALUES (host_user_id, host_user_id, 'host@flowmeet.test',
+    jsonb_build_object('sub', host_user_id::text, 'email', 'host@flowmeet.test'),
+    'email', NOW(), NOW(), NOW());
+
   -- 分配host角色
   INSERT INTO public.usr_role (user_id, role)
   VALUES (host_user_id, 'host')
@@ -192,6 +198,47 @@ BEGIN
 
   RAISE NOTICE '✅ Host账号已创建: host@flowmeet.test / host123';
   RAISE NOTICE '📋 已创建2个模板: 标准社交流程 / 深度交流流程（含话题）';
+END $$;
+
+-- 2.5 创建Admin管理员账号
+DO $$
+DECLARE
+  admin_user_id UUID;
+BEGIN
+  admin_user_id := gen_random_uuid();
+
+  INSERT INTO auth.users (
+    id, instance_id, email, encrypted_password,
+    email_confirmed_at, created_at, updated_at,
+    raw_app_meta_data, raw_user_meta_data,
+    is_super_admin, role, aud,
+    confirmation_token, recovery_token, email_change_token_new, email_change
+  ) VALUES (
+    admin_user_id,
+    '00000000-0000-0000-0000-000000000000',
+    'admin@flowmeet.test',
+    crypt('admin123', gen_salt('bf')),
+    NOW(), NOW(), NOW(),
+    '{"provider":"email","providers":["email"]}',
+    jsonb_build_object('name', '系统管理员'),
+    FALSE, 'authenticated', 'authenticated',
+    '', '', '', ''
+  );
+
+  -- 创建 identity 记录（Supabase 登录必需）
+  INSERT INTO auth.identities (id, user_id, provider_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
+  VALUES (admin_user_id, admin_user_id, 'admin@flowmeet.test',
+    jsonb_build_object('sub', admin_user_id::text, 'email', 'admin@flowmeet.test'),
+    'email', NOW(), NOW(), NOW());
+
+  INSERT INTO public.usr_role (user_id, role)
+  VALUES (admin_user_id, 'admin')
+  ON CONFLICT (user_id) DO UPDATE SET role = 'admin';
+
+  INSERT INTO public.usr_profiles (user_id, nickname, gender, age_group)
+  VALUES (admin_user_id, '系统管理员', 'other', '25-34');
+
+  RAISE NOTICE '✅ Admin账号已创建: admin@flowmeet.test / admin123';
 END $$;
 
 -- 3. 创建额外的活动（在现有4个活动基础上再加6个）

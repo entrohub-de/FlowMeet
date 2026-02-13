@@ -49,7 +49,13 @@
     "hideSteps": "收起流程",
     "notCheckedIn": "你还没有签到",
     "notCheckedInHint": "请先完成签到，才能参与活动流程和匹配",
-    "goCheckin": "去签到"
+    "goCheckin": "去签到",
+    "waitingToBegin": "等待开始",
+    "waitingToBeginHint": "主持人即将开始第一个环节",
+    "intermission": "环节间隙",
+    "intermissionHint": "请稍候，主持人正在准备下一环节",
+    "completedCount": "已完成 {completed}/{total} 个环节",
+    "nextStep": "下一环节：{title}"
   },
   "flowMatching": {
     "readyToMatch": "准备配对？",
@@ -211,6 +217,12 @@
       "deleteFailed": "删除活动失败，请重试。",
       "deleteModalTitle": "删除活动",
       "deleteModalMessage": "确定要删除这个活动吗？此操作无法撤销。",
+      "signupCount": "{count} 人报名",
+      "checkedInCount": "{count} 人签到",
+      "noSignups": "暂无报名",
+      "anonymousUser": "匿名用户",
+      "checkedInLabel": "已签到",
+      "notCheckedInLabel": "未签到",
       "status": {
         "upcoming": "即将开始",
         "ongoing": "进行中",
@@ -242,7 +254,26 @@
       "noSignups": "暂无报名",
       "signedUpAt": "报名时间",
       "expectation": "期待",
-      "noExpectation": "未填写期待"
+      "noExpectation": "未填写期待",
+      "participants": {
+        "title": "参与人员",
+        "viewAll": "查看全部",
+        "viewAllDesc": "查看全部 {count} 位参与者的详情",
+        "totalSignups": "报名",
+        "checkedIn": "已签到",
+        "withExpectations": "有期待",
+        "searchPlaceholder": "搜索参与者...",
+        "filter": {
+          "all": "全部",
+          "checkedIn": "已签到",
+          "notCheckedIn": "未签到"
+        },
+        "signedUpAt": "{time} 报名",
+        "checkedInAt": "签到时间：{time}",
+        "expectation": "期待内容",
+        "noExpectation": "未填写期待",
+        "noResults": "没有匹配的参与者"
+      }
     },
     "workflows": {
       "errors": {
@@ -359,7 +390,8 @@
       "pause": "暂停",
       "complete": "完成",
       "resume": "继续",
-      "completed": "已完成"
+      "completed": "已完成",
+      "checkinStats": "签到 {checked}/{total}"
     }
   },
   "profile": {
@@ -652,7 +684,6 @@
     },
     "host": {
       "confirmComplete": "确认完成？",
-      "confirmCompleteDesc": "当前 {count} 人已配对",
       "confirm": "确认",
       "timeRemaining": "剩余时间"
     },
@@ -762,7 +793,12 @@
   "globalPause": {
     "paused": "主持人已暂停活动",
     "pauseAll": "暂停全场",
-    "resumeAll": "恢复活动"
+    "resumeAll": "恢复活动",
+    "endEvent": "结束活动",
+    "endEventConfirm": "确定结束活动吗？所有未完成的环节将被标记为已完成。",
+    "endEventConfirmButton": "确认结束",
+    "eventEnded": "活动已结束",
+    "eventEndedHint": "感谢参与，期待下次相见！"
   },
   "feedback": {
     "rateConversation": "为这次对话评分",

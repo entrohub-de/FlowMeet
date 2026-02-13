@@ -152,6 +152,7 @@ export function observeMatchingQueue(
   callbacks: MatchingQueueCallbacks
 ): RealtimeChannel {
   const channelName = MATCHING_CHANNEL(eventId, stepId);
+  console.log('[Host] observeMatchingQueue channel:', channelName);
   const channel = supabase.channel(channelName);
 
   channel
@@ -165,6 +166,7 @@ export function observeMatchingQueue(
           if (p.ready) readyUsers.push(p);
         });
       });
+      console.log(`[Host] presence sync: ${readyUsers.length} ready / ${allUsers.length} total`);
       callbacks.onPresenceSync(readyUsers, allUsers);
     })
     .on('broadcast', { event: 'match_assigned' }, ({ payload }) => {
@@ -173,7 +175,9 @@ export function observeMatchingQueue(
     .on('broadcast', { event: 'group_assigned' }, ({ payload }) => {
       callbacks.onGroupAssigned?.(payload as GroupAssignmentPayload);
     })
-    .subscribe();
+    .subscribe((status) => {
+      console.log(`[Host] observeMatchingQueue subscribe status: ${status}`);
+    });
 
   return channel;
 }

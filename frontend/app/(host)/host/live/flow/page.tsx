@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ListChecks, PauseCircle, PlayCircle } from 'lucide-react';
+import { ListChecks, PauseCircle, PlayCircle, StopCircle } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 import { getEvents } from '@/lib/api/events';
 import type { Event, ActiveFlowStep } from '@/types/domain';
@@ -15,6 +15,7 @@ import {
   type WorkflowTemplateRecord,
 } from '@/lib/api/workflow-templates';
 import { getActiveFlow, upsertActiveFlow } from '@/lib/api/active-flows';
+import { getCheckinStats } from '@/lib/api/signup';
 import { broadcastFlowUpdate, broadcastGlobalPause, broadcastGlobalResume } from '@/lib/realtime/flow-broadcast';
 import TemplateSelectionPanel from '@/components/workflow/flow-control/TemplateSelectionPanel';
 import TemplateSummaryBar from '@/components/workflow/flow-control/TemplateSummaryBar';
@@ -59,6 +60,12 @@ export default function FlowControlPage() {
   // Global pause state (Workstream D)
   const [isGloballyPaused, setIsGloballyPaused] = useState(false);
 
+  // End event confirmation
+  const [showEndConfirm, setShowEndConfirm] = useState(false);
+
+  // Checkin stats
+  const [checkinStats, setCheckinStats] = useState<{ checkedIn: number; total: number } | null>(null);
+
   useEffect(() => {
     const init = async () => {
       try {
@@ -80,6 +87,25 @@ export default function FlowControlPage() {
 
     init();
   }, []);
+
+  // Fetch checkin stats for selected event (refresh every 30s)
+  useEffect(() => {
+    if (!selectedEventId) return;
+    let cancelled = false;
+
+    const fetchStats = async () => {
+      try {
+        const stats = await getCheckinStats(selectedEventId);
+        if (!cancelled) setCheckinStats(stats);
+      } catch (error) {
+        console.error('Failed to fetch checkin stats:', error);
+      }
+    };
+
+    fetchStats();
+    const interval = setInterval(fetchStats, 30000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [selectedEventId]);
 
   // Fetch all templates and auto-apply the first one
   useEffect(() => {
@@ -377,6 +403,40 @@ export default function FlowControlPage() {
     }
   }, [selectedEventId, isGloballyPaused]);
 
+  // End event handler: mark all steps completed and broadcast
+  const handleEndEvent = useCallback(async () => {
+    if (!selectedEventId) return;
+    const now = new Date().toISOString();
+    const completedSteps = flowSteps.map((step) => ({
+      ...step,
+      status: 'completed' as FlowStatus,
+    }));
+    setFlowSteps(completedSteps);
+    setShowEndConfirm(false);
+
+    try {
+      await upsertActiveFlow(selectedEventId, {
+        flow_status: 'completed',
+        steps: completedSteps,
+        active_step_id: null,
+        active_step_started_at: null,
+        active_step_remaining_seconds: null,
+        completed_at: now,
+      });
+      broadcastFlowUpdate(selectedEventId, 'step_changed', {
+        flowStatus: 'completed',
+        steps: completedSteps,
+        activeStepId: null,
+        activeStepStartedAt: null,
+        activeStepRemainingSeconds: null,
+        timestamp: now,
+      });
+      logHostAction(selectedEventId, 'flow_completed', { endedManually: true });
+    } catch (error) {
+      console.error('Failed to end event:', error);
+    }
+  }, [selectedEventId, flowSteps]);
+
   const selectedTemplate = templates.find((tpl) => tpl.template_id === selectedTemplateId);
 
   // Auto-scroll to active step
@@ -419,6 +479,12 @@ export default function FlowControlPage() {
             <h1 className="text-3xl font-bold text-foreground">
               {t('host.flowControl.title')}
             </h1>
+            {/* ── Checkin Stats Badge ── */}
+            {checkinStats && (
+              <span className="px-3 py-1 text-sm font-medium bg-primary/10 text-primary rounded-full whitespace-nowrap">
+                {t('host.flowControl.checkinStats', { checked: checkinStats.checkedIn, total: checkinStats.total })}
+              </span>
+            )}
             {/* ── Audit: History Toggle ── */}
             <button
               type="button"
@@ -434,13 +500,13 @@ export default function FlowControlPage() {
           </div>
         </div>
 
-        {/* ── Global Pause Button (Workstream D) ── */}
-        {flowSteps.length > 0 && (
-          <div className="mb-4">
+        {/* ── Global Pause & End Event Buttons ── */}
+        {flowSteps.length > 0 && !flowSteps.every((s) => s.status === 'completed') && (
+          <div className="mb-4 flex gap-3">
             <button
               type="button"
               onClick={handleToggleGlobalPause}
-              className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${
                 isGloballyPaused
                   ? 'bg-red-500 text-white hover:bg-red-600'
                   : 'bg-primary text-primary-foreground hover:bg-primary/90'
@@ -458,6 +524,41 @@ export default function FlowControlPage() {
                 </>
               )}
             </button>
+            <button
+              type="button"
+              onClick={() => setShowEndConfirm(true)}
+              className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold border border-red-300 text-red-600 bg-white hover:bg-red-50 transition-colors"
+            >
+              <StopCircle className="w-5 h-5" />
+              {t('globalPause.endEvent')}
+            </button>
+          </div>
+        )}
+
+        {/* ── End Event Confirmation Modal ── */}
+        {showEndConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div className="bg-card rounded-xl p-6 mx-4 max-w-sm w-full shadow-lg border border-border">
+              <p className="text-foreground font-medium text-center mb-6">
+                {t('globalPause.endEventConfirm')}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowEndConfirm(false)}
+                  className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium border border-border bg-background hover:bg-muted transition-colors"
+                >
+                  {t('common.cancel')}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleEndEvent}
+                  className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold bg-red-500 text-white hover:bg-red-600 transition-colors"
+                >
+                  {t('globalPause.endEventConfirmButton')}
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

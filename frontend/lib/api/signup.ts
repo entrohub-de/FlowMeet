@@ -165,6 +165,31 @@ export async function getUserSignedUpEvents(userId: string): Promise<Event[]> {
 }
 
 /**
+ * 获取某活动的签到统计（轻量查询，仅 checked_in 字段）
+ */
+export async function getCheckinStats(eventId: string): Promise<{ checkedIn: number; total: number }> {
+  try {
+    const { data, error } = await supabase
+      .from('evt_signups')
+      .select('checked_in')
+      .eq('event_id', eventId)
+      .eq('status', 'active');
+
+    if (error) {
+      console.error('Error getting checkin stats:', error);
+      return { checkedIn: 0, total: 0 };
+    }
+
+    const total = data?.length ?? 0;
+    const checkedIn = data?.filter(s => s.checked_in).length ?? 0;
+    return { checkedIn, total };
+  } catch (error) {
+    console.error('Error getting checkin stats:', error);
+    return { checkedIn: 0, total: 0 };
+  }
+}
+
+/**
  * 获取某个活动的所有报名详情
  * 包括用户资料和期待
  * 只返回 active 状态的报名

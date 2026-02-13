@@ -389,11 +389,6 @@ export default function FlowStepCard({
                 <h3 className="font-semibold text-foreground">
                   {t('ux.host.confirmComplete')}
                 </h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {t('ux.host.confirmCompleteDesc', {
-                    count: matchingPairedCount ?? groupedCount ?? 0,
-                  })}
-                </p>
               </div>
               <button
                 type="button"

@@ -3,6 +3,17 @@
 import { useState } from 'react';
 import { ChevronDown, Pencil, Trash2 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import type { WorkflowTemplateRecord } from '@/lib/api/workflow-templates';
 import type { WorkflowModule } from '@/features/host-console/workflowModules';
 
@@ -54,19 +65,34 @@ export default function TemplateCard({ template, allModules, onEdit, onDelete }:
           >
             <Pencil className="w-3.5 h-3.5" />
           </button>
-          <button
-            type="button"
-            onClick={() => {
-              const ok = window.confirm(
-                t('host.workflows.templates.deleteConfirm', { name: template.name })
-              );
-              if (ok) onDelete(template.template_id);
-            }}
-            className="h-7 w-7 inline-flex items-center justify-center rounded-button border border-red-200 text-red-400 hover:text-red-600 hover:bg-red-50"
-            aria-label={t('host.workflows.templates.deleteAria')}
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <button
+                type="button"
+                className="h-7 w-7 inline-flex items-center justify-center rounded-button border border-red-200 text-red-400 hover:text-red-600 hover:bg-red-50"
+                aria-label={t('host.workflows.templates.deleteAria')}
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t('common.confirmDelete')}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t('host.workflows.templates.deleteConfirm', { name: template.name })}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => onDelete(template.template_id)}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  {t('common.delete')}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
 

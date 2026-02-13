@@ -47,7 +47,13 @@
     "hideSteps": "Hide steps",
     "notCheckedIn": "You haven't checked in yet",
     "notCheckedInHint": "Please check in first to join the event flow and matching",
-    "goCheckin": "Check In"
+    "goCheckin": "Check In",
+    "waitingToBegin": "Waiting to Start",
+    "waitingToBeginHint": "The host will begin the first step shortly",
+    "intermission": "Between Steps",
+    "intermissionHint": "Please wait, the host is preparing the next step",
+    "completedCount": "{completed}/{total} steps completed",
+    "nextStep": "Next: {title}"
   },
   "flowMatching": {
     "readyToMatch": "Ready to match?",
@@ -209,6 +215,12 @@
       "deleteFailed": "Failed to delete event. Please try again.",
       "deleteModalTitle": "Delete Event",
       "deleteModalMessage": "Are you sure you want to delete this event? This action cannot be undone.",
+      "signupCount": "{count} Signups",
+      "checkedInCount": "{count} Checked In",
+      "noSignups": "No signups yet",
+      "anonymousUser": "Anonymous",
+      "checkedInLabel": "Checked In",
+      "notCheckedInLabel": "Not Checked In",
       "status": {
         "upcoming": "Upcoming",
         "ongoing": "Ongoing",
@@ -240,7 +252,26 @@
       "noSignups": "No registrations yet",
       "signedUpAt": "Signed up at",
       "expectation": "Expectation",
-      "noExpectation": "No expectation provided"
+      "noExpectation": "No expectation provided",
+      "participants": {
+        "title": "Participants",
+        "viewAll": "View All",
+        "viewAllDesc": "View details of all {count} participants",
+        "totalSignups": "Signups",
+        "checkedIn": "Checked In",
+        "withExpectations": "Expectations",
+        "searchPlaceholder": "Search participants...",
+        "filter": {
+          "all": "All",
+          "checkedIn": "Checked In",
+          "notCheckedIn": "Not Checked In"
+        },
+        "signedUpAt": "Signed up {time}",
+        "checkedInAt": "Checked in at {time}",
+        "expectation": "Expectation",
+        "noExpectation": "No expectation provided",
+        "noResults": "No matching participants"
+      }
     },
     "workflows": {
       "errors": {
@@ -357,7 +388,8 @@
       "pause": "Pause",
       "complete": "Complete",
       "resume": "Resume",
-      "completed": "Completed"
+      "completed": "Completed",
+      "checkinStats": "Check-in {checked}/{total}"
     }
   },
   "profile": {
@@ -650,7 +682,6 @@
     },
     "host": {
       "confirmComplete": "Confirm complete?",
-      "confirmCompleteDesc": "{count} participants paired",
       "confirm": "Confirm",
       "timeRemaining": "Time remaining"
     },
@@ -760,7 +791,12 @@
   "globalPause": {
     "paused": "Host has paused the event",
     "pauseAll": "Pause All",
-    "resumeAll": "Resume"
+    "resumeAll": "Resume",
+    "endEvent": "End Event",
+    "endEventConfirm": "Are you sure you want to end the event? All remaining steps will be marked as completed.",
+    "endEventConfirmButton": "Confirm End",
+    "eventEnded": "Event Ended",
+    "eventEndedHint": "Thanks for joining, see you next time!"
   },
   "feedback": {
     "rateConversation": "Rate this conversation",

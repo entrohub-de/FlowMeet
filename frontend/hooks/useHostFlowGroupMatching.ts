@@ -77,10 +77,21 @@ export function useHostFlowGroupMatching(
         const totalGrouped = persisted.reduce((acc, g) => acc + g.memberIds.length, 0);
         setGroupedCount(totalGrouped);
 
-        broadcastGroupAssignments(eventId, activeStepId, {
+        const payload = {
           groups: persisted,
           timestamp: new Date().toISOString(),
-        });
+        };
+
+        // Use existing observer channel to avoid duplicate channel issues
+        if (channelRef.current) {
+          channelRef.current.send({
+            type: 'broadcast',
+            event: 'group_assigned',
+            payload,
+          });
+        } else {
+          broadcastGroupAssignments(eventId, activeStepId, payload);
+        }
       } finally {
         setIsGrouping(false);
       }

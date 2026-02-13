@@ -116,6 +116,12 @@ export default function LoginPage() {
 
       console.log('用户角色:', normalizedRole);
 
+      if (normalizedRole === 'admin') {
+        console.log('跳转到 /admin/test/simulator');
+        router.push('/admin/test/simulator');
+        return;
+      }
+
       if (normalizedRole === 'host') {
         console.log('跳转到 /host');
         router.push('/host');

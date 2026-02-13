@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 
 type AppRole = 'user' | 'host' | 'admin';
-type AccessArea = 'user' | 'host';
+type AccessArea = 'user' | 'host' | 'admin';
 
 interface RoleRouteGuardProps {
   area: AccessArea;
@@ -19,8 +19,10 @@ function normalizeRole(rawRole: string | null | undefined): AppRole {
   return 'user';
 }
 
-function getHomeByRole(role: AppRole): '/user' | '/host' {
-  return role === 'host' || role === 'admin' ? '/host' : '/user';
+function getHomeByRole(role: AppRole): string {
+  if (role === 'admin') return '/admin/test/simulator';
+  if (role === 'host') return '/host';
+  return '/user';
 }
 
 export default function RoleRouteGuard({ area, children }: RoleRouteGuardProps) {
@@ -59,6 +61,7 @@ export default function RoleRouteGuard({ area, children }: RoleRouteGuardProps) 
 
       const role = normalizeRole(roleData.role);
       const allowed =
+        (area === 'admin' && role === 'admin') ||
         (area === 'host' && (role === 'host' || role === 'admin')) ||
         (area === 'user' && role === 'user');
 
