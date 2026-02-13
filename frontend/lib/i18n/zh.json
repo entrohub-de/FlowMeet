@@ -46,6 +46,22 @@
     "templateName": "流程模板",
     "flowCompleted": "流程已全部完成"
   },
+  "flowMatching": {
+    "readyToMatch": "准备配对？",
+    "readyButton": "我准备好了",
+    "cancelReady": "取消准备",
+    "waitingForMatch": "等待匹配中...",
+    "waitingToStart": "等待环节开始...",
+    "readyCount": "{ready}/{total} 已准备",
+    "matchFound": "配对成功！",
+    "yourPartner": "你的搭档",
+    "matchScore": "匹配度：{score}%",
+    "oddOneOut": "本轮暂无配对搭档，下轮将优先为你匹配。",
+    "matchNow": "立即匹配",
+    "matching": "匹配中...",
+    "pairedCount": "已配对 {count} 人",
+    "stepBadge1v1": "1v1 匹配"
+  },
   "pages": {
     "signup": {
       "title": "活动报名",

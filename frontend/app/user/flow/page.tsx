@@ -5,11 +5,13 @@ import { useTranslation } from '@/lib/i18n/context';
 import { useActiveFlow } from '@/hooks/useActiveFlow';
 import FlowStatusCards from '@/components/workflow/flow-control/FlowStatusCards';
 import FlowStepCardReadOnly from '@/components/workflow/flow-control/FlowStepCardReadOnly';
+import MatchingStepCard from '@/components/workflow/flow-control/MatchingStepCard';
 
 export default function UserFlowPage() {
   const { t } = useTranslation();
   const {
     loading,
+    selectedEventId,
     flowState,
     activeStep,
     totalDuration,
@@ -67,17 +69,35 @@ export default function UserFlowPage() {
               </div>
               <div className="p-6">
                 <div className="space-y-3">
-                  {flowState.steps.map((step, index) => (
-                    <FlowStepCardReadOnly
-                      key={step.id}
-                      index={index}
-                      title={step.title}
-                      duration={step.duration}
-                      status={step.status}
-                      remainingSeconds={step.remainingSeconds}
-                      formatTime={formatTime}
-                    />
-                  ))}
+                  {flowState.steps.map((step, index) => {
+                    const isActiveMatching =
+                      step.pairingMode === '1v1' &&
+                      (step.status === 'active' || step.status === 'paused');
+
+                    return isActiveMatching ? (
+                      <MatchingStepCard
+                        key={step.id}
+                        index={index}
+                        stepId={step.id}
+                        title={step.title}
+                        status={step.status}
+                        remainingSeconds={step.remainingSeconds}
+                        formatTime={formatTime}
+                        eventId={selectedEventId}
+                      />
+                    ) : (
+                      <FlowStepCardReadOnly
+                        key={step.id}
+                        index={index}
+                        title={step.title}
+                        duration={step.duration}
+                        status={step.status}
+                        remainingSeconds={step.remainingSeconds}
+                        formatTime={formatTime}
+                        pairingMode={step.pairingMode}
+                      />
+                    );
+                  })}
                 </div>
               </div>
             </div>

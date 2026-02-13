@@ -44,6 +44,22 @@
     "templateName": "Flow Template",
     "flowCompleted": "All steps completed"
   },
+  "flowMatching": {
+    "readyToMatch": "Ready to match?",
+    "readyButton": "I'm Ready",
+    "cancelReady": "Cancel",
+    "waitingForMatch": "Waiting for match...",
+    "waitingToStart": "Waiting to start...",
+    "readyCount": "{ready}/{total} ready",
+    "matchFound": "Match Found!",
+    "yourPartner": "Your Partner",
+    "matchScore": "Match Score: {score}%",
+    "oddOneOut": "No partner available this round. You'll be prioritized next time.",
+    "matchNow": "Match Now",
+    "matching": "Matching...",
+    "pairedCount": "{count} paired",
+    "stepBadge1v1": "1v1 Matching"
+  },
   "pages": {
     "signup": {
       "title": "Event Signup",

@@ -12,6 +12,7 @@ interface FlowStepCardReadOnlyProps {
   status: FlowStatus;
   remainingSeconds: number;
   formatTime: (totalSeconds: number) => string;
+  pairingMode?: 'group' | '1v1';
 }
 
 const cardStyles: Record<FlowStatus, string> = {
@@ -35,6 +36,7 @@ export default function FlowStepCardReadOnly({
   status,
   remainingSeconds,
   formatTime,
+  pairingMode,
 }: FlowStepCardReadOnlyProps) {
   const { t } = useTranslation();
 
@@ -51,7 +53,14 @@ export default function FlowStepCardReadOnly({
           )}
         </div>
         <div>
-          <div className="font-semibold text-foreground">{title}</div>
+          <div className="flex items-center gap-2 font-semibold text-foreground">
+            {title}
+            {pairingMode === '1v1' && (
+              <span className="px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 text-xs font-medium">
+                1v1
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Clock className="w-4 h-4" />
             {status === 'active' || status === 'paused' ? (

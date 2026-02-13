@@ -210,6 +210,7 @@ export interface ActiveFlowStep {
   duration: number;
   status: FlowStepStatus;
   remainingSeconds: number;
+  pairingMode?: 'group' | '1v1';
 }
 
 export interface ActiveFlow {

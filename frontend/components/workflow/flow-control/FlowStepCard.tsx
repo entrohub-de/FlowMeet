@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, Play, Pause, CheckCircle } from 'lucide-react';
+import { Clock, Play, Pause, CheckCircle, Users, Zap } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 
 type FlowStatus = 'pending' | 'active' | 'paused' | 'completed';
@@ -14,6 +14,13 @@ interface FlowStepCardProps {
   remainingSeconds: number;
   formatTime: (totalSeconds: number) => string;
   onStatusChange: (stepId: string, newStatus: FlowStatus) => void;
+  pairingMode?: 'group' | '1v1';
+  matchingReadyCount?: number;
+  matchingTotalCount?: number;
+  matchingPairedCount?: number;
+  onTriggerMatching?: (stepId: string) => void;
+  isMatching?: boolean;
+  matchingError?: string | null;
 }
 
 const cardStyles: Record<FlowStatus, string> = {
@@ -39,8 +46,17 @@ export default function FlowStepCard({
   remainingSeconds,
   formatTime,
   onStatusChange,
+  pairingMode,
+  matchingReadyCount,
+  matchingTotalCount,
+  matchingPairedCount,
+  onTriggerMatching,
+  isMatching,
+  matchingError,
 }: FlowStepCardProps) {
   const { t } = useTranslation();
+
+  const is1v1Active = pairingMode === '1v1' && (status === 'active' || status === 'paused');
 
   return (
     <div className={`p-4 rounded-lg border transition-all ${cardStyles[status]}`}>
@@ -56,7 +72,14 @@ export default function FlowStepCard({
             )}
           </div>
           <div>
-            <div className="font-semibold text-foreground">{title}</div>
+            <div className="flex items-center gap-2 font-semibold text-foreground">
+              {title}
+              {pairingMode === '1v1' && (
+                <span className="px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 text-xs font-medium">
+                  1v1
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="w-4 h-4" />
               {status === 'active' || status === 'paused' ? (
@@ -152,6 +175,38 @@ export default function FlowStepCard({
           )}
         </div>
       </div>
+
+      {/* 1v1 Matching controls for host */}
+      {is1v1Active && (
+        <div className="mt-3 pt-3 border-t border-border flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Users className="w-4 h-4" />
+            <span>
+              {t('flowMatching.readyCount', {
+                ready: matchingReadyCount ?? 0,
+                total: matchingTotalCount ?? 0,
+              })}
+            </span>
+          </div>
+          {(matchingPairedCount ?? 0) > 0 && (
+            <span className="text-sm text-green-600 font-medium">
+              {t('flowMatching.pairedCount', { count: matchingPairedCount ?? 0 })}
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={() => onTriggerMatching?.(id)}
+            disabled={isMatching || (matchingReadyCount ?? 0) < 2}
+            className="ml-auto px-4 py-2 rounded-button bg-violet-600 text-white hover:bg-violet-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Zap className="w-4 h-4" />
+            {isMatching ? t('flowMatching.matching') : t('flowMatching.matchNow')}
+          </button>
+          {matchingError && (
+            <p className="w-full text-sm text-red-600">{matchingError}</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

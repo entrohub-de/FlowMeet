@@ -14,6 +14,7 @@ export interface FlowStep {
   duration: number;
   status: FlowStatus;
   remainingSeconds: number;
+  pairingMode?: 'group' | '1v1';
 }
 
 export interface ActiveFlowState {

@@ -20,6 +20,7 @@ import TemplateSelectionPanel from '@/components/workflow/flow-control/TemplateS
 import TemplateSummaryBar from '@/components/workflow/flow-control/TemplateSummaryBar';
 import FlowStatusCards from '@/components/workflow/flow-control/FlowStatusCards';
 import FlowStepCard from '@/components/workflow/flow-control/FlowStepCard';
+import { useHostFlowMatching } from '@/hooks/useHostFlowMatching';
 
 type FlowStatus = 'pending' | 'active' | 'paused' | 'completed';
 
@@ -29,6 +30,7 @@ interface FlowStep {
   duration: number;
   status: FlowStatus;
   remainingSeconds: number;
+  pairingMode?: 'group' | '1v1';
 }
 
 export default function FlowControlPage() {
@@ -146,13 +148,17 @@ export default function FlowControlPage() {
       if (!template) return;
 
       const resolved = resolveWorkflow(template.steps, modules);
-      const nextSteps: FlowStep[] = resolved.map((step) => ({
-        id: step.stepId,
-        title: step.title,
-        duration: step.durationMinutes,
-        status: 'pending' as FlowStatus,
-        remainingSeconds: step.durationMinutes * 60,
-      }));
+      const nextSteps: FlowStep[] = resolved.map((step) => {
+        const mod = modules.find((m) => m.id === step.moduleId);
+        return {
+          id: step.stepId,
+          title: step.title,
+          duration: step.durationMinutes,
+          status: 'pending' as FlowStatus,
+          remainingSeconds: step.durationMinutes * 60,
+          pairingMode: mod?.definition?.pairingMode,
+        };
+      });
 
       setFlowSteps(nextSteps);
       setSelectedTemplateId(templateId);
@@ -296,6 +302,13 @@ export default function FlowControlPage() {
     [flowSteps]
   );
 
+  const activeStepForMatching = flowSteps.find((s) => s.status === 'active' || s.status === 'paused');
+  const { matchingState, triggerMatching, isMatching, matchingError } = useHostFlowMatching(
+    selectedEventId,
+    activeStepForMatching?.id ?? null,
+    activeStepForMatching?.pairingMode
+  );
+
   const selectedTemplate = templates.find((tpl) => tpl.template_id === selectedTemplateId);
 
   if (loading) {
@@ -377,6 +390,13 @@ export default function FlowControlPage() {
                     remainingSeconds={step.remainingSeconds}
                     formatTime={formatTime}
                     onStatusChange={handleStepStatusChange}
+                    pairingMode={step.pairingMode}
+                    matchingReadyCount={step.id === activeStepForMatching?.id ? matchingState.readyCount : undefined}
+                    matchingTotalCount={step.id === activeStepForMatching?.id ? matchingState.totalPresent : undefined}
+                    matchingPairedCount={step.id === activeStepForMatching?.id ? matchingState.pairedCount : undefined}
+                    onTriggerMatching={triggerMatching}
+                    isMatching={isMatching}
+                    matchingError={step.id === activeStepForMatching?.id ? matchingError : undefined}
                   />
                 ))}
               </div>
