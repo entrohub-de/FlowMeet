@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from '@/lib/i18n/context';
 import { getEvents } from '@/lib/api/events';
 import {
   getWorkflowTemplates,
+  updateWorkflowTemplateSteps,
   type WorkflowTemplateRecord,
 } from '@/lib/api/workflow-templates';
 import {
@@ -53,6 +54,35 @@ export default function HostWorkflowsPage() {
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
   const [lastAddedStepId, setLastAddedStepId] = useState('');
 
+  // Track whether workflowConfig changes come from loading vs user actions
+  const configSourceRef = useRef<'load' | 'user'>('load');
+  const selectedTemplateIdRef = useRef(selectedTemplateId);
+  selectedTemplateIdRef.current = selectedTemplateId;
+
+  // Auto-save workflowConfig changes to the selected template (debounced)
+  useEffect(() => {
+    if (configSourceRef.current === 'load') {
+      configSourceRef.current = 'user';
+      return;
+    }
+    const tid = selectedTemplateIdRef.current;
+    if (!tid || tid === '__new__') return;
+
+    const timer = setTimeout(() => {
+      updateWorkflowTemplateSteps(tid, workflowConfig)
+        .then(() => {
+          setTemplates((prev) =>
+            prev.map((tmpl) =>
+              tmpl.template_id === tid ? { ...tmpl, steps: workflowConfig } : tmpl
+            )
+          );
+        })
+        .catch((err) => console.error('Failed to persist workflow steps:', err));
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [workflowConfig]);
+
   const [isModulePickerOpen, setIsModulePickerOpen] = useState(false);
   const [isCreatingModule, setIsCreatingModule] = useState(false);
   const [editingModule, setEditingModule] = useState<WorkflowModule | null>(null);
@@ -87,6 +117,7 @@ export default function HostWorkflowsPage() {
 
     const loadData = async () => {
       try {
+        configSourceRef.current = 'load';
         const existing = loadEventWorkflow(selectedEventId);
         setWorkflowConfig(existing ?? getDefaultWorkflowConfig(allModules));
 
@@ -285,7 +316,10 @@ export default function HostWorkflowsPage() {
               selectedTemplateId={selectedTemplateId}
               onSelectedTemplateIdChange={setSelectedTemplateId}
               workflowConfig={workflowConfig}
-              onApplyTemplate={setWorkflowConfig}
+              onApplyTemplate={(steps) => {
+                configSourceRef.current = 'load';
+                setWorkflowConfig(steps);
+              }}
               cloneSteps={cloneStepsWithNewIds}
             />
 
