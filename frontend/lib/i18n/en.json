@@ -193,6 +193,83 @@
       "signedUpAt": "Signed up at",
       "expectation": "Expectation",
       "noExpectation": "No expectation provided"
+    },
+    "workflows": {
+      "errors": {
+        "loadTemplates": "Failed to load templates. Please try again later.",
+        "enterModuleName": "Please enter a module name",
+        "emptyWorkflow": "Workflow is empty. Cannot save template.",
+        "enterTemplateName": "Please enter a template name",
+        "saveTemplate": "Failed to save template. Please check database connection.",
+        "deleteTemplate": "Failed to delete template. Please try again later."
+      },
+      "messages": {
+        "addedModule": "Added module: {title}",
+        "untitledModule": "Untitled module",
+        "defaultCustomModuleDescription": "Custom workflow module",
+        "appliedTemplate": "Applied template: {name}",
+        "noEventHint": "Create an event first, then design workflow templates.",
+        "lastAction": "Last action: {action}"
+      },
+      "tabs": {
+        "templates": "Template Management",
+        "modules": "Module Management"
+      },
+      "templates": {
+        "sectionTitle": "Template Management",
+        "newTemplate": "New Template",
+        "inputPlaceholder": "Template name, e.g. 90-minute standard social flow",
+        "saveCurrentAsTemplate": "Save Current Workflow as Template",
+        "loading": "Loading templates...",
+        "selectTemplate": "Select Template",
+        "optionLabel": "{name} ({count} steps)",
+        "apply": "Apply Template",
+        "delete": "Delete",
+        "deleteAria": "Delete template",
+        "deleteConfirm": "Delete template \"{name}\"?",
+        "empty": "No templates yet. Save one first."
+      },
+      "current": {
+        "title": "Current Workflow",
+        "summary": "{count} steps, estimated {minutes} min",
+        "addModule": "Add Module",
+        "empty": "No steps yet. Add a module first.",
+        "stepLabel": "Step {index}",
+        "dragAria": "Long press and drag to reorder",
+        "moveUpAria": "Move up",
+        "moveDownAria": "Move down",
+        "deleteStepAria": "Delete step",
+        "duration": "Duration",
+        "minuteUnit": "min",
+        "minutesLabel": "{minutes} min"
+      },
+      "custom": {
+        "title": "Create Custom Module",
+        "namePlaceholder": "Module name, e.g. Icebreaker game",
+        "durationPlaceholder": "Duration (min)",
+        "descriptionPlaceholder": "Module description (optional)",
+        "category": "Category",
+        "categories": {
+          "opening": "Opening",
+          "networking": "Networking",
+          "group": "Group",
+          "industry": "Industry",
+          "closing": "Closing"
+        },
+        "save": "Save to Module Library",
+        "libraryTitle": "Module Library",
+        "total": "Total {count}",
+        "customBadge": "Custom",
+        "defaultDuration": "Default duration: {minutes} min",
+        "add": "Add",
+        "deleteCustomAria": "Delete custom module"
+      },
+      "picker": {
+        "title": "Select a module to add",
+        "closeAria": "Close",
+        "confirmAdd": "Confirm Add",
+        "goToModuleManagement": "Go to module management to create a new module"
+      }
     }
   },
   "profile": {

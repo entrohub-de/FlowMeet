@@ -17,6 +17,9 @@ export interface WorkflowStepConfig {
   stepId: string;
   moduleId: string;
   durationMinutes: number;
+  titleSnapshot?: string;
+  descriptionSnapshot?: string;
+  categorySnapshot?: WorkflowModuleCategory;
 }
 
 export interface WorkflowResolvedStep extends WorkflowStepConfig {
@@ -85,19 +88,26 @@ export const WORKFLOW_MODULE_LIBRARY: WorkflowModule[] = [
 ];
 
 const STORAGE_KEY_PREFIX = 'flowmeet:host:workflow:v1';
+const CUSTOM_MODULE_STORAGE_KEY = 'flowmeet:host:custom-modules:v1';
 
 function buildStorageKey(eventId: string): string {
   return `${STORAGE_KEY_PREFIX}:${eventId}`;
 }
 
-export function createStepFromModule(moduleId: string): WorkflowStepConfig | null {
-  const module = WORKFLOW_MODULE_LIBRARY.find((item) => item.id === moduleId);
+export function createStepFromModule(
+  moduleId: string,
+  moduleLibrary: WorkflowModule[] = WORKFLOW_MODULE_LIBRARY
+): WorkflowStepConfig | null {
+  const module = moduleLibrary.find((item) => item.id === moduleId);
   if (!module) return null;
 
   return {
     stepId: `${moduleId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     moduleId: module.id,
     durationMinutes: module.durationMinutes,
+    titleSnapshot: module.title,
+    descriptionSnapshot: module.description,
+    categorySnapshot: module.category,
   };
 }
 
@@ -116,17 +126,20 @@ export function getDefaultWorkflowConfig(): WorkflowStepConfig[] {
     .filter((step): step is WorkflowStepConfig => step !== null);
 }
 
-export function resolveWorkflow(config: WorkflowStepConfig[]): WorkflowResolvedStep[] {
+export function resolveWorkflow(
+  config: WorkflowStepConfig[],
+  moduleLibrary: WorkflowModule[] = WORKFLOW_MODULE_LIBRARY
+): WorkflowResolvedStep[] {
   return config
     .map((step) => {
-      const module = WORKFLOW_MODULE_LIBRARY.find((item) => item.id === step.moduleId);
-      if (!module) return null;
+      const module = moduleLibrary.find((item) => item.id === step.moduleId);
+      if (!module && !step.titleSnapshot) return null;
 
       return {
         ...step,
-        title: module.title,
-        description: module.description,
-        category: module.category,
+        title: module?.title ?? step.titleSnapshot ?? '',
+        description: module?.description ?? step.descriptionSnapshot ?? '',
+        category: module?.category ?? step.categorySnapshot ?? 'opening',
       };
     })
     .filter((step): step is WorkflowResolvedStep => step !== null);
@@ -147,12 +160,24 @@ export function loadEventWorkflow(eventId: string): WorkflowStepConfig[] | null 
         (step) =>
           typeof step?.stepId === 'string' &&
           typeof step?.moduleId === 'string' &&
-          typeof step?.durationMinutes === 'number'
+          typeof step?.durationMinutes === 'number' &&
+          (typeof step?.titleSnapshot === 'undefined' || typeof step?.titleSnapshot === 'string') &&
+          (typeof step?.descriptionSnapshot === 'undefined' ||
+            typeof step?.descriptionSnapshot === 'string') &&
+          (typeof step?.categorySnapshot === 'undefined' ||
+            step?.categorySnapshot === 'opening' ||
+            step?.categorySnapshot === 'networking' ||
+            step?.categorySnapshot === 'group' ||
+            step?.categorySnapshot === 'industry' ||
+            step?.categorySnapshot === 'closing')
       )
       .map((step) => ({
         stepId: step.stepId,
         moduleId: step.moduleId,
         durationMinutes: Math.max(1, Math.round(step.durationMinutes)),
+        titleSnapshot: step.titleSnapshot,
+        descriptionSnapshot: step.descriptionSnapshot,
+        categorySnapshot: step.categorySnapshot,
       }));
 
     return normalized.length > 0 ? normalized : null;
@@ -164,4 +189,35 @@ export function loadEventWorkflow(eventId: string): WorkflowStepConfig[] | null 
 export function saveEventWorkflow(eventId: string, steps: WorkflowStepConfig[]): void {
   if (typeof window === 'undefined' || !eventId) return;
   window.localStorage.setItem(buildStorageKey(eventId), JSON.stringify(steps));
+}
+
+export function loadCustomWorkflowModules(): WorkflowModule[] {
+  if (typeof window === 'undefined') return [];
+  const raw = window.localStorage.getItem(CUSTOM_MODULE_STORAGE_KEY);
+  if (!raw) return [];
+
+  try {
+    const parsed = JSON.parse(raw) as WorkflowModule[];
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed.filter(
+      (item) =>
+        typeof item?.id === 'string' &&
+        typeof item?.title === 'string' &&
+        typeof item?.description === 'string' &&
+        typeof item?.durationMinutes === 'number' &&
+        (item?.category === 'opening' ||
+          item?.category === 'networking' ||
+          item?.category === 'group' ||
+          item?.category === 'industry' ||
+          item?.category === 'closing')
+    );
+  } catch {
+    return [];
+  }
+}
+
+export function saveCustomWorkflowModules(modules: WorkflowModule[]): void {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(CUSTOM_MODULE_STORAGE_KEY, JSON.stringify(modules));
 }

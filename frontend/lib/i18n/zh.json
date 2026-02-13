@@ -195,6 +195,83 @@
       "signedUpAt": "报名时间",
       "expectation": "期待",
       "noExpectation": "未填写期待"
+    },
+    "workflows": {
+      "errors": {
+        "loadTemplates": "模板加载失败，请稍后重试。",
+        "enterModuleName": "请输入模块名称",
+        "emptyWorkflow": "当前流程为空，无法保存模板。",
+        "enterTemplateName": "请输入模板名称",
+        "saveTemplate": "保存模板失败，请检查数据库连接。",
+        "deleteTemplate": "删除模板失败，请稍后重试。"
+      },
+      "messages": {
+        "addedModule": "已添加模块：{title}",
+        "untitledModule": "未命名模块",
+        "defaultCustomModuleDescription": "自定义流程模块",
+        "appliedTemplate": "已应用模板：{name}",
+        "noEventHint": "请先创建活动，再进行流程模板设计。",
+        "lastAction": "最近操作：{action}"
+      },
+      "tabs": {
+        "templates": "模板管理",
+        "modules": "模块管理"
+      },
+      "templates": {
+        "sectionTitle": "模板管理",
+        "newTemplate": "新建模板",
+        "inputPlaceholder": "模板名称，例如：90分钟标准社交流程",
+        "saveCurrentAsTemplate": "保存当前流程为模板",
+        "loading": "模板加载中...",
+        "selectTemplate": "选择模板",
+        "optionLabel": "{name}（{count}个环节）",
+        "apply": "应用模板",
+        "delete": "删除",
+        "deleteAria": "删除模板",
+        "deleteConfirm": "确定删除模板“{name}”吗？",
+        "empty": "还没有模板，先保存一个模板。"
+      },
+      "current": {
+        "title": "当前流程",
+        "summary": "{count}个环节，预计{minutes}分钟",
+        "addModule": "添加模块",
+        "empty": "暂无步骤，请先添加模块。",
+        "stepLabel": "第 {index} 步",
+        "dragAria": "长按拖拽排序",
+        "moveUpAria": "上移",
+        "moveDownAria": "下移",
+        "deleteStepAria": "删除步骤",
+        "duration": "时长",
+        "minuteUnit": "分钟",
+        "minutesLabel": "{minutes} 分钟"
+      },
+      "custom": {
+        "title": "新建自定义模块",
+        "namePlaceholder": "模块名称，例如：破冰小游戏",
+        "durationPlaceholder": "时长（分钟）",
+        "descriptionPlaceholder": "模块说明（可选）",
+        "category": "分类",
+        "categories": {
+          "opening": "开场",
+          "networking": "交流",
+          "group": "小组",
+          "industry": "行业",
+          "closing": "结束"
+        },
+        "save": "保存到模块库",
+        "libraryTitle": "模块库",
+        "total": "共 {count} 个",
+        "customBadge": "自定义",
+        "defaultDuration": "默认时长：{minutes} 分钟",
+        "add": "添加",
+        "deleteCustomAria": "删除自定义模块"
+      },
+      "picker": {
+        "title": "选择要添加的模块",
+        "closeAria": "关闭",
+        "confirmAdd": "确认添加",
+        "goToModuleManagement": "去模块管理创建新模块"
+      }
     }
   },
   "profile": {
