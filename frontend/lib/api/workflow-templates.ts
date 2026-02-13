@@ -3,7 +3,7 @@ import type { WorkflowStepConfig } from '@/features/host-console/workflowModules
 
 export interface WorkflowTemplateRecord {
   template_id: string;
-  event_id: string;
+  event_id: string | null;
   name: string;
   steps: WorkflowStepConfig[];
   created_at: string;
@@ -21,14 +21,23 @@ export async function getWorkflowTemplates(eventId: string): Promise<WorkflowTem
   return (data as WorkflowTemplateRecord[]) || [];
 }
 
+export async function getAllWorkflowTemplates(): Promise<WorkflowTemplateRecord[]> {
+  const { data, error } = await supabase
+    .from('workflow_templates')
+    .select('template_id, event_id, name, steps, created_at, updated_at')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return (data as WorkflowTemplateRecord[]) || [];
+}
+
 export async function createWorkflowTemplate(
-  eventId: string,
   name: string,
   steps: WorkflowStepConfig[]
 ): Promise<WorkflowTemplateRecord> {
   const { data, error } = await supabase
     .from('workflow_templates')
-    .insert([{ event_id: eventId, name, steps }])
+    .insert([{ name, steps }])
     .select('template_id, event_id, name, steps, created_at, updated_at')
     .single();
 

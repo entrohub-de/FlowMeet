@@ -2,9 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from '@/lib/i18n/context';
-import { getEvents } from '@/lib/api/events';
 import {
-  getWorkflowTemplates,
+  getAllWorkflowTemplates,
   createWorkflowTemplate,
   renameWorkflowTemplate,
   deleteWorkflowTemplate as deleteWorkflowTemplateById,
@@ -30,7 +29,7 @@ import ModuleLibrary from '@/components/workflow/ModuleLibrary';
 import ModuleEditModal from '@/components/workflow/ModuleEditModal';
 import ModulePicker from '@/components/workflow/ModulePicker';
 import TemplateLibrary from '@/components/workflow/TemplateLibrary';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, X } from 'lucide-react';
 
 type ActiveTab = 'templates' | 'modules';
 
@@ -44,7 +43,6 @@ function cloneStepsWithNewIds(steps: WorkflowStepConfig[]): WorkflowStepConfig[]
 export default function HostWorkflowsPage() {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<ActiveTab>('templates');
-  const [selectedEventId, setSelectedEventId] = useState('');
   const [workflowConfig, setWorkflowConfig] = useState<WorkflowStepConfig[]>([]);
   const [allModules, setAllModules] = useState<WorkflowModule[]>([]);
   const [templates, setTemplates] = useState<WorkflowTemplateRecord[]>([]);
@@ -53,7 +51,7 @@ export default function HostWorkflowsPage() {
   const [customError, setCustomError] = useState('');
   const [lastAction, setLastAction] = useState('');
 
-  // Template editor state: null = list view, '__new__' = creating, templateId = editing
+  // Template editor state: null = list view, '__new__' = creating (modal), templateId = editing (full page)
   const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null);
   const [templateName, setTemplateName] = useState('');
   const [templateError, setTemplateError] = useState('');
@@ -95,44 +93,25 @@ export default function HostWorkflowsPage() {
   const [editingModule, setEditingModule] = useState<WorkflowModule | null>(null);
 
   useEffect(() => {
-    getAllWorkflowModules()
-      .then(setAllModules)
-      .catch((err) => console.error('Failed to load modules:', err));
-  }, []);
-
-  useEffect(() => {
-    const loadEvents = async () => {
+    const loadData = async () => {
       try {
-        const eventsData = await getEvents();
-        if (eventsData.length > 0) {
-          setSelectedEventId(eventsData[0].event_id);
-        }
+        const [modulesData, templatesData] = await Promise.all([
+          getAllWorkflowModules(),
+          getAllWorkflowTemplates(),
+        ]);
+        setAllModules(modulesData);
+        setTemplates(templatesData);
       } catch (error) {
-        console.error('Failed to load events:', error);
+        console.error('Failed to load data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    loadEvents();
+    loadData();
   }, []);
 
   const availableModules = allModules;
-
-  useEffect(() => {
-    if (!selectedEventId) return;
-
-    const loadData = async () => {
-      try {
-        const data = await getWorkflowTemplates(selectedEventId);
-        setTemplates(data);
-      } catch (error) {
-        console.error('Failed to load workflow templates:', error);
-      }
-    };
-
-    loadData();
-  }, [selectedEventId]);
 
   const resolvedSteps = useMemo(
     () => resolveWorkflow(workflowConfig, availableModules),
@@ -196,6 +175,14 @@ export default function HostWorkflowsPage() {
     setLastAction('');
   };
 
+  const closeCreateModal = () => {
+    setEditingTemplateId(null);
+    setTemplateName('');
+    setWorkflowConfig([]);
+    setTemplateError('');
+    setLastAction('');
+  };
+
   const backToList = () => {
     setEditingTemplateId(null);
     setTemplateName('');
@@ -214,16 +201,13 @@ export default function HostWorkflowsPage() {
     setTemplateSaving(true);
     try {
       if (editingTemplateId === '__new__') {
-        // Create new template
-        if (!selectedEventId) return;
+        // Create new template and close modal
         const template = await createWorkflowTemplate(
-          selectedEventId,
           safeName,
           cloneStepsWithNewIds(workflowConfig)
         );
         setTemplates((prev) => [template, ...prev]);
-        // Switch to editing the newly created template
-        setEditingTemplateId(template.template_id);
+        closeCreateModal();
       } else if (editingTemplateId) {
         // Rename existing template
         const current = templates.find((tpl) => tpl.template_id === editingTemplateId);
@@ -343,21 +327,11 @@ export default function HostWorkflowsPage() {
     );
   }
 
-  if (!selectedEventId) {
-    return (
-      <div className="min-h-[calc(100vh-60px)] p-4 bg-muted/30">
-        <div className="rounded-lg border border-border bg-card p-6 text-muted-foreground">
-          {t('host.workflows.messages.noEventHint')}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-[calc(100vh-60px)] p-4 bg-muted/30">
       <div className="mx-auto max-w-3xl space-y-4">
-        {/* Tab switcher - hide when in editor mode */}
-        {editingTemplateId === null && (
+        {/* Tab switcher - hide when editing existing template */}
+        {(editingTemplateId === null || editingTemplateId === '__new__') && (
           <div className="rounded-xl border border-border bg-card p-1">
             <div className="grid grid-cols-2 gap-1">
               <button
@@ -386,8 +360,8 @@ export default function HostWorkflowsPage() {
           </div>
         )}
 
-        {/* Template list view */}
-        {activeTab === 'templates' && editingTemplateId === null && (
+        {/* Template list view - visible in list mode and while create modal is open */}
+        {activeTab === 'templates' && (editingTemplateId === null || editingTemplateId === '__new__') && (
           <TemplateLibrary
             templates={templates}
             allModules={availableModules}
@@ -397,8 +371,8 @@ export default function HostWorkflowsPage() {
           />
         )}
 
-        {/* Template editor view */}
-        {activeTab === 'templates' && editingTemplateId !== null && (
+        {/* Template editor view (full page - for editing existing templates) */}
+        {activeTab === 'templates' && editingTemplateId !== null && editingTemplateId !== '__new__' && (
           <section className="space-y-4">
             {/* Back button */}
             <button
@@ -446,7 +420,7 @@ export default function HostWorkflowsPage() {
         )}
 
         {/* Module library view */}
-        {activeTab === 'modules' && editingTemplateId === null && (
+        {activeTab === 'modules' && (editingTemplateId === null || editingTemplateId === '__new__') && (
           <ModuleLibrary
             modules={availableModules}
             onEdit={setEditingModule}
@@ -455,6 +429,66 @@ export default function HostWorkflowsPage() {
           />
         )}
       </div>
+
+      {/* Create template modal */}
+      {editingTemplateId === '__new__' && (
+        <div className="fixed inset-0 z-20 bg-black/40 backdrop-blur-[1px] p-4 flex items-end sm:items-center sm:justify-center" onClick={closeCreateModal}>
+          <div className="w-full sm:max-w-lg max-h-[85vh] flex flex-col rounded-xl border border-border bg-card shadow-lg" onClick={(e) => e.stopPropagation()}>
+            {/* Modal header */}
+            <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
+              <h3 className="text-base font-semibold text-foreground">
+                {t('host.workflows.templates.newTemplate')}
+              </h3>
+              <button
+                type="button"
+                onClick={closeCreateModal}
+                className="h-8 w-8 inline-flex items-center justify-center rounded-button border border-border hover:bg-muted"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal body - scrollable */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {/* Template name */}
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={templateName}
+                  onChange={(e) => setTemplateName(e.target.value)}
+                  placeholder={t('host.workflows.templates.inputPlaceholder')}
+                  className="h-10 flex-1 min-w-0 rounded-button border border-border px-3 bg-background text-sm"
+                  autoFocus
+                />
+              </div>
+              {templateError && <p className="text-xs text-red-600">{templateError}</p>}
+
+              {/* Workflow step editor */}
+              <WorkflowStepList
+                resolvedSteps={resolvedSteps}
+                onReorder={setWorkflowConfig}
+                onDurationChange={updateDuration}
+                onRemove={removeStep}
+                onAddModule={() => setIsModulePickerOpen(true)}
+                lastAction={lastAction}
+              />
+            </div>
+
+            {/* Modal footer */}
+            <div className="p-4 border-t border-border shrink-0">
+              <button
+                type="button"
+                onClick={saveTemplate}
+                disabled={!templateName.trim() || templateSaving}
+                className="h-10 w-full inline-flex items-center justify-center gap-1.5 rounded-button bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm disabled:opacity-50"
+              >
+                <Save className="w-4 h-4" />
+                {t('common.save')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {isModulePickerOpen && (
         <ModulePicker
