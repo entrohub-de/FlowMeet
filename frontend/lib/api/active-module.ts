@@ -48,7 +48,7 @@ export async function completeActiveModule(
     paired_count: number;
     unpaired_user_ids?: string[];
     avg_match_score?: number;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }
 ): Promise<void> {
   const { error } = await supabase

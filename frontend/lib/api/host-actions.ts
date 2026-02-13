@@ -8,7 +8,7 @@ import type { HostAction, HostActionType } from '@/types/domain';
 export function logHostAction(
   eventId: string,
   actionType: HostActionType,
-  metadata?: Record<string, any>,
+  metadata?: Record<string, unknown>,
   targetStepId?: string
 ): void {
   supabase.auth.getUser().then(({ data: { user } }) => {

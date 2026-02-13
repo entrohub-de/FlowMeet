@@ -52,7 +52,7 @@ const TIMELINE_DOT_COLORS: Record<string, string> = {
   global_resume: 'bg-slate-500',
 };
 
-function relativeTime(isoString: string, t: (key: string, params?: Record<string, any>) => string): string {
+function relativeTime(isoString: string, t: (key: string, params?: Record<string, string | number>) => string): string {
   const diff = Date.now() - new Date(isoString).getTime();
   const seconds = Math.floor(diff / 1000);
   if (seconds < 60) return t('hostActions.history.justNow');

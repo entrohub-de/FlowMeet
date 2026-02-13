@@ -57,10 +57,10 @@ export default function ManualPairPanel({ eventId, stepId }: ManualPairPanelProp
       });
 
       const unpaired = (signups ?? [])
-        .filter((s: any) => !pairedUserIds.has(s.user_id))
-        .map((s: any) => ({
+        .filter((s) => !pairedUserIds.has(s.user_id))
+        .map((s) => ({
           user_id: s.user_id,
-          nickname: s.profile?.nickname ?? null,
+          nickname: (s.profile as { nickname: string | null }[] | null)?.[0]?.nickname ?? null,
         }));
 
       setUnpairedUsers(unpaired);
