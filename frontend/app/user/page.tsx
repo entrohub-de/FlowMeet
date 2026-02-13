@@ -3,35 +3,17 @@
 import { useTranslation } from '@/lib/i18n/context';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Calendar, Users, MessageSquare, Award } from 'lucide-react';
+import { ListChecks } from 'lucide-react';
 
 export default function UserHomePage() {
   const { t } = useTranslation();
 
   const quickLinks = [
     {
-      title: t('nav.user.signup'),
-      description: t('pages.signup.description'),
-      href: '/user/event',
-      icon: Calendar,
-    },
-    {
-      title: t('nav.user.matching'),
-      description: t('pages.matching.description'),
-      href: '/user/matching',
-      icon: Users,
-    },
-    {
-      title: t('nav.user.groups'),
-      description: t('pages.groups.description'),
-      href: '/user/groups',
-      icon: MessageSquare,
-    },
-    {
-      title: t('nav.user.rating'),
-      description: t('pages.rating.description'),
-      href: '/user/rating',
-      icon: Award,
+      title: t('nav.user.flow'),
+      description: t('userFlow.description'),
+      href: '/user/flow',
+      icon: ListChecks,
     },
   ];
 

@@ -25,9 +25,6 @@ export default function UserLayout({
       label: t('nav.user.eventLive'),
       children: [
         { label: t('nav.user.flow'), href: '/user/flow' },
-        { label: t('nav.user.matching'), href: '/user/matching' },
-        { label: t('nav.user.groups'), href: '/user/groups' },
-        { label: t('nav.user.topics'), href: '/user/topics' },
         { label: t('nav.user.rating'), href: '/user/rating' },
       ]
     },
