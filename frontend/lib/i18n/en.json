@@ -283,6 +283,35 @@
         "confirmAdd": "Confirm Add",
         "goToModuleManagement": "Go to module management to create a new module"
       }
+    },
+    "flowControl": {
+      "title": "Flow Control",
+      "currentTemplate": "Current template:",
+      "changeTemplate": "Change Template",
+      "selectTemplate": "Select Workflow Template",
+      "selectEvent": "Select Event",
+      "selectEventPlaceholder": "Select event",
+      "selectTemplatePlaceholder": "Select template",
+      "selectTemplateLabel": "Select Template",
+      "noTemplates": "No workflow templates available.",
+      "goToCreateTemplate": "Go to Workflow Settings to create templates",
+      "templatePreview": "Template Preview",
+      "minutesSuffix": "{minutes} min",
+      "stepsAndDuration": "{count} steps, total {minutes} min",
+      "confirmStart": "Confirm & Start",
+      "goToWorkflows": "Go to Workflow Settings",
+      "currentStep": "Current Step",
+      "notStarted": "Not Started",
+      "paused": "Paused",
+      "totalDuration": "Total Duration",
+      "flowProcess": "Event Flow",
+      "emptyFlow": "No executable steps in this template. Add modules in Workflow Settings first.",
+      "inProgress": "In Progress",
+      "start": "Start",
+      "pause": "Pause",
+      "complete": "Complete",
+      "resume": "Resume",
+      "completed": "Completed"
     }
   },
   "profile": {

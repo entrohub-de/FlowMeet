@@ -285,6 +285,35 @@
         "confirmAdd": "确认添加",
         "goToModuleManagement": "去模块管理创建新模块"
       }
+    },
+    "flowControl": {
+      "title": "流程控制",
+      "currentTemplate": "当前模板：",
+      "changeTemplate": "更换模板",
+      "selectTemplate": "选择流程模板",
+      "selectEvent": "选择活动",
+      "selectEventPlaceholder": "选择活动",
+      "selectTemplatePlaceholder": "选择模板",
+      "selectTemplateLabel": "选择模板",
+      "noTemplates": "该活动暂无流程模板。",
+      "goToCreateTemplate": "前往流程设置创建模板",
+      "templatePreview": "模板预览",
+      "minutesSuffix": "{minutes}分钟",
+      "stepsAndDuration": "共 {count} 个环节，总时长 {minutes} 分钟",
+      "confirmStart": "确认开始",
+      "goToWorkflows": "前往流程设置",
+      "currentStep": "当前环节",
+      "notStarted": "未开始",
+      "paused": "已暂停",
+      "totalDuration": "总时长",
+      "flowProcess": "活动流程",
+      "emptyFlow": "当前模板没有可执行流程。请先在流程设置中添加模块。",
+      "inProgress": "进行中",
+      "start": "开始",
+      "pause": "暂停",
+      "complete": "完成",
+      "resume": "继续",
+      "completed": "已完成"
     }
   },
   "profile": {
