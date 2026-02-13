@@ -4,5 +4,8 @@
       "Bash(supabase db push:*)",
       "Bash(wc:*)"
     ]
+  },
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   }
 }
