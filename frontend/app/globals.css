@@ -126,3 +126,50 @@
     display: none;
   }
 }
+
+/* Mobile touch optimizations */
+@layer components {
+  /* Touch feedback for interactive elements */
+  .touch-feedback {
+    @apply active:scale-95 transition-transform duration-100;
+  }
+
+  /* Minimum touch target size */
+  .touch-target {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Active step pulsing border */
+  .active-step-pulse {
+    animation: active-step-border-pulse 2s ease-in-out infinite;
+  }
+
+  /* Time progress bar */
+  .time-progress-bar {
+    @apply h-1 rounded-full bg-primary/20 overflow-hidden;
+  }
+  .time-progress-bar-fill {
+    @apply h-full bg-primary rounded-full transition-all duration-1000 ease-linear;
+  }
+}
+
+@keyframes active-step-border-pulse {
+  0%, 100% { border-color: hsl(var(--primary)); }
+  50% { border-color: hsl(var(--primary) / 0.4); }
+}
+
+/* Hover-only styles: only apply hover effects on devices that support hover */
+@media (hover: hover) {
+  .hover-only\:shadow-md:hover {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  }
+}
+
+/* Disable hover effects on touch-only devices */
+@media (hover: none) {
+  button:hover,
+  a:hover {
+    /* Prevent sticky hover states on mobile */
+  }
+}

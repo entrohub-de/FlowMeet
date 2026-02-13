@@ -615,6 +615,96 @@
       "defaultUser": "用户"
     }
   },
+  "recovery": {
+    "reconnecting": "正在重新连接...",
+    "restored": "状态已恢复",
+    "offline": "连接已断开"
+  },
+  "ux": {
+    "toast": {
+      "matchSuccess": "配对成功！",
+      "matchFailed": "配对保存失败",
+      "locationUpdated": "位置已更新",
+      "locationUpdateFailed": "位置更新失败，请重试",
+      "checkinSuccess": "签到成功",
+      "templateApplied": "模板已应用",
+      "fillRequired": "请填写所有必填项",
+      "createEventFailed": "创建活动失败，请重试",
+      "deleteEventFailed": "删除活动失败",
+      "loginRequired": "请先登录"
+    },
+    "matching": {
+      "readyCount": "已有 {count} 人准备好",
+      "waitingAnimation": "寻找最佳搭档中...",
+      "unpaired": "别灰心，下一轮优先为你匹配！",
+      "ungrouped": "别担心，下一轮优先为你分组！"
+    },
+    "host": {
+      "confirmComplete": "确认完成？",
+      "confirmCompleteDesc": "当前 {count} 人已配对",
+      "confirm": "确认",
+      "timeRemaining": "剩余时间"
+    },
+    "empty": {
+      "noTemplate": "选择一个流程模板开始",
+      "noParticipants": "等待参与者加入...",
+      "noCheckins": "分享签到码给参与者",
+      "noHistory": "开始操作后这里会显示记录"
+    },
+    "skeleton": {
+      "loadingFlow": "加载流程中..."
+    }
+  },
+  "matchQuality": {
+    "avgScore": "平均匹配分: {score}",
+    "pairCount": "{count} 组配对",
+    "excellent": "优秀",
+    "good": "良好",
+    "fair": "一般",
+    "noRepeats": "已排除历史配对"
+  },
+  "hostActions": {
+    "historyToggle": "操作记录",
+    "actionTypes": {
+      "flow_applied": "应用模板",
+      "step_started": "开始环节",
+      "step_paused": "暂停环节",
+      "step_resumed": "继续环节",
+      "step_completed": "完成环节",
+      "flow_paused": "暂停流程",
+      "flow_resumed": "继续流程",
+      "flow_completed": "完成流程",
+      "flow_reset": "重置流程",
+      "matching_triggered": "触发匹配",
+      "grouping_triggered": "触发分组",
+      "manual_pair": "手动配对",
+      "manual_unpair": "拆散配对",
+      "manual_regroup": "手动重组",
+      "global_pause": "全局暂停",
+      "global_resume": "全局恢复"
+    },
+    "history": {
+      "title": "操作历史",
+      "empty": "暂无操作记录",
+      "justNow": "刚刚",
+      "minutesAgo": "{n}分钟前",
+      "hoursAgo": "{n}小时前",
+      "ready": "人就绪",
+      "groupSize": "组大小"
+    },
+    "manualPair": {
+      "title": "配对管理",
+      "pairButton": "手动配对",
+      "selectUsers": "选择两位用户配对",
+      "user1": "选择用户1",
+      "user2": "选择用户2",
+      "confirm": "确认配对",
+      "breakPair": "拆散",
+      "noPairs": "暂无活跃配对",
+      "noUnpaired": "所有用户已配对",
+      "unpairedCount": "{count} 位用户未配对"
+    }
+  },
   "testPanel": {
     "title": "测试面板",
     "selectEvent": "选择活动",
@@ -632,5 +722,16 @@
     "checkinSuccess": "已成功签到 {count} 人",
     "checkinFailed": "批量签到失败",
     "cleanupDone": "已清理：{matches} 个配对，{groups} 个小组"
+  },
+  "globalPause": {
+    "paused": "主持人已暂停活动",
+    "pauseAll": "暂停全场",
+    "resumeAll": "恢复活动"
+  },
+  "feedback": {
+    "rateConversation": "为这次对话评分",
+    "skip": "跳过",
+    "submit": "提交",
+    "placeholder": "分享你的感受..."
   }
 }

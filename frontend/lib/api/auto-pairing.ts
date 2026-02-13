@@ -9,6 +9,7 @@ export interface PairResult {
   user1Id: string;
   user2Id: string;
   score: number;
+  reasons: string[];
 }
 
 /**
@@ -23,16 +24,41 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 /**
+ * Build a Set of history pair keys from existing matches.
+ * Each pair is stored as both orderings: "u1:u2" and "u2:u1".
+ */
+async function fetchHistoryPairs(eventId: string): Promise<Set<string>> {
+  const { data: existingMatches } = await supabase
+    .from('evt_matches')
+    .select('user1_id, user2_id')
+    .eq('event_id', eventId);
+
+  const historySet = new Set<string>();
+  if (existingMatches) {
+    for (const m of existingMatches) {
+      historySet.add(`${m.user1_id}:${m.user2_id}`);
+      historySet.add(`${m.user2_id}:${m.user1_id}`);
+    }
+  }
+  return historySet;
+}
+
+/**
  * Generate optimal 1v1 pairs from a list of ready user IDs.
+ * - Excludes pairs that have already been matched in this event.
  * - Users with profiles: matched by score (greedy maximum-weight matching).
  * - Users without profiles: randomly paired among themselves.
  */
 export async function generatePairs(
+  eventId: string,
   readyUserIds: string[]
 ): Promise<{ pairs: PairResult[]; unpairedUserId?: string }> {
   if (readyUserIds.length < 2) {
     return { pairs: [], unpairedUserId: readyUserIds[0] };
   }
+
+  // 0. Fetch history pairs for this event
+  const historySet = await fetchHistoryPairs(eventId);
 
   // 1. Fetch profiles + preferences
   const { data: profiles } = await supabase
@@ -71,13 +97,20 @@ export async function generatePairs(
 
     for (let i = 0; i < profiledIds.length; i++) {
       for (let j = i + 1; j < profiledIds.length; j++) {
-        const u1 = usersWithProfile.get(profiledIds[i])!;
-        const u2 = usersWithProfile.get(profiledIds[j])!;
+        const id1 = profiledIds[i];
+        const id2 = profiledIds[j];
+
+        // Skip history pairs
+        if (historySet.has(`${id1}:${id2}`)) continue;
+
+        const u1 = usersWithProfile.get(id1)!;
+        const u2 = usersWithProfile.get(id2)!;
         const result = calculateMatchScore(u1, u2);
         scoredPairs.push({
-          user1Id: profiledIds[i],
-          user2Id: profiledIds[j],
+          user1Id: id1,
+          user2Id: id2,
           score: result.score,
+          reasons: result.reasons,
         });
       }
     }
@@ -98,10 +131,39 @@ export async function generatePairs(
   shuffle(remaining);
 
   for (let i = 0; i + 1 < remaining.length; i += 2) {
+    const id1 = remaining[i];
+    const id2 = remaining[i + 1];
+
+    // Skip history pairs for random fallback
+    if (historySet.has(`${id1}:${id2}`)) {
+      // Try to find a non-history partner further in the array
+      let swapped = false;
+      for (let k = i + 2; k < remaining.length; k++) {
+        if (!paired.has(remaining[k]) && !historySet.has(`${id1}:${remaining[k]}`)) {
+          [remaining[i + 1], remaining[k]] = [remaining[k], remaining[i + 1]];
+          swapped = true;
+          break;
+        }
+      }
+      // If no swap found, pair them anyway (all options exhausted)
+      if (!swapped) {
+        finalPairs.push({
+          user1Id: id1,
+          user2Id: id2,
+          score: 0,
+          reasons: ['随机配对'],
+        });
+        paired.add(id1);
+        paired.add(id2);
+        continue;
+      }
+    }
+
     finalPairs.push({
       user1Id: remaining[i],
       user2Id: remaining[i + 1],
       score: 0,
+      reasons: ['随机配对'],
     });
     paired.add(remaining[i]);
     paired.add(remaining[i + 1]);
@@ -135,11 +197,21 @@ export async function persistPairs(
     });
 
     if (!error && data) {
+      const matchId = data as string;
       results.push({
         user1Id: pair.user1Id,
         user2Id: pair.user2Id,
-        matchId: data as string,
+        matchId,
       });
+
+      // Update match_score and match_reasons on the persisted row
+      await supabase
+        .from('evt_matches')
+        .update({
+          match_score: pair.score,
+          match_reasons: pair.reasons,
+        })
+        .eq('match_id', matchId);
     } else {
       errors.push(error?.message ?? 'Unknown error');
     }

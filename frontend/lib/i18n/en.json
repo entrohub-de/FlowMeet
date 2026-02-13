@@ -613,6 +613,96 @@
       "defaultUser": "User"
     }
   },
+  "recovery": {
+    "reconnecting": "Reconnecting...",
+    "restored": "State restored",
+    "offline": "Connection lost"
+  },
+  "ux": {
+    "toast": {
+      "matchSuccess": "Match found!",
+      "matchFailed": "Failed to save match",
+      "locationUpdated": "Location updated",
+      "locationUpdateFailed": "Failed to update location, please retry",
+      "checkinSuccess": "Check-in successful",
+      "templateApplied": "Template applied",
+      "fillRequired": "Please fill in all required fields",
+      "createEventFailed": "Failed to create event, please retry",
+      "deleteEventFailed": "Failed to delete event",
+      "loginRequired": "Please login first"
+    },
+    "matching": {
+      "readyCount": "{count} people ready",
+      "waitingAnimation": "Finding your best match...",
+      "unpaired": "Don't worry, you'll be prioritized next round!",
+      "ungrouped": "Don't worry, you'll be grouped next round!"
+    },
+    "host": {
+      "confirmComplete": "Confirm complete?",
+      "confirmCompleteDesc": "{count} participants paired",
+      "confirm": "Confirm",
+      "timeRemaining": "Time remaining"
+    },
+    "empty": {
+      "noTemplate": "Select a flow template to start",
+      "noParticipants": "Waiting for participants to join...",
+      "noCheckins": "Share the check-in code with participants",
+      "noHistory": "Records will appear here once you start"
+    },
+    "skeleton": {
+      "loadingFlow": "Loading flow..."
+    }
+  },
+  "matchQuality": {
+    "avgScore": "Avg Score: {score}",
+    "pairCount": "{count} Pairs",
+    "excellent": "Excellent",
+    "good": "Good",
+    "fair": "Fair",
+    "noRepeats": "History pairs excluded"
+  },
+  "hostActions": {
+    "historyToggle": "History",
+    "actionTypes": {
+      "flow_applied": "Template Applied",
+      "step_started": "Step Started",
+      "step_paused": "Step Paused",
+      "step_resumed": "Step Resumed",
+      "step_completed": "Step Completed",
+      "flow_paused": "Flow Paused",
+      "flow_resumed": "Flow Resumed",
+      "flow_completed": "Flow Completed",
+      "flow_reset": "Flow Reset",
+      "matching_triggered": "Matching Triggered",
+      "grouping_triggered": "Grouping Triggered",
+      "manual_pair": "Manual Pair",
+      "manual_unpair": "Pair Broken",
+      "manual_regroup": "Manual Regroup",
+      "global_pause": "Global Pause",
+      "global_resume": "Global Resume"
+    },
+    "history": {
+      "title": "Action History",
+      "empty": "No actions recorded yet",
+      "justNow": "Just now",
+      "minutesAgo": "{n} min ago",
+      "hoursAgo": "{n} hr ago",
+      "ready": "ready",
+      "groupSize": "Group size"
+    },
+    "manualPair": {
+      "title": "Pair Management",
+      "pairButton": "Manual Pair",
+      "selectUsers": "Select two users to pair",
+      "user1": "Select user 1",
+      "user2": "Select user 2",
+      "confirm": "Confirm Pair",
+      "breakPair": "Break",
+      "noPairs": "No active pairs",
+      "noUnpaired": "All users are paired",
+      "unpairedCount": "{count} users unpaired"
+    }
+  },
   "testPanel": {
     "title": "Test Panel",
     "selectEvent": "Select Event",
@@ -630,5 +720,16 @@
     "checkinSuccess": "Successfully checked in {count} users",
     "checkinFailed": "Batch check-in failed",
     "cleanupDone": "Cleaned up: {matches} matches, {groups} groups"
+  },
+  "globalPause": {
+    "paused": "Host has paused the event",
+    "pauseAll": "Pause All",
+    "resumeAll": "Resume"
+  },
+  "feedback": {
+    "rateConversation": "Rate this conversation",
+    "skip": "Skip",
+    "submit": "Submit",
+    "placeholder": "Share your thoughts..."
   }
 }

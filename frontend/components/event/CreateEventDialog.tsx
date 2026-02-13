@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { useTranslation } from '@/lib/i18n/context';
 import { createEvent } from '@/lib/api/events';
 import { supabase } from '@/lib/supabase/client';
@@ -45,7 +46,7 @@ export default function CreateEventDialog({
     e.preventDefault();
 
     if (!formData.name || !formData.start_time || !formData.end_time) {
-      alert(t('host.events.fillRequiredFields'));
+      toast.error(t('ux.toast.fillRequired'));
       return;
     }
 
@@ -61,7 +62,7 @@ export default function CreateEventDialog({
       onSuccess();
     } catch (error) {
       console.error('Failed to create event:', error);
-      alert(t('host.events.createFailed'));
+      toast.error(t('ux.toast.createEventFailed'));
     } finally {
       setLoading(false);
     }

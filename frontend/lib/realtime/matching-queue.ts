@@ -5,6 +5,7 @@ export interface MatchingPresenceState {
   userId: string;
   ready: boolean;
   joinedAt: string;
+  lastHeartbeat: string;
 }
 
 export interface MatchAssignmentPayload {
@@ -64,13 +65,44 @@ export function joinMatchingQueue(
     })
     .subscribe(async (status) => {
       if (status === 'SUBSCRIBED') {
+        const now = new Date().toISOString();
         await channel.track({
           userId,
           ready: false,
-          joinedAt: new Date().toISOString(),
+          joinedAt: now,
+          lastHeartbeat: now,
         });
+
+        // Start heartbeat interval: re-track presence every 15 seconds
+        const heartbeatInterval = setInterval(async () => {
+          try {
+            const currentState = channel.presenceState<MatchingPresenceState>();
+            const myPresence = Object.values(currentState)
+              .flat()
+              .find((p) => p.userId === userId);
+            if (myPresence) {
+              await channel.track({
+                ...myPresence,
+                lastHeartbeat: new Date().toISOString(),
+              });
+            }
+          } catch {
+            // Channel may have been closed
+          }
+        }, 15_000);
+
+        // Store interval on channel for cleanup
+        (channel as unknown as Record<string, unknown>).__heartbeatInterval = heartbeatInterval;
       }
     });
+
+  // Patch unsubscribe to clear heartbeat interval
+  const originalUnsubscribe = channel.unsubscribe.bind(channel);
+  channel.unsubscribe = () => {
+    const interval = (channel as unknown as Record<string, unknown>).__heartbeatInterval as ReturnType<typeof setInterval> | undefined;
+    if (interval) clearInterval(interval);
+    return originalUnsubscribe();
+  };
 
   return channel;
 }
@@ -87,7 +119,28 @@ export async function setReady(
     userId,
     ready,
     joinedAt: new Date().toISOString(),
+    lastHeartbeat: new Date().toISOString(),
   });
+}
+
+/**
+ * Detect stale users whose lastHeartbeat exceeds the given threshold (ms).
+ */
+export function getStaleUserIds(
+  channel: RealtimeChannel,
+  thresholdMs: number = 30_000
+): string[] {
+  const state = channel.presenceState<MatchingPresenceState>();
+  const now = Date.now();
+  const staleIds: string[] = [];
+  Object.values(state).forEach((presences) => {
+    presences.forEach((p) => {
+      if (p.lastHeartbeat && now - new Date(p.lastHeartbeat).getTime() > thresholdMs) {
+        staleIds.push(p.userId);
+      }
+    });
+  });
+  return staleIds;
 }
 
 /**

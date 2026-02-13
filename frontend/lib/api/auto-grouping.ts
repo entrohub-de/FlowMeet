@@ -38,10 +38,48 @@ function calculateGroupAvgScore(members: UserWithPreferences[]): number {
 }
 
 /**
+ * Build a Set of history pair keys from existing matches and group memberships.
+ */
+async function fetchHistoryPairs(eventId: string): Promise<Set<string>> {
+  const { data: existingMatches } = await supabase
+    .from('evt_matches')
+    .select('user1_id, user2_id')
+    .eq('event_id', eventId);
+
+  const historySet = new Set<string>();
+  if (existingMatches) {
+    for (const m of existingMatches) {
+      historySet.add(`${m.user1_id}:${m.user2_id}`);
+      historySet.add(`${m.user2_id}:${m.user1_id}`);
+    }
+  }
+  return historySet;
+}
+
+/**
+ * Count how many history pair overlaps a candidate has with existing group members.
+ */
+function countHistoryOverlaps(
+  candidateId: string,
+  groupMembers: string[],
+  historySet: Set<string>
+): number {
+  let count = 0;
+  for (const memberId of groupMembers) {
+    if (historySet.has(`${candidateId}:${memberId}`)) {
+      count++;
+    }
+  }
+  return count;
+}
+
+/**
  * Generate optimal groups from a list of ready user IDs.
- * Uses greedy optimization: form groups by picking users that maximize diversity.
+ * Uses greedy optimization: form groups by picking users that maximize diversity
+ * while minimizing history pair overlaps.
  */
 export async function generateGroups(
+  eventId: string,
   readyUserIds: string[],
   groupSize: number
 ): Promise<{ groups: GroupResult[]; ungroupedUserIds: string[] }> {
@@ -50,6 +88,9 @@ export async function generateGroups(
   }
 
   const effectiveGroupSize = Math.max(2, Math.min(groupSize, readyUserIds.length));
+
+  // Fetch history pairs
+  const historySet = await fetchHistoryPairs(eventId);
 
   // Fetch profiles + preferences
   const { data: profiles } = await supabase
@@ -95,10 +136,10 @@ export async function generateGroups(
     const group: string[] = [available[0]];
     assigned.add(available[0]);
 
-    // Greedily add users that maximize group diversity
+    // Greedily add users that maximize group diversity and minimize history overlaps
     while (group.length < effectiveGroupSize) {
       let bestUser = '';
-      let bestScore = -1;
+      let bestScore = -Infinity;
 
       for (const candidate of available) {
         if (assigned.has(candidate)) continue;
@@ -110,8 +151,12 @@ export async function generateGroups(
         }
         const avgScore = totalScore / group.length;
 
-        if (avgScore > bestScore) {
-          bestScore = avgScore;
+        // Penalize candidates who have history with group members
+        const historyOverlaps = countHistoryOverlaps(candidate, group, historySet);
+        const penalizedScore = avgScore - historyOverlaps * 20;
+
+        if (penalizedScore > bestScore) {
+          bestScore = penalizedScore;
           bestUser = candidate;
         }
       }

@@ -135,6 +135,11 @@ export interface Match {
   user2_profile?: Profile;
 }
 
+export interface MatchWithScore extends Match {
+  match_score: number | null;
+  match_reasons: string[] | null;
+}
+
 export interface MatchPreference {
   preference_id: string;
   event_id: string;
@@ -244,6 +249,8 @@ export interface ActiveFlow {
   active_step_remaining_seconds: number | null;
   started_at: string | null;
   completed_at: string | null;
+  is_globally_paused?: boolean;
+  global_pause_message?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -259,4 +266,38 @@ export interface Signup {
   signup_timestamp?: string;
   profile?: Profile;
   expectation?: Expectation;
+}
+
+export type HostActionType =
+  | 'flow_applied' | 'step_started' | 'step_paused' | 'step_resumed' | 'step_completed'
+  | 'flow_paused' | 'flow_resumed' | 'flow_completed' | 'flow_reset'
+  | 'matching_triggered' | 'grouping_triggered'
+  | 'manual_pair' | 'manual_unpair' | 'manual_regroup'
+  | 'global_pause' | 'global_resume';
+
+export interface HostAction {
+  action_id: string;
+  event_id: string;
+  host_user_id: string;
+  action_type: HostActionType;
+  target_step_id: string | null;
+  metadata: Record<string, any>;
+  created_at: string;
+}
+
+export type ParticipantStatus = 'checkin' | 'waiting' | 'ready' | 'matched' | 'in_conversation' | 'feedback';
+
+export interface ParticipantState {
+  id: string;
+  event_id: string;
+  user_id: string;
+  flow_step_id: string | null;
+  participant_status: ParticipantStatus;
+  current_match_id: string | null;
+  current_group_id: string | null;
+  last_heartbeat_at: string;
+  last_connected_at: string;
+  is_online: boolean;
+  created_at: string;
+  updated_at: string;
 }

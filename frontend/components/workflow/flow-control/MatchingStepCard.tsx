@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Clock, Users, Loader2, UserCheck } from 'lucide-react';
+import { Clock, Users, Loader2, UserCheck, Heart } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 import { useFlowMatching } from '@/hooks/useFlowMatching';
 import { updateMatchLocation } from '@/lib/api/matching';
@@ -9,6 +9,8 @@ import { getEventVenueAreas } from '@/lib/api/venues';
 import { supabase } from '@/lib/supabase/client';
 import LocationSharing from '@/components/matching/LocationSharing';
 import PartnerLocationCard from '@/components/matching/PartnerLocationCard';
+import MatchingTransition from '@/components/workflow/flow-control/MatchingTransition';
+import PostMatchFeedback from '@/components/workflow/flow-control/PostMatchFeedback';
 import type { Area } from '@/types/domain';
 
 type FlowStatus = 'pending' | 'active' | 'paused' | 'completed';
@@ -38,6 +40,15 @@ export default function MatchingStepCard({
   const [areas, setAreas] = useState<Area[]>([]);
   const [isUpdatingLocation, setIsUpdatingLocation] = useState(false);
   const [isUser1, setIsUser1] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [feedbackDismissed, setFeedbackDismissed] = useState(false);
+
+  // Get current user ID for feedback
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setCurrentUserId(session?.user?.id ?? null);
+    });
+  }, []);
 
   // Load venue areas for area selection
   useEffect(() => {
@@ -109,108 +120,123 @@ export default function MatchingStepCard({
         </div>
       </div>
 
-      {/* Matching content */}
+      {/* Matching content with transition animations */}
       <div className="px-4 pb-4">
-        {/* Phase: Ready prompt */}
-        {state.phase === 'ready_prompt' && (
-          <div className="bg-background rounded-lg p-6 text-center space-y-4">
-            <Users className="w-12 h-12 mx-auto text-primary/60" />
-            <div>
-              <h3 className="font-semibold text-lg text-foreground">
-                {t('flowMatching.readyToMatch')}
-              </h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                {t('flowMatching.readyCount', {
-                  ready: state.readyCount,
-                  total: state.totalPresent,
-                })}
-              </p>
+        <MatchingTransition phase={state.phase}>
+          {/* Phase: Ready prompt */}
+          {state.phase === 'ready_prompt' && (
+            <div className="bg-background rounded-lg p-6 text-center space-y-4">
+              <Users className="w-12 h-12 mx-auto text-primary/60" />
+              <div>
+                <h3 className="font-semibold text-lg text-foreground">
+                  {t('flowMatching.readyToMatch')}
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {t('ux.matching.readyCount', {
+                    count: state.readyCount,
+                  })}
+                </p>
+              </div>
+              <button
+                onClick={toggleReady}
+                className="w-full sm:w-auto px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium text-lg hover:bg-primary/90 transition-colors touch-target touch-feedback"
+              >
+                {t('flowMatching.readyButton')}
+              </button>
             </div>
-            <button
-              onClick={toggleReady}
-              className="px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
-            >
-              {t('flowMatching.readyButton')}
-            </button>
-          </div>
-        )}
+          )}
 
-        {/* Phase: Waiting */}
-        {state.phase === 'waiting' && (
-          <div className="bg-background rounded-lg p-6 text-center space-y-4">
-            <Loader2 className="w-12 h-12 mx-auto text-primary animate-spin" />
-            <div>
-              <h3 className="font-semibold text-lg text-foreground">
-                {t('flowMatching.waitingForMatch')}
-              </h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                {t('flowMatching.readyCount', {
-                  ready: state.readyCount,
-                  total: state.totalPresent,
-                })}
-              </p>
-            </div>
-            <button
-              onClick={toggleReady}
-              className="px-4 py-2 border border-border text-muted-foreground rounded-lg text-sm hover:bg-muted transition-colors"
-            >
-              {t('flowMatching.cancelReady')}
-            </button>
-            {state.isUnpaired && (
-              <p className="text-sm text-amber-600 bg-amber-50 rounded-lg px-4 py-2">
-                {t('flowMatching.oddOneOut')}
-              </p>
-            )}
-          </div>
-        )}
-
-        {/* Phase: Matched */}
-        {state.phase === 'matched' && state.partner && (
-          <div className="bg-background rounded-lg p-5 space-y-4">
-            <div className="flex items-center gap-2 text-primary font-medium">
-              <UserCheck className="w-5 h-5" />
-              {t('flowMatching.matchFound')}
-            </div>
-
-            {/* Partner info */}
-            <div className="flex items-center gap-3">
-              <div className="w-14 h-14 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
-                <span className="text-xl font-semibold text-primary">
-                  {state.partner.profile?.nickname?.[0] || '?'}
-                </span>
+          {/* Phase: Waiting */}
+          {state.phase === 'waiting' && (
+            <div className="bg-background rounded-lg p-6 text-center space-y-4">
+              <div className="relative w-16 h-16 mx-auto">
+                <Loader2 className="w-16 h-16 text-primary animate-spin" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-3 h-3 rounded-full bg-primary animate-breathing" />
+                </div>
               </div>
               <div>
                 <h3 className="font-semibold text-lg text-foreground">
-                  {state.partner.profile?.nickname || t('user.anonymous')}
+                  {t('ux.matching.waitingAnimation')}
                 </h3>
-                <p className="text-sm text-muted-foreground">
-                  {state.partner.profile?.gender || ''}{' '}
-                  {state.partner.profile?.age_group || ''}
+                <p className="text-sm text-muted-foreground mt-1">
+                  {t('ux.matching.readyCount', {
+                    count: state.readyCount,
+                  })}
                 </p>
               </div>
+              <button
+                onClick={toggleReady}
+                className="px-4 py-2 border border-border text-muted-foreground rounded-lg text-sm hover:bg-muted transition-colors touch-target touch-feedback"
+              >
+                {t('flowMatching.cancelReady')}
+              </button>
+              {state.isUnpaired && (
+                <div className="flex items-center gap-2 justify-center text-sm text-amber-600 bg-amber-50 rounded-lg px-4 py-3">
+                  <Heart className="w-4 h-4 shrink-0" />
+                  <p>{t('ux.matching.unpaired')}</p>
+                </div>
+              )}
             </div>
+          )}
 
-            {/* Partner location (real-time) */}
-            <div className="pt-3 border-t border-border space-y-3">
-              <PartnerLocationCard
-                matchId={state.partner.matchId}
-                isUser1={isUser1}
-                areas={areas}
-              />
-              <LocationSharing
-                areas={areas}
-                onUpdateLocation={handleUpdateLocation}
-                isUpdating={isUpdatingLocation}
-              />
+          {/* Phase: Matched */}
+          {state.phase === 'matched' && state.partner && (
+            <div className="bg-background rounded-lg p-5 space-y-4 animate-slide-up-fade">
+              <div className="flex items-center gap-2 text-primary font-medium">
+                <UserCheck className="w-5 h-5" />
+                {t('flowMatching.matchFound')}
+              </div>
+
+              {/* Partner info - larger avatar */}
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-primary/30 to-primary/10 rounded-full flex items-center justify-center ring-2 ring-primary/20">
+                  <span className="text-2xl font-semibold text-primary">
+                    {state.partner.profile?.nickname?.[0] || '?'}
+                  </span>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg text-foreground">
+                    {state.partner.profile?.nickname || t('user.anonymous')}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {state.partner.profile?.gender || ''}{' '}
+                    {state.partner.profile?.age_group || ''}
+                  </p>
+                </div>
+              </div>
+
+              {/* Partner location (real-time) - more prominent */}
+              <div className="pt-3 border-t border-border space-y-3">
+                <PartnerLocationCard
+                  matchId={state.partner.matchId}
+                  isUser1={isUser1}
+                  areas={areas}
+                />
+                <LocationSharing
+                  areas={areas}
+                  onUpdateLocation={handleUpdateLocation}
+                  isUpdating={isUpdatingLocation}
+                />
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Phase: idle (shouldn't normally show, but fallback) */}
-        {state.phase === 'idle' && (
-          <div className="bg-background rounded-lg p-4 text-center text-muted-foreground text-sm">
-            {t('flowMatching.waitingToStart')}
-          </div>
+          {/* Phase: idle (shouldn't normally show, but fallback) */}
+          {state.phase === 'idle' && (
+            <div className="bg-background rounded-lg p-4 text-center text-muted-foreground text-sm">
+              {t('flowMatching.waitingToStart')}
+            </div>
+          )}
+        </MatchingTransition>
+
+        {/* Post-match feedback (Workstream D): shown when step is completed and user was matched */}
+        {status === 'completed' && state.partner && currentUserId && !feedbackDismissed && (
+          <PostMatchFeedback
+            matchId={state.partner.matchId}
+            userId={currentUserId}
+            onDismiss={() => setFeedbackDismissed(true)}
+          />
         )}
       </div>
     </div>

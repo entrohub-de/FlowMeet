@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { Event } from '@/types/domain';
 import { Calendar, MapPin, Clock, Settings, Trash2, AlertTriangle, X } from 'lucide-react';
+import { toast } from 'sonner';
 import { useTranslation } from '@/lib/i18n/context';
 import { useRouter } from 'next/navigation';
 import { deleteEvent } from '@/lib/api/events';
@@ -49,7 +50,7 @@ export default function HostEventCard({ event, onUpdate }: HostEventCardProps) {
     } catch (error) {
       console.error('Failed to delete event:', error);
       const errorMessage = error instanceof Error ? error.message : String(error);
-      alert(`${t('host.events.deleteFailed')}\n${errorMessage}`);
+      toast.error(`${t('ux.toast.deleteEventFailed')}: ${errorMessage}`);
     } finally {
       setDeleting(false);
     }

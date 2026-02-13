@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 
 type AppRole = 'user' | 'host' | 'admin';
@@ -25,7 +25,8 @@ function getHomeByRole(role: AppRole): '/user' | '/host' {
 
 export default function RoleRouteGuard({ area, children }: RoleRouteGuardProps) {
   const router = useRouter();
-  const pathname = usePathname();
+  const routerRef = useRef(router);
+  routerRef.current = router;
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
@@ -37,7 +38,7 @@ export default function RoleRouteGuard({ area, children }: RoleRouteGuardProps) 
 
       if (!sessionUser) {
         if (!cancelled) {
-          router.replace('/login');
+          routerRef.current.replace('/login');
         }
         return;
       }
@@ -50,7 +51,7 @@ export default function RoleRouteGuard({ area, children }: RoleRouteGuardProps) 
 
       if (roleError) {
         if (!cancelled) {
-          router.replace('/login');
+          routerRef.current.replace('/login');
         }
         return;
       }
@@ -62,7 +63,7 @@ export default function RoleRouteGuard({ area, children }: RoleRouteGuardProps) 
 
       if (!allowed) {
         if (!cancelled) {
-          router.replace(getHomeByRole(role));
+          routerRef.current.replace(getHomeByRole(role));
         }
         return;
       }
@@ -76,7 +77,7 @@ export default function RoleRouteGuard({ area, children }: RoleRouteGuardProps) 
     return () => {
       cancelled = true;
     };
-  }, [area, pathname, router]);
+  }, [area]);
 
   if (!isAuthorized) {
     return null;

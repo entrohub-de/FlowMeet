@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Check, X, MessageSquare, MapPin } from 'lucide-react';
+import { toast } from 'sonner';
 import { useTranslation } from '@/lib/i18n/context';
 import type { Match, Profile } from '@/types/domain';
 import { updateMatchLocation } from '@/lib/api/matching';
@@ -66,14 +67,14 @@ export function MatchCard({
     try {
       const success = await updateMatchLocation(match.match_id, myLocation.trim());
       if (success) {
-        // 成功后可以显示提示或刷新数据
         setMyLocation('');
+        toast.success(t('ux.toast.locationUpdated'));
       } else {
-        alert(t('user.matchLocation.locationUpdateFailed'));
+        toast.error(t('ux.toast.locationUpdateFailed'));
       }
     } catch (error) {
       console.error('Error updating location:', error);
-      alert(t('user.matchLocation.locationUpdateFailed'));
+      toast.error(t('ux.toast.locationUpdateFailed'));
     } finally {
       setIsUpdating(false);
     }

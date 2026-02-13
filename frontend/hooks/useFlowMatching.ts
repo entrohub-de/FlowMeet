@@ -8,6 +8,7 @@ import {
   type MatchAssignmentPayload,
   type MatchingPresenceState,
 } from '@/lib/realtime/matching-queue';
+import { getParticipantState, upsertParticipantState } from '@/lib/api/participant-state';
 import type { Profile } from '@/types/domain';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
@@ -44,6 +45,7 @@ export function useFlowMatching(
 
   const channelRef = useRef<RealtimeChannel | null>(null);
   const matchedRef = useRef(false);
+  const recoveryAttemptedRef = useRef(false);
 
   // Get current user ID
   useEffect(() => {
@@ -51,6 +53,53 @@ export function useFlowMatching(
       setUserId(session?.user?.id ?? null);
     });
   }, []);
+
+  // State recovery: attempt to restore state from DB before joining queue
+  useEffect(() => {
+    if (pairingMode !== '1v1' || stepStatus !== 'active' || !userId || !eventId || !stepId) return;
+    if (recoveryAttemptedRef.current || matchedRef.current) return;
+
+    recoveryAttemptedRef.current = true;
+
+    const recover = async () => {
+      try {
+        const saved = await getParticipantState(eventId, userId);
+        if (!saved || saved.flow_step_id !== stepId) return;
+
+        if (saved.participant_status === 'matched' && saved.current_match_id) {
+          // Fetch match to get partner ID
+          const { data: match } = await supabase
+            .from('evt_matches')
+            .select('*')
+            .eq('match_id', saved.current_match_id)
+            .maybeSingle();
+
+          if (match) {
+            const partnerId = match.user1_id === userId ? match.user2_id : match.user1_id;
+            const { data: profiles } = await supabase
+              .from('usr_profiles')
+              .select('*')
+              .eq('user_id', partnerId)
+              .limit(1);
+
+            setPartner({
+              userId: partnerId,
+              profile: (profiles?.[0] as Profile) ?? null,
+              matchId: saved.current_match_id,
+            });
+            setIsUnpaired(false);
+            setPhase('matched');
+            matchedRef.current = true;
+          }
+        }
+        // For 'ready' status, the queue join effect below will handle it naturally
+      } catch (err) {
+        console.error('State recovery failed:', err);
+      }
+    };
+
+    recover();
+  }, [pairingMode, stepStatus, userId, eventId, stepId]);
 
   // Join/leave matching queue based on step status
   // NOTE: phase is intentionally NOT in the dependency array to avoid
@@ -103,6 +152,14 @@ export function useFlowMatching(
         setIsUnpaired(false);
         setPhase('matched');
         matchedRef.current = true;
+
+        // Persist matched state for recovery
+        upsertParticipantState(eventId, userId, {
+          flow_step_id: stepId,
+          participant_status: 'matched',
+          current_match_id: myPair.matchId,
+          current_group_id: null,
+        }).catch((err) => console.error('Failed to persist matched state:', err));
       } else if (payload.unpaired?.includes(userId)) {
         setIsUnpaired(true);
       }
@@ -127,7 +184,13 @@ export function useFlowMatching(
     setIsReady(newReady);
     setPhase(newReady ? 'waiting' : 'ready_prompt');
     await setReadyInQueue(channelRef.current, userId, newReady);
-  }, [isReady, userId]);
+
+    // Persist ready state for recovery
+    upsertParticipantState(eventId, userId, {
+      flow_step_id: stepId,
+      participant_status: newReady ? 'ready' : 'waiting',
+    }).catch((err) => console.error('Failed to persist ready state:', err));
+  }, [isReady, userId, eventId, stepId]);
 
   const state: FlowMatchingState = {
     phase,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ListChecks } from 'lucide-react';
+import { ListChecks, PauseCircle, PlayCircle } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 import { getEvents } from '@/lib/api/events';
 import type { Event, ActiveFlowStep } from '@/types/domain';
@@ -15,13 +15,16 @@ import {
   type WorkflowTemplateRecord,
 } from '@/lib/api/workflow-templates';
 import { getActiveFlow, upsertActiveFlow } from '@/lib/api/active-flows';
-import { broadcastFlowUpdate } from '@/lib/realtime/flow-broadcast';
+import { broadcastFlowUpdate, broadcastGlobalPause, broadcastGlobalResume } from '@/lib/realtime/flow-broadcast';
 import TemplateSelectionPanel from '@/components/workflow/flow-control/TemplateSelectionPanel';
 import TemplateSummaryBar from '@/components/workflow/flow-control/TemplateSummaryBar';
 import FlowStatusCards from '@/components/workflow/flow-control/FlowStatusCards';
 import FlowStepCard from '@/components/workflow/flow-control/FlowStepCard';
 import { useHostFlowMatching } from '@/hooks/useHostFlowMatching';
 import { useHostFlowGroupMatching } from '@/hooks/useHostFlowGroupMatching';
+import { logHostAction } from '@/lib/api/host-actions';
+import ActionHistoryPanel from '@/components/workflow/flow-control/ActionHistoryPanel';
+import { FlowStepSkeleton } from '@/components/ui/skeleton';
 
 type FlowStatus = 'pending' | 'active' | 'paused' | 'completed';
 
@@ -49,6 +52,12 @@ export default function FlowControlPage() {
 
   // Flow execution stage
   const [flowSteps, setFlowSteps] = useState<FlowStep[]>([]);
+
+  // Action history panel toggle
+  const [showHistory, setShowHistory] = useState(false);
+
+  // Global pause state (Workstream D)
+  const [isGloballyPaused, setIsGloballyPaused] = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -131,6 +140,10 @@ export default function FlowControlPage() {
           if (activeFlow.template_id) {
             setSelectedTemplateId(activeFlow.template_id);
           }
+          // Restore global pause state
+          if (activeFlow.is_globally_paused) {
+            setIsGloballyPaused(true);
+          }
           restoredRef.current = true;
         }
       } catch (error) {
@@ -189,6 +202,7 @@ export default function FlowControlPage() {
             activeStepRemainingSeconds: null,
             timestamp: now,
           });
+          logHostAction(selectedEventId, 'flow_applied', { templateName: template.name, templateId });
         } catch (error) {
           console.error('Failed to persist flow:', error);
         }
@@ -260,6 +274,26 @@ export default function FlowControlPage() {
           changedStepNewStatus: newStatus,
           timestamp: now,
         });
+
+        // Log step status change
+        const stepTitle = updatedSteps.find((s) => s.id === stepId)?.title;
+        const prevStatus = flowSteps.find((s) => s.id === stepId)?.status;
+        let actionType: 'step_started' | 'step_paused' | 'step_resumed' | 'step_completed' | null = null;
+        if (newStatus === 'active') {
+          actionType = prevStatus === 'paused' ? 'step_resumed' : 'step_started';
+        } else if (newStatus === 'paused') {
+          actionType = 'step_paused';
+        } else if (newStatus === 'completed') {
+          actionType = 'step_completed';
+        }
+        if (actionType) {
+          logHostAction(selectedEventId, actionType, { stepTitle }, stepId);
+        }
+
+        // Log flow-level events
+        if (allCompleted) {
+          logHostAction(selectedEventId, 'flow_completed');
+        }
       } catch (error) {
         console.error('Failed to persist step change:', error);
       }
@@ -304,7 +338,7 @@ export default function FlowControlPage() {
   );
 
   const activeStepForMatching = flowSteps.find((s) => s.status === 'active' || s.status === 'paused');
-  const { matchingState, triggerMatching, isMatching, matchingError } = useHostFlowMatching(
+  const { matchingState, triggerMatching, isMatching, matchingError, matchQuality } = useHostFlowMatching(
     selectedEventId,
     activeStepForMatching?.id ?? null,
     activeStepForMatching?.pairingMode
@@ -322,12 +356,56 @@ export default function FlowControlPage() {
     activeStepForMatching?.pairingMode
   );
 
+  // Global pause/resume handler (Workstream D)
+  const handleToggleGlobalPause = useCallback(async () => {
+    if (!selectedEventId) return;
+    const newPaused = !isGloballyPaused;
+    setIsGloballyPaused(newPaused);
+    try {
+      await upsertActiveFlow(selectedEventId, {
+        is_globally_paused: newPaused,
+        global_pause_message: null,
+      });
+      if (newPaused) {
+        broadcastGlobalPause(selectedEventId);
+      } else {
+        broadcastGlobalResume(selectedEventId);
+      }
+    } catch (error) {
+      console.error('Failed to toggle global pause:', error);
+      setIsGloballyPaused(!newPaused);
+    }
+  }, [selectedEventId, isGloballyPaused]);
+
   const selectedTemplate = templates.find((tpl) => tpl.template_id === selectedTemplateId);
+
+  // Auto-scroll to active step
+  const activeStepRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (activeStep && activeStepRef.current) {
+      activeStepRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [activeStep?.id]);
 
   if (loading) {
     return (
-      <div className="min-h-[calc(100vh-60px)] p-4 flex items-center justify-center">
-        <div className="text-muted-foreground">{t('common.loading')}</div>
+      <div className="min-h-[calc(100vh-60px)] p-4 bg-muted/30">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-6">
+            <div className="flex items-center gap-3 mb-4">
+              <ListChecks className="w-8 h-8 text-primary" />
+              <h1 className="text-3xl font-bold text-foreground">
+                {t('host.flowControl.title')}
+              </h1>
+            </div>
+          </div>
+          <div className="space-y-3">
+            <FlowStepSkeleton />
+            <FlowStepSkeleton />
+            <FlowStepSkeleton />
+            <FlowStepSkeleton />
+          </div>
+        </div>
       </div>
     );
   }
@@ -341,8 +419,52 @@ export default function FlowControlPage() {
             <h1 className="text-3xl font-bold text-foreground">
               {t('host.flowControl.title')}
             </h1>
+            {/* ── Audit: History Toggle ── */}
+            <button
+              type="button"
+              onClick={() => setShowHistory((v) => !v)}
+              className={`ml-auto px-3 py-1.5 rounded-button text-sm border transition-colors ${
+                showHistory
+                  ? 'bg-primary text-white border-primary'
+                  : 'bg-background text-muted-foreground border-border hover:bg-muted'
+              }`}
+            >
+              {t('hostActions.historyToggle')}
+            </button>
           </div>
         </div>
+
+        {/* ── Global Pause Button (Workstream D) ── */}
+        {flowSteps.length > 0 && (
+          <div className="mb-4">
+            <button
+              type="button"
+              onClick={handleToggleGlobalPause}
+              className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${
+                isGloballyPaused
+                  ? 'bg-red-500 text-white hover:bg-red-600'
+                  : 'bg-primary text-primary-foreground hover:bg-primary/90'
+              }`}
+            >
+              {isGloballyPaused ? (
+                <>
+                  <PlayCircle className="w-5 h-5" />
+                  {t('globalPause.resumeAll')}
+                </>
+              ) : (
+                <>
+                  <PauseCircle className="w-5 h-5" />
+                  {t('globalPause.pauseAll')}
+                </>
+              )}
+            </button>
+          </div>
+        )}
+
+        {/* ── Audit: Action History Panel ── */}
+        {showHistory && selectedEventId && (
+          <ActionHistoryPanel eventId={selectedEventId} />
+        )}
 
         {/* ── Template Summary Bar ── */}
         <TemplateSummaryBar
@@ -393,8 +515,11 @@ export default function FlowControlPage() {
             ) : (
               <div className="space-y-3">
                 {flowSteps.map((step, index) => (
-                  <FlowStepCard
+                  <div
                     key={step.id}
+                    ref={(step.status === 'active' || step.status === 'paused') ? activeStepRef : undefined}
+                  >
+                  <FlowStepCard
                     id={step.id}
                     index={index}
                     title={step.title}
@@ -415,7 +540,9 @@ export default function FlowControlPage() {
                     groupedCount={step.id === activeStepForMatching?.id ? groupedCount : undefined}
                     onTriggerGrouping={triggerGrouping}
                     isGrouping={isGrouping}
+                    matchQuality={step.id === activeStepForMatching?.id ? matchQuality : undefined}
                   />
+                  </div>
                 ))}
               </div>
             )}

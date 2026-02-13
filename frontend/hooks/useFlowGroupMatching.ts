@@ -8,6 +8,7 @@ import {
   type GroupAssignmentPayload,
   type MatchingPresenceState,
 } from '@/lib/realtime/matching-queue';
+import { getParticipantState, upsertParticipantState } from '@/lib/api/participant-state';
 import type { Profile } from '@/types/domain';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
@@ -48,12 +49,58 @@ export function useFlowGroupMatching(
 
   const channelRef = useRef<RealtimeChannel | null>(null);
   const groupedRef = useRef(false);
+  const recoveryAttemptedRef = useRef(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUserId(session?.user?.id ?? null);
     });
   }, []);
+
+  // State recovery: attempt to restore state from DB before joining queue
+  useEffect(() => {
+    if (pairingMode !== 'group' || stepStatus !== 'active' || !userId || !eventId || !stepId) return;
+    if (recoveryAttemptedRef.current || groupedRef.current) return;
+
+    recoveryAttemptedRef.current = true;
+
+    const recover = async () => {
+      try {
+        const saved = await getParticipantState(eventId, userId);
+        if (!saved || saved.flow_step_id !== stepId) return;
+
+        if (saved.participant_status === 'matched' && saved.current_group_id) {
+          // Fetch group members
+          const { data: members } = await supabase
+            .from('evt_group_members')
+            .select('user_id')
+            .eq('group_id', saved.current_group_id);
+
+          if (members && members.length > 0) {
+            const memberIds = members.map((m: { user_id: string }) => m.user_id);
+            const { data: profiles } = await supabase
+              .from('usr_profiles')
+              .select('*')
+              .in('user_id', memberIds);
+
+            const groupMembers: GroupMemberInfo[] = memberIds.map((id: string) => ({
+              userId: id,
+              profile: (profiles?.find((p) => p.user_id === id) as Profile) ?? null,
+            }));
+
+            setGroup({ groupId: saved.current_group_id, members: groupMembers });
+            setIsUngrouped(false);
+            setPhase('grouped');
+            groupedRef.current = true;
+          }
+        }
+      } catch (err) {
+        console.error('Group state recovery failed:', err);
+      }
+    };
+
+    recover();
+  }, [pairingMode, stepStatus, userId, eventId, stepId]);
 
   useEffect(() => {
     if (pairingMode !== 'group' || stepStatus !== 'active' || !userId || !eventId || !stepId) {
@@ -102,6 +149,14 @@ export function useFlowGroupMatching(
         setIsUngrouped(false);
         setPhase('grouped');
         groupedRef.current = true;
+
+        // Persist grouped state for recovery
+        upsertParticipantState(eventId, userId, {
+          flow_step_id: stepId,
+          participant_status: 'matched',
+          current_match_id: null,
+          current_group_id: myGroup.groupId,
+        }).catch((err) => console.error('Failed to persist grouped state:', err));
       } else if (payload.ungrouped?.includes(userId)) {
         setIsUngrouped(true);
       }
@@ -126,7 +181,13 @@ export function useFlowGroupMatching(
     setIsReady(newReady);
     setPhase(newReady ? 'waiting' : 'ready_prompt');
     await setReadyInQueue(channelRef.current, userId, newReady);
-  }, [isReady, userId]);
+
+    // Persist ready state for recovery
+    upsertParticipantState(eventId, userId, {
+      flow_step_id: stepId,
+      participant_status: newReady ? 'ready' : 'waiting',
+    }).catch((err) => console.error('Failed to persist ready state:', err));
+  }, [isReady, userId, eventId, stepId]);
 
   const state: FlowGroupMatchingState = {
     phase,

@@ -4,9 +4,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   observeMatchingQueue,
   broadcastMatchAssignments,
+  getStaleUserIds,
   type MatchingPresenceState,
 } from '@/lib/realtime/matching-queue';
-import { generatePairs, persistPairs } from '@/lib/api/auto-pairing';
+import { generatePairs, persistPairs, type PairResult } from '@/lib/api/auto-pairing';
+import { logHostAction } from '@/lib/api/host-actions';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
 interface StepMatchingState {
@@ -14,6 +16,14 @@ interface StepMatchingState {
   totalPresent: number;
   pairedCount: number;
   readyUserIds: string[];
+  staleUserIds: string[];
+}
+
+export interface MatchQualityInfo {
+  totalPairs: number;
+  avgScore: number;
+  pairs: PairResult[];
+  historyExcluded: boolean;
 }
 
 export function useHostFlowMatching(
@@ -26,9 +36,11 @@ export function useHostFlowMatching(
     totalPresent: 0,
     pairedCount: 0,
     readyUserIds: [],
+    staleUserIds: [],
   });
   const [isMatching, setIsMatching] = useState(false);
   const [matchingError, setMatchingError] = useState<string | null>(null);
+  const [matchQuality, setMatchQuality] = useState<MatchQualityInfo | null>(null);
 
   const channelRef = useRef<RealtimeChannel | null>(null);
 
@@ -39,7 +51,7 @@ export function useHostFlowMatching(
         channelRef.current.unsubscribe();
         channelRef.current = null;
       }
-      setMatchingState({ readyCount: 0, totalPresent: 0, pairedCount: 0, readyUserIds: [] });
+      setMatchingState({ readyCount: 0, totalPresent: 0, pairedCount: 0, readyUserIds: [], staleUserIds: [] });
       return;
     }
 
@@ -60,9 +72,18 @@ export function useHostFlowMatching(
     });
     channelRef.current = channel;
 
+    // Periodic stale user detection (every 15s, threshold 30s)
+    const staleCheckInterval = setInterval(() => {
+      if (channelRef.current) {
+        const stale = getStaleUserIds(channelRef.current, 30_000);
+        setMatchingState((prev) => ({ ...prev, staleUserIds: stale }));
+      }
+    }, 15_000);
+
     return () => {
       channel.unsubscribe();
       channelRef.current = null;
+      clearInterval(staleCheckInterval);
     };
   }, [eventId, activeStepId, activeStepPairingMode]);
 
@@ -72,9 +93,13 @@ export function useHostFlowMatching(
 
     setIsMatching(true);
     setMatchingError(null);
+    logHostAction(eventId, 'matching_triggered', {
+      readyCount: matchingState.readyUserIds.length,
+      stepId: activeStepId,
+    }, activeStepId ?? undefined);
     try {
-      // 1. Generate optimal pairs
-      const { pairs, unpairedUserId } = await generatePairs(matchingState.readyUserIds);
+      // 1. Generate optimal pairs (with history exclusion)
+      const { pairs, unpairedUserId } = await generatePairs(eventId, matchingState.readyUserIds);
 
       // 2. Persist to database
       const persisted = await persistPairs(pairs, eventId);
@@ -84,7 +109,18 @@ export function useHostFlowMatching(
         return;
       }
 
-      // 3. Broadcast to all participants via the existing observer channel
+      // 3. Store match quality info
+      const avgScore = pairs.length > 0
+        ? Math.round(pairs.reduce((sum, p) => sum + p.score, 0) / pairs.length)
+        : 0;
+      setMatchQuality({
+        totalPairs: pairs.length,
+        avgScore,
+        pairs,
+        historyExcluded: true,
+      });
+
+      // 4. Broadcast to all participants via the existing observer channel
       if (channelRef.current) {
         channelRef.current.send({
           type: 'broadcast',
@@ -117,5 +153,5 @@ export function useHostFlowMatching(
     }
   }, [eventId, activeStepId, isMatching, matchingState.readyUserIds]);
 
-  return { matchingState, triggerMatching, isMatching, matchingError };
+  return { matchingState, triggerMatching, isMatching, matchingError, matchQuality };
 }

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Event } from '@/types/domain';
 import { Calendar, MapPin, Clock } from 'lucide-react';
+import { toast } from 'sonner';
 import { signupForEvent, cancelSignup, getUserSignupStatus } from '@/lib/api/signup';
 import { supabase } from '@/lib/supabase/client';
 
@@ -51,8 +52,7 @@ export default function EventCard({ event, locale, t }: EventCardProps) {
 
   const handleSignup = async () => {
     if (!userId) {
-      // User not logged in, redirect to login or show message
-      alert(t('common.loginRequired') || '请先登录');
+      toast.error(t('ux.toast.loginRequired'));
       return;
     }
 

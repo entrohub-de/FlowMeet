@@ -109,6 +109,10 @@ const config: Config = {
       animation: {
         'scan-line': 'scan-line 2s linear infinite',
         'scale-in': 'scale-in 0.3s ease-out',
+        'matching-pulse': 'matching-pulse 2s ease-in-out infinite',
+        'match-celebrate': 'match-celebrate 0.4s ease-out',
+        'slide-up-fade': 'slide-up-fade 0.4s ease-out',
+        'breathing': 'breathing 2s ease-in-out infinite',
       },
       keyframes: {
         'scan-line': {
@@ -118,6 +122,22 @@ const config: Config = {
         'scale-in': {
           '0%': { transform: 'scale(0)', opacity: '0' },
           '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        'matching-pulse': {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.7' },
+        },
+        'match-celebrate': {
+          '0%': { transform: 'scale(0.8)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        'slide-up-fade': {
+          '0%': { transform: 'translateY(16px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        'breathing': {
+          '0%, 100%': { boxShadow: '0 0 0 0 hsl(var(--primary) / 0.4)' },
+          '50%': { boxShadow: '0 0 0 8px hsl(var(--primary) / 0)' },
         },
       },
     },

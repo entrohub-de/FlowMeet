@@ -7,6 +7,7 @@ import {
   type MatchingPresenceState,
 } from '@/lib/realtime/matching-queue';
 import { generateGroups, persistGroups } from '@/lib/api/auto-grouping';
+import { logHostAction } from '@/lib/api/host-actions';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
 export function useHostFlowGroupMatching(
@@ -61,9 +62,14 @@ export function useHostFlowGroupMatching(
     async (groupSize: number = 4) => {
       if (!activeStepId || readyUserIds.length < 2) return;
       setIsGrouping(true);
+      logHostAction(eventId, 'grouping_triggered', {
+        readyCount: readyUserIds.length,
+        groupSize,
+        stepId: activeStepId,
+      }, activeStepId);
 
       try {
-        const { groups } = await generateGroups(readyUserIds, groupSize);
+        const { groups } = await generateGroups(eventId, readyUserIds, groupSize);
         if (groups.length === 0) return;
 
         const persisted = await persistGroups(groups, eventId, activeStepId);

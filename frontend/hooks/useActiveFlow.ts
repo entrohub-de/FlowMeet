@@ -51,6 +51,10 @@ export function useActiveFlow() {
   const [loading, setLoading] = useState(true);
   const [flowState, setFlowState] = useState<ActiveFlowState | null>(null);
 
+  // Global pause state (Workstream D)
+  const [isGloballyPaused, setIsGloballyPaused] = useState(false);
+  const [globalPauseMessage, setGlobalPauseMessage] = useState<string | null>(null);
+
   // Load events
   useEffect(() => {
     const load = async () => {
@@ -97,8 +101,19 @@ export function useActiveFlow() {
             templateName: activeFlow.template_name,
             steps,
           });
+
+          // Restore global pause state from DB
+          if (activeFlow.is_globally_paused) {
+            setIsGloballyPaused(true);
+            setGlobalPauseMessage(activeFlow.global_pause_message ?? null);
+          } else {
+            setIsGloballyPaused(false);
+            setGlobalPauseMessage(null);
+          }
         } else {
           setFlowState(null);
+          setIsGloballyPaused(false);
+          setGlobalPauseMessage(null);
         }
       } catch (error) {
         console.error('Failed to fetch active flow:', error);
@@ -119,11 +134,32 @@ export function useActiveFlow() {
       onFlowReset: () => {
         if (!cancelled) setFlowState(null);
       },
+      onGlobalPause: (message) => {
+        if (!cancelled) {
+          setIsGloballyPaused(true);
+          setGlobalPauseMessage(message);
+        }
+      },
+      onGlobalResume: () => {
+        if (!cancelled) {
+          setIsGloballyPaused(false);
+          setGlobalPauseMessage(null);
+        }
+      },
     });
+
+    // Re-fetch active flow when page becomes visible (e.g. phone unlocked, tab switched back)
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && !cancelled) {
+        fetchAndSubscribe();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
       cancelled = true;
       channel.unsubscribe();
+      document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [selectedEventId]);
 
@@ -181,5 +217,7 @@ export function useActiveFlow() {
     activeStep,
     totalDuration,
     formatTime,
+    isGloballyPaused,
+    globalPauseMessage,
   };
 }
