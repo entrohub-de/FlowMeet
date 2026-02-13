@@ -81,7 +81,7 @@ export default function HostRatingStatsPage() {
           .eq('event_id', selectedEventId);
 
         const eventMatchesPromise = supabase
-          .from('evt_matches')
+          .from('match_records')
           .select('match_id')
           .eq('event_id', selectedEventId);
 

@@ -205,7 +205,7 @@ serve(async (req) => {
 
     // 3. Get existing matches
     const { data: existingMatches } = await supabaseClient
-      .from('evt_matches')
+      .from('match_records')
       .select('user1_id, user2_id')
       .eq('event_id', eventId)
       .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`)

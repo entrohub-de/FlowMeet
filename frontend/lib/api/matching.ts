@@ -18,7 +18,7 @@ export async function getMatchPreference(
   userId: string
 ): Promise<MatchPreference | null> {
   const { data, error } = await supabase
-    .from('evt_match_preferences')
+    .from('match_preferences')
     .select('*')
     .eq('event_id', eventId)
     .eq('user_id', userId)
@@ -44,7 +44,7 @@ export async function saveMatchPreference(
     notes?: string;
   }
 ): Promise<boolean> {
-  const { error } = await supabase.from('evt_match_preferences').upsert(
+  const { error } = await supabase.from('match_preferences').upsert(
     {
       event_id: eventId,
       user_id: userId,
@@ -73,7 +73,7 @@ export async function getUserMatches(
 ): Promise<Match[]> {
   // 先获取配对记录
   const { data: matches, error: matchError } = await supabase
-    .from('evt_matches')
+    .from('match_records')
     .select('*')
     .eq('event_id', eventId)
     .or(`user1_id.eq.${userId},user2_id.eq.${userId}`)
@@ -118,7 +118,7 @@ export async function requestMatch(
   user1Id: string,
   user2Id: string
 ): Promise<boolean> {
-  const { error } = await supabase.from('evt_matches').insert({
+  const { error } = await supabase.from('match_records').insert({
     event_id: eventId,
     user1_id: user1Id,
     user2_id: user2Id,
@@ -138,7 +138,7 @@ export async function requestMatch(
  */
 export async function acceptMatch(matchId: string): Promise<boolean> {
   const { error } = await supabase
-    .from('evt_matches')
+    .from('match_records')
     .update({
       status: 'accepted',
       updated_at: new Date().toISOString(),
@@ -158,7 +158,7 @@ export async function acceptMatch(matchId: string): Promise<boolean> {
  */
 export async function declineMatch(matchId: string): Promise<boolean> {
   const { error } = await supabase
-    .from('evt_matches')
+    .from('match_records')
     .update({
       status: 'declined',
       updated_at: new Date().toISOString(),
@@ -178,7 +178,7 @@ export async function declineMatch(matchId: string): Promise<boolean> {
  */
 export async function completeMatch(matchId: string): Promise<boolean> {
   const { error } = await supabase
-    .from('evt_matches')
+    .from('match_records')
     .update({
       status: 'completed',
       updated_at: new Date().toISOString(),
@@ -233,7 +233,7 @@ export async function getAvailableUsers(
 
   // 获取当前用户已配对的用户ID
   const { data: existingMatches, error: matchError } = await supabase
-    .from('evt_matches')
+    .from('match_records')
     .select('user1_id, user2_id')
     .eq('event_id', eventId)
     .or(`user1_id.eq.${currentUserId},user2_id.eq.${currentUserId}`);
@@ -348,7 +348,7 @@ export async function getAvailableUsersWithPreferences(
   const matchedUserIds = new Set<string>();
   try {
     const { data: existingMatches, error: matchError } = await supabase
-      .from('evt_matches')
+      .from('match_records')
       .select('user1_id, user2_id')
       .eq('event_id', eventId)
       .or(`user1_id.eq.${currentUserId},user2_id.eq.${currentUserId}`);
@@ -460,7 +460,7 @@ export async function updateMatchLocation(
 
     // 获取配对信息以确定是user1还是user2
     const { data: match, error: fetchError } = await supabase
-      .from('evt_matches')
+      .from('match_records')
       .select('user1_id, user2_id')
       .eq('match_id', matchId)
       .single();
@@ -491,7 +491,7 @@ export async function updateMatchLocation(
 
     // 更新位置
     const { error: updateError } = await supabase
-      .from('evt_matches')
+      .from('match_records')
       .update(updateData)
       .eq('match_id', matchId);
 
@@ -528,7 +528,7 @@ export function subscribeToMatchLocation(
       {
         event: 'UPDATE',
         schema: 'public',
-        table: 'evt_matches',
+        table: 'match_records',
         filter: `match_id=eq.${matchId}`,
       },
       (payload) => {

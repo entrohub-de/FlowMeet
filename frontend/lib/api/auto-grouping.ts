@@ -42,7 +42,7 @@ function calculateGroupAvgScore(members: UserWithPreferences[]): number {
  */
 async function fetchHistoryPairs(eventId: string): Promise<Set<string>> {
   const { data: existingMatches } = await supabase
-    .from('evt_matches')
+    .from('match_records')
     .select('user1_id, user2_id')
     .eq('event_id', eventId);
 

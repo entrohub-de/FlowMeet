@@ -79,7 +79,7 @@ export async function manualUnpair(
   eventId: string
 ): Promise<void> {
   const { error } = await supabase
-    .from('evt_matches')
+    .from('match_records')
     .update({ status: 'declined', updated_at: new Date().toISOString() })
     .eq('match_id', matchId);
 

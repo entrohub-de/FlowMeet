@@ -663,6 +663,31 @@
     "fair": "Fair",
     "noRepeats": "History pairs excluded"
   },
+  "matchDetail": {
+    "score": "Match Score",
+    "excellent": "Excellent Match",
+    "good": "Good Match",
+    "fair": "Fair Match",
+    "low": "Low Match",
+    "reasons": "Match Reasons",
+    "partnerPreferences": "Partner Preferences",
+    "noPreferences": "No preference info available",
+    "languages": "Languages",
+    "interests": "Interests",
+    "purpose": "Purpose",
+    "industry": "Industry"
+  },
+  "groupDetail": {
+    "groupName": "Group Name",
+    "memberPreferences": "Member Preferences",
+    "showPreferences": "Show Preferences",
+    "hidePreferences": "Hide Preferences",
+    "noPreferences": "No preference info available",
+    "languages": "Languages",
+    "interests": "Interests",
+    "purpose": "Purpose",
+    "industry": "Industry"
+  },
   "hostActions": {
     "historyToggle": "History",
     "actionTypes": {

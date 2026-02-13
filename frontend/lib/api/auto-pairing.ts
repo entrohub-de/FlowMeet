@@ -29,7 +29,7 @@ function shuffle<T>(arr: T[]): T[] {
  */
 async function fetchHistoryPairs(eventId: string): Promise<Set<string>> {
   const { data: existingMatches } = await supabase
-    .from('evt_matches')
+    .from('match_records')
     .select('user1_id, user2_id')
     .eq('event_id', eventId);
 
@@ -181,7 +181,8 @@ export async function generatePairs(
  */
 export async function persistPairs(
   pairs: PairResult[],
-  eventId: string
+  eventId: string,
+  activeModuleId?: string
 ): Promise<Array<{ user1Id: string; user2Id: string; matchId: string }>> {
   if (pairs.length === 0) return [];
 
@@ -194,6 +195,7 @@ export async function persistPairs(
       p_user1_id: pair.user1Id,
       p_user2_id: pair.user2Id,
       p_status: 'accepted',
+      p_active_module_id: activeModuleId ?? null,
     });
 
     if (!error && data) {
@@ -206,7 +208,7 @@ export async function persistPairs(
 
       // Update match_score and match_reasons on the persisted row
       await supabase
-        .from('evt_matches')
+        .from('match_records')
         .update({
           match_score: pair.score,
           match_reasons: pair.reasons,

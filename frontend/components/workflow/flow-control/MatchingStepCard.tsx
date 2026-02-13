@@ -10,6 +10,7 @@ import { supabase } from '@/lib/supabase/client';
 import LocationSharing from '@/components/matching/LocationSharing';
 import PartnerLocationCard from '@/components/matching/PartnerLocationCard';
 import MatchingTransition from '@/components/workflow/flow-control/MatchingTransition';
+import MatchDetailCard from '@/components/workflow/flow-control/MatchDetailCard';
 import PostMatchFeedback from '@/components/workflow/flow-control/PostMatchFeedback';
 import type { Area } from '@/types/domain';
 
@@ -62,7 +63,7 @@ export default function MatchingStepCard({
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session?.user) return;
       supabase
-        .from('evt_matches')
+        .from('match_records')
         .select('user1_id')
         .eq('match_id', state.partner!.matchId)
         .single()
@@ -219,6 +220,12 @@ export default function MatchingStepCard({
                   isUpdating={isUpdatingLocation}
                 />
               </div>
+
+              {/* Match details: score, reasons, partner preferences */}
+              <MatchDetailCard
+                matchId={state.partner.matchId}
+                partnerId={state.partner.userId}
+              />
             </div>
           )}
 

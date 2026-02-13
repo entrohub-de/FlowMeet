@@ -9,6 +9,7 @@ import {
 } from '@/lib/realtime/matching-queue';
 import { generatePairs, persistPairs, type PairResult } from '@/lib/api/auto-pairing';
 import { logHostAction } from '@/lib/api/host-actions';
+import { createActiveModule, completeActiveModule } from '@/lib/api/active-module';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
 interface StepMatchingState {
@@ -98,11 +99,21 @@ export function useHostFlowMatching(
       stepId: activeStepId,
     }, activeStepId ?? undefined);
     try {
+      // 0. Create active module record for this matching round
+      const { data: { session } } = await (await import('@/lib/supabase/client')).supabase.auth.getSession();
+      const activeModule = await createActiveModule(
+        eventId,
+        activeStepId,
+        activeStepPairingMode ?? '1v1',
+        matchingState.readyUserIds.length,
+        session?.user?.id ?? ''
+      );
+
       // 1. Generate optimal pairs (with history exclusion)
       const { pairs, unpairedUserId } = await generatePairs(eventId, matchingState.readyUserIds);
 
-      // 2. Persist to database
-      const persisted = await persistPairs(pairs, eventId);
+      // 2. Persist to database (with active_module_id)
+      const persisted = await persistPairs(pairs, eventId, activeModule.id);
 
       if (persisted.length === 0) {
         setMatchingError('配对保存失败，请检查数据库权限');
@@ -120,7 +131,14 @@ export function useHostFlowMatching(
         historyExcluded: true,
       });
 
-      // 4. Broadcast to all participants via the existing observer channel
+      // 4. Complete the active module record with stats
+      await completeActiveModule(activeModule.id, {
+        paired_count: persisted.length * 2,
+        unpaired_user_ids: unpairedUserId ? [unpairedUserId] : [],
+        avg_match_score: avgScore,
+      });
+
+      // 5. Broadcast to all participants via the existing observer channel
       if (channelRef.current) {
         channelRef.current.send({
           type: 'broadcast',
@@ -151,7 +169,7 @@ export function useHostFlowMatching(
     } finally {
       setIsMatching(false);
     }
-  }, [eventId, activeStepId, isMatching, matchingState.readyUserIds]);
+  }, [eventId, activeStepId, activeStepPairingMode, isMatching, matchingState.readyUserIds]);
 
   return { matchingState, triggerMatching, isMatching, matchingError, matchQuality };
 }

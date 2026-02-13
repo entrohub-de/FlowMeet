@@ -4,6 +4,7 @@ import { Clock, Users, Loader2, UsersRound, Heart } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 import { useFlowGroupMatching } from '@/hooks/useFlowGroupMatching';
 import MatchingTransition from '@/components/workflow/flow-control/MatchingTransition';
+import GroupDetailCard from '@/components/workflow/flow-control/GroupDetailCard';
 
 type FlowStatus = 'pending' | 'active' | 'paused' | 'completed';
 
@@ -158,6 +159,12 @@ export default function GroupMatchingStepCard({
                   ))}
                 </div>
               </div>
+
+              {/* Group details: name, description, member preferences */}
+              <GroupDetailCard
+                groupId={state.group.groupId}
+                members={state.group.members}
+              />
             </div>
           )}
 

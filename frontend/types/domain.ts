@@ -123,6 +123,7 @@ export interface Match {
   user1_id: string;
   user2_id: string;
   status: 'pending' | 'accepted' | 'declined' | 'completed';
+  active_module_id: string | null;
   created_at: string;
   updated_at: string;
   user1_location: string | null;
@@ -283,6 +284,27 @@ export interface HostAction {
   target_step_id: string | null;
   metadata: Record<string, any>;
   created_at: string;
+}
+
+export type ActiveModuleStatus = 'active' | 'completed' | 'cancelled';
+
+export interface ActiveModule {
+  id: string;
+  event_id: string;
+  step_id: string;
+  module_type: string;
+  status: ActiveModuleStatus;
+  round_number: number;
+  ready_count: number;
+  paired_count: number;
+  unpaired_user_ids: string[];
+  avg_match_score: number | null;
+  started_at: string;
+  completed_at: string | null;
+  started_by: string | null;
+  metadata: Record<string, any>;
+  created_at: string;
+  updated_at: string;
 }
 
 export type ParticipantStatus = 'checkin' | 'waiting' | 'ready' | 'matched' | 'in_conversation' | 'feedback';

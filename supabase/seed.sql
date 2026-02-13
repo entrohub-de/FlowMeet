@@ -411,7 +411,7 @@ BEGIN
     AND status = 'active';
 
   -- 场景1: 完美场景 - 双方都设置了位置（刚刚更新）
-  INSERT INTO public.evt_matches (
+  INSERT INTO public.match_records (
     event_id, user1_id, user2_id, status,
     user1_location, user2_location,
     location_updated_by_user1_at, location_updated_by_user2_at
@@ -422,7 +422,7 @@ BEGIN
   );
 
   -- 场景2: 只有对方位置 - 对方已设置位置，我还没设置
-  INSERT INTO public.evt_matches (
+  INSERT INTO public.match_records (
     event_id, user1_id, user2_id, status,
     user1_location, user2_location,
     location_updated_by_user1_at, location_updated_by_user2_at
@@ -433,7 +433,7 @@ BEGIN
   );
 
   -- 场景3: 空位置 - 双方都还没设置位置
-  INSERT INTO public.evt_matches (
+  INSERT INTO public.match_records (
     event_id, user1_id, user2_id, status,
     user1_location, user2_location,
     location_updated_by_user1_at, location_updated_by_user2_at
@@ -444,14 +444,14 @@ BEGIN
   );
 
   -- 场景4: 待处理状态 - 不应该显示位置功能
-  INSERT INTO public.evt_matches (
+  INSERT INTO public.match_records (
     event_id, user1_id, user2_id, status
   ) VALUES (
     test_event_id, user1_id, user5_id, 'pending'
   );
 
   -- 场景5: 已完成状态 - 显示历史位置（只读）
-  INSERT INTO public.evt_matches (
+  INSERT INTO public.match_records (
     event_id, user1_id, user2_id, status,
     user1_location, user2_location,
     location_updated_by_user1_at, location_updated_by_user2_at
@@ -462,7 +462,7 @@ BEGIN
   );
 
   -- 场景6: 旧位置 - 测试时间显示（几小时前）
-  INSERT INTO public.evt_matches (
+  INSERT INTO public.match_records (
     event_id, user1_id, user2_id, status,
     user1_location, user2_location,
     location_updated_by_user1_at, location_updated_by_user2_at
@@ -473,7 +473,7 @@ BEGIN
   );
 
   -- 场景7: 中等时间 - 测试分钟显示（30分钟前）
-  INSERT INTO public.evt_matches (
+  INSERT INTO public.match_records (
     event_id, user1_id, user2_id, status,
     user1_location, user2_location,
     location_updated_by_user1_at, location_updated_by_user2_at
@@ -484,7 +484,7 @@ BEGIN
   );
 
   -- 场景8: 已拒绝状态 - 不应该显示
-  INSERT INTO public.evt_matches (
+  INSERT INTO public.match_records (
     event_id, user1_id, user2_id, status
   ) VALUES (
     test_event_id, user5_id, user6_id, 'declined'

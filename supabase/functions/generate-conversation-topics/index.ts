@@ -52,7 +52,7 @@ serve(async (req) => {
 
     // 1. Verify user is part of this match
     const { data: match, error: matchError } = await supabaseClient
-      .from('evt_matches')
+      .from('match_records')
       .select('*, user1_profile:usr_profiles!user1_id(*), user2_profile:usr_profiles!user2_id(*)')
       .eq('match_id', matchId)
       .single()

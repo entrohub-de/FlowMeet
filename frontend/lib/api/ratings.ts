@@ -106,7 +106,7 @@ export async function getEventMatchRatings(
 ): Promise<MatchRating[]> {
   // First get all matches for this event and user
   const { data: matches, error: matchesError } = await supabase
-    .from('evt_matches')
+    .from('match_records')
     .select('match_id')
     .eq('event_id', eventId)
     .or(`user1_id.eq.${userId},user2_id.eq.${userId}`);
@@ -297,7 +297,7 @@ export async function getUserMatchesForRating(
 ): Promise<Match[]> {
   // First get the matches
   const { data: matches, error } = await supabase
-    .from('evt_matches')
+    .from('match_records')
     .select('*')
     .eq('event_id', eventId)
     .or(`user1_id.eq.${userId},user2_id.eq.${userId}`)

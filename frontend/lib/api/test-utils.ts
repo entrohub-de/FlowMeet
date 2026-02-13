@@ -103,7 +103,7 @@ export async function cleanupTestData(eventId: string): Promise<{
 }> {
   // Delete matches
   const { data: deletedMatches } = await supabase
-    .from('evt_matches')
+    .from('match_records')
     .delete()
     .eq('event_id', eventId)
     .select('match_id');

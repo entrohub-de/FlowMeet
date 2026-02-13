@@ -665,6 +665,31 @@
     "fair": "一般",
     "noRepeats": "已排除历史配对"
   },
+  "matchDetail": {
+    "score": "匹配分数",
+    "excellent": "高度匹配",
+    "good": "较好匹配",
+    "fair": "一般匹配",
+    "low": "低匹配度",
+    "reasons": "匹配原因",
+    "partnerPreferences": "对方偏好",
+    "noPreferences": "暂无偏好信息",
+    "languages": "语言",
+    "interests": "兴趣",
+    "purpose": "参会目的",
+    "industry": "行业背景"
+  },
+  "groupDetail": {
+    "groupName": "小组名称",
+    "memberPreferences": "成员偏好",
+    "showPreferences": "查看偏好",
+    "hidePreferences": "收起偏好",
+    "noPreferences": "暂无偏好信息",
+    "languages": "语言",
+    "interests": "兴趣",
+    "purpose": "参会目的",
+    "industry": "行业背景"
+  },
   "hostActions": {
     "historyToggle": "操作记录",
     "actionTypes": {

@@ -69,7 +69,7 @@ export function useFlowMatching(
         if (saved.participant_status === 'matched' && saved.current_match_id) {
           // Fetch match to get partner ID
           const { data: match } = await supabase
-            .from('evt_matches')
+            .from('match_records')
             .select('*')
             .eq('match_id', saved.current_match_id)
             .maybeSingle();

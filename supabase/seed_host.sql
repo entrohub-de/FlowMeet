@@ -182,7 +182,7 @@ BEGIN
   -- 创建活动1的配对数据（多种场景）
   IF ARRAY_LENGTH(participant_ids, 1) >= 6 THEN
     -- 场景1: 双方都有位置
-    INSERT INTO public.evt_matches (
+    INSERT INTO public.match_records (
       event_id, user1_id, user2_id, status,
       user1_location, user2_location,
       location_updated_by_user1_at, location_updated_by_user2_at
@@ -193,7 +193,7 @@ BEGIN
     );
 
     -- 场景2: 只有一方位置
-    INSERT INTO public.evt_matches (
+    INSERT INTO public.match_records (
       event_id, user1_id, user2_id, status,
       user1_location, user2_location,
       location_updated_by_user1_at, location_updated_by_user2_at
@@ -204,14 +204,14 @@ BEGIN
     );
 
     -- 场景3: 待处理
-    INSERT INTO public.evt_matches (
+    INSERT INTO public.match_records (
       event_id, user1_id, user2_id, status
     ) VALUES (
       event1_id, participant_ids[5], participant_ids[6], 'pending'
     );
 
     -- 场景4: 已完成
-    INSERT INTO public.evt_matches (
+    INSERT INTO public.match_records (
       event_id, user1_id, user2_id, status,
       user1_location, user2_location,
       location_updated_by_user1_at, location_updated_by_user2_at

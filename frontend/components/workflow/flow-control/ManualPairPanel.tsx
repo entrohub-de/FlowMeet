@@ -33,8 +33,8 @@ export default function ManualPairPanel({ eventId, stepId }: ManualPairPanelProp
     try {
       // Fetch active matches for this event
       const { data: matchData } = await supabase
-        .from('evt_matches')
-        .select('*, user1_profile:usr_profiles!evt_matches_user1_id_fkey(nickname), user2_profile:usr_profiles!evt_matches_user2_id_fkey(nickname)')
+        .from('match_records')
+        .select('*, user1_profile:usr_profiles!match_records_user1_id_fkey(nickname), user2_profile:usr_profiles!match_records_user2_id_fkey(nickname)')
         .eq('event_id', eventId)
         .in('status', ['accepted', 'pending'])
         .order('created_at', { ascending: false });
