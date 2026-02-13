@@ -21,6 +21,7 @@ interface TemplateSelectionPanelProps {
   loadingTemplates: boolean;
   modules: WorkflowModule[];
   onConfirm: () => void;
+  onCancel?: () => void;
 }
 
 export default function TemplateSelectionPanel({
@@ -33,6 +34,7 @@ export default function TemplateSelectionPanel({
   loadingTemplates,
   modules,
   onConfirm,
+  onCancel,
 }: TemplateSelectionPanelProps) {
   const { t } = useTranslation();
   const selectedTemplate = templates.find((tpl) => tpl.template_id === selectedTemplateId);
@@ -132,6 +134,15 @@ export default function TemplateSelectionPanel({
           >
             {t('host.flowControl.confirmStart')}
           </button>
+          {onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {t('common.cancel')}
+            </button>
+          )}
           {selectedEventId && (
             <Link
               href="/host/workflows"

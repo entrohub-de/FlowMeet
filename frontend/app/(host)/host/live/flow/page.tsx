@@ -40,7 +40,7 @@ export default function FlowControlPage() {
   const [templates, setTemplates] = useState<WorkflowTemplateRecord[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
   const [loadingTemplates, setLoadingTemplates] = useState(false);
-  const [confirmed, setConfirmed] = useState(false);
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
 
   // Flow execution stage
   const [flowSteps, setFlowSteps] = useState<FlowStep[]>([]);
@@ -67,7 +67,7 @@ export default function FlowControlPage() {
     init();
   }, []);
 
-  // Fetch all templates (templates are shared across events)
+  // Fetch all templates and auto-apply the first one
   useEffect(() => {
     let cancelled = false;
     const fetchTemplates = async () => {
@@ -91,31 +91,44 @@ export default function FlowControlPage() {
     return () => { cancelled = true; };
   }, []);
 
-  // Build flow steps from confirmed template
-  const handleConfirm = () => {
-    const template = templates.find((tpl) => tpl.template_id === selectedTemplateId);
-    if (!template) return;
+  // Build flow steps from a template (by id)
+  const applyTemplate = useCallback(
+    (templateId: string) => {
+      const template = templates.find((tpl) => tpl.template_id === templateId);
+      if (!template) return;
 
-    const resolved = resolveWorkflow(template.steps, modules);
-    const nextSteps: FlowStep[] = resolved.map((step) => ({
-      id: step.stepId,
-      title: step.title,
-      duration: step.durationMinutes,
-      status: 'pending',
-      remainingSeconds: step.durationMinutes * 60,
-    }));
+      const resolved = resolveWorkflow(template.steps, modules);
+      const nextSteps: FlowStep[] = resolved.map((step) => ({
+        id: step.stepId,
+        title: step.title,
+        duration: step.durationMinutes,
+        status: 'pending',
+        remainingSeconds: step.durationMinutes * 60,
+      }));
 
-    if (nextSteps[0]) {
-      nextSteps[0].status = 'active';
+      if (nextSteps[0]) {
+        nextSteps[0].status = 'active';
+      }
+
+      setFlowSteps(nextSteps);
+      setSelectedTemplateId(templateId);
+    },
+    [templates, modules]
+  );
+
+  // Auto-apply first template once templates and modules are loaded
+  const autoApplied = useRef(false);
+  useEffect(() => {
+    if (!autoApplied.current && templates.length > 0 && modules.length > 0 && flowSteps.length === 0) {
+      autoApplied.current = true;
+      applyTemplate(templates[0].template_id);
     }
+  }, [templates, modules, flowSteps.length, applyTemplate]);
 
-    setFlowSteps(nextSteps);
-    setConfirmed(true);
-  };
-
-  const handleBack = () => {
-    setConfirmed(false);
-    setFlowSteps([]);
+  // Confirm from modal
+  const handleConfirm = () => {
+    applyTemplate(selectedTemplateId);
+    setShowTemplateSelector(false);
   };
 
   const handleStepStatusChange = (stepId: string, newStatus: FlowStatus) => {
@@ -195,69 +208,71 @@ export default function FlowControlPage() {
           </div>
         </div>
 
-        {/* ── Template Selection / Summary ── */}
-        {confirmed ? (
-          <TemplateSummaryBar
-            templateName={selectedTemplate?.name}
-            onChangeTemplate={handleBack}
-          />
-        ) : (
-          <TemplateSelectionPanel
-            events={events}
-            selectedEventId={selectedEventId}
-            onEventChange={setSelectedEventId}
-            templates={templates}
-            selectedTemplateId={selectedTemplateId}
-            onTemplateChange={setSelectedTemplateId}
-            loadingTemplates={loadingTemplates}
-            modules={modules}
-            onConfirm={handleConfirm}
-          />
+        {/* ── Template Summary Bar ── */}
+        <TemplateSummaryBar
+          templateName={selectedTemplate?.name}
+          onChangeTemplate={() => setShowTemplateSelector(true)}
+        />
+
+        {/* ── Template Selection Modal ── */}
+        {showTemplateSelector && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div className="w-full max-w-lg mx-4">
+              <TemplateSelectionPanel
+                events={events}
+                selectedEventId={selectedEventId}
+                onEventChange={setSelectedEventId}
+                templates={templates}
+                selectedTemplateId={selectedTemplateId}
+                onTemplateChange={setSelectedTemplateId}
+                loadingTemplates={loadingTemplates}
+                modules={modules}
+                onConfirm={handleConfirm}
+                onCancel={() => setShowTemplateSelector(false)}
+              />
+            </div>
+          </div>
         )}
 
         {/* ── Execution Stage ── */}
-        {confirmed && (
-          <>
-            <FlowStatusCards
-              activeStepTitle={activeStep?.title}
-              activeStepRemainingSeconds={activeStep?.remainingSeconds}
-              activeStepStatus={activeStep?.status as 'active' | 'paused' | undefined}
-              totalDuration={totalDuration}
-              formatTime={formatTime}
-            />
+        <FlowStatusCards
+          activeStepTitle={activeStep?.title}
+          activeStepRemainingSeconds={activeStep?.remainingSeconds}
+          activeStepStatus={activeStep?.status as 'active' | 'paused' | undefined}
+          totalDuration={totalDuration}
+          formatTime={formatTime}
+        />
 
-            <div className="bg-card border border-border rounded-xl shadow-sm">
-              <div className="p-6 border-b border-border">
-                <h2 className="text-xl font-semibold text-foreground">
-                  {t('host.flowControl.flowProcess')}
-                </h2>
+        <div className="bg-card border border-border rounded-xl shadow-sm">
+          <div className="p-6 border-b border-border">
+            <h2 className="text-xl font-semibold text-foreground">
+              {t('host.flowControl.flowProcess')}
+            </h2>
+          </div>
+          <div className="p-6">
+            {flowSteps.length === 0 ? (
+              <div className="rounded-lg border border-dashed border-border p-8 text-center text-muted-foreground">
+                {t('host.flowControl.emptyFlow')}
               </div>
-              <div className="p-6">
-                {flowSteps.length === 0 ? (
-                  <div className="rounded-lg border border-dashed border-border p-8 text-center text-muted-foreground">
-                    {t('host.flowControl.emptyFlow')}
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {flowSteps.map((step, index) => (
-                      <FlowStepCard
-                        key={step.id}
-                        id={step.id}
-                        index={index}
-                        title={step.title}
-                        duration={step.duration}
-                        status={step.status}
-                        remainingSeconds={step.remainingSeconds}
-                        formatTime={formatTime}
-                        onStatusChange={handleStepStatusChange}
-                      />
-                    ))}
-                  </div>
-                )}
+            ) : (
+              <div className="space-y-3">
+                {flowSteps.map((step, index) => (
+                  <FlowStepCard
+                    key={step.id}
+                    id={step.id}
+                    index={index}
+                    title={step.title}
+                    duration={step.duration}
+                    status={step.status}
+                    remainingSeconds={step.remainingSeconds}
+                    formatTime={formatTime}
+                    onStatusChange={handleStepStatusChange}
+                  />
+                ))}
               </div>
-            </div>
-          </>
-        )}
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
