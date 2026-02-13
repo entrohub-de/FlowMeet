@@ -44,7 +44,9 @@
     "noActiveFlow": "暂无活动流程",
     "noActiveFlowHint": "主办方尚未启动流程",
     "templateName": "流程模板",
-    "flowCompleted": "流程已全部完成"
+    "flowCompleted": "流程已全部完成",
+    "viewAllSteps": "查看全部流程",
+    "hideSteps": "收起流程"
   },
   "flowMatching": {
     "readyToMatch": "准备配对？",

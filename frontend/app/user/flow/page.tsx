@@ -1,9 +1,10 @@
 'use client';
 
-import { ListChecks, PauseCircle } from 'lucide-react';
+import { useState } from 'react';
+import { ListChecks, PauseCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 import { useActiveFlow } from '@/hooks/useActiveFlow';
-import FlowStatusCards from '@/components/workflow/flow-control/FlowStatusCards';
+import ActiveStepCard from '@/components/workflow/flow-control/ActiveStepCard';
 import FlowStepCardReadOnly from '@/components/workflow/flow-control/FlowStepCardReadOnly';
 import MatchingStepCard from '@/components/workflow/flow-control/MatchingStepCard';
 import GroupMatchingStepCard from '@/components/workflow/flow-control/GroupMatchingStepCard';
@@ -11,12 +12,12 @@ import { FlowStepSkeleton } from '@/components/ui/skeleton';
 
 export default function UserFlowPage() {
   const { t } = useTranslation();
+  const [showAllSteps, setShowAllSteps] = useState(false);
   const {
     loading,
     selectedEventId,
     flowState,
     activeStep,
-    totalDuration,
     formatTime,
     isGloballyPaused,
     globalPauseMessage,
@@ -81,73 +82,108 @@ export default function UserFlowPage() {
               </div>
             )}
 
-            <FlowStatusCards
-              activeStepTitle={activeStep?.title}
-              activeStepRemainingSeconds={activeStep?.remainingSeconds}
-              activeStepStatus={activeStep?.status as 'active' | 'paused' | undefined}
-              totalDuration={totalDuration}
-              formatTime={formatTime}
-            />
-
-            <div className="bg-card border border-border rounded-xl shadow-sm">
-              <div className="p-6 border-b border-border">
-                <h2 className="text-xl font-semibold text-foreground">
-                  {t('host.flowControl.flowProcess')}
-                </h2>
-              </div>
-              <div className="p-6">
-                <div className="space-y-3">
-                  {flowState.steps.map((step, index) => {
-                    const isActive = step.status === 'active' || step.status === 'paused';
-                    const isActive1v1 = step.pairingMode === '1v1' && isActive;
-                    const isActiveGroup = step.pairingMode === 'group' && isActive;
-
-                    if (isActive1v1) {
-                      return (
-                        <MatchingStepCard
-                          key={step.id}
-                          index={index}
-                          stepId={step.id}
-                          title={step.title}
-                          status={step.status}
-                          remainingSeconds={step.remainingSeconds}
-                          formatTime={formatTime}
-                          eventId={selectedEventId}
-                        />
-                      );
-                    }
-
-                    if (isActiveGroup) {
-                      return (
-                        <GroupMatchingStepCard
-                          key={step.id}
-                          index={index}
-                          stepId={step.id}
-                          title={step.title}
-                          status={step.status}
-                          remainingSeconds={step.remainingSeconds}
-                          formatTime={formatTime}
-                          eventId={selectedEventId}
-                        />
-                      );
-                    }
-
-                    return (
-                      <FlowStepCardReadOnly
-                        key={step.id}
-                        index={index}
-                        title={step.title}
-                        duration={step.duration}
-                        status={step.status}
-                        remainingSeconds={step.remainingSeconds}
-                        formatTime={formatTime}
-                        pairingMode={step.pairingMode}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
+            <div className="mb-6">
+              <ActiveStepCard
+                title={activeStep?.title}
+                remainingSeconds={activeStep?.remainingSeconds}
+                status={activeStep?.status as 'active' | 'paused' | undefined}
+                formatTime={formatTime}
+              />
             </div>
+
+            {/* Active step(s) shown prominently */}
+            {flowState.steps.map((step, index) => {
+              const isActive = step.status === 'active' || step.status === 'paused';
+              if (!isActive) return null;
+
+              const isActive1v1 = step.pairingMode === '1v1';
+              const isActiveGroup = step.pairingMode === 'group';
+
+              if (isActive1v1) {
+                return (
+                  <MatchingStepCard
+                    key={step.id}
+                    index={index}
+                    stepId={step.id}
+                    title={step.title}
+                    status={step.status}
+                    remainingSeconds={step.remainingSeconds}
+                    formatTime={formatTime}
+                    eventId={selectedEventId}
+                  />
+                );
+              }
+
+              if (isActiveGroup) {
+                return (
+                  <GroupMatchingStepCard
+                    key={step.id}
+                    index={index}
+                    stepId={step.id}
+                    title={step.title}
+                    status={step.status}
+                    remainingSeconds={step.remainingSeconds}
+                    formatTime={formatTime}
+                    eventId={selectedEventId}
+                  />
+                );
+              }
+
+              return (
+                <FlowStepCardReadOnly
+                  key={step.id}
+                  index={index}
+                  title={step.title}
+                  duration={step.duration}
+                  status={step.status}
+                  remainingSeconds={step.remainingSeconds}
+                  formatTime={formatTime}
+                  pairingMode={step.pairingMode}
+                />
+              );
+            })}
+
+            {/* Collapsible section for other steps */}
+            {flowState.steps.some(s => s.status !== 'active' && s.status !== 'paused') && (
+              <div className="mt-4">
+                <button
+                  onClick={() => setShowAllSteps(prev => !prev)}
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 text-sm text-muted-foreground hover:text-foreground bg-card border border-border rounded-xl shadow-sm transition-colors"
+                >
+                  {showAllSteps ? (
+                    <>
+                      {t('userFlow.hideSteps')}
+                      <ChevronUp className="w-4 h-4" />
+                    </>
+                  ) : (
+                    <>
+                      {t('userFlow.viewAllSteps')}
+                      <ChevronDown className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+
+                {showAllSteps && (
+                  <div className="mt-3 space-y-3">
+                    {flowState.steps.map((step, index) => {
+                      if (step.status === 'active' || step.status === 'paused') return null;
+                      return (
+                        <FlowStepCardReadOnly
+                          key={step.id}
+                          index={index}
+                          title={step.title}
+                          duration={step.duration}
+                          status={step.status}
+                          remainingSeconds={step.remainingSeconds}
+                          formatTime={formatTime}
+                          pairingMode={step.pairingMode}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
 
             {flowState.flowStatus === 'completed' && (
               <div className="mt-4 p-4 rounded-lg bg-green-50 border border-green-200 text-center text-green-700 font-medium">

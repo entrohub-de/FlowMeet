@@ -143,7 +143,7 @@ export default function HostVenuesPage() {
         });
       } else {
         await createArea({
-          event_id: expandedVenueId,
+          venue_id: expandedVenueId,
           name: areaName.trim(),
           area_type: areaType,
           max_people: parseInt(areaMaxPeople) || 0,

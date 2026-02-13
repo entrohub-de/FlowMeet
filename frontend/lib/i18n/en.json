@@ -42,7 +42,9 @@
     "noActiveFlow": "No active flow",
     "noActiveFlowHint": "The host has not started the event flow yet",
     "templateName": "Flow Template",
-    "flowCompleted": "All steps completed"
+    "flowCompleted": "All steps completed",
+    "viewAllSteps": "View all steps",
+    "hideSteps": "Hide steps"
   },
   "flowMatching": {
     "readyToMatch": "Ready to match?",

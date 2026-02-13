@@ -87,7 +87,7 @@ export async function getVenueAreas(venueId: string): Promise<Area[]> {
   const { data, error } = await supabase
     .from('evt_areas')
     .select('*')
-    .eq('event_id', venueId)
+    .eq('venue_id', venueId)
     .order('area_order', { ascending: true });
 
   if (error) {
@@ -98,7 +98,7 @@ export async function getVenueAreas(venueId: string): Promise<Area[]> {
 }
 
 export async function createArea(area: {
-  event_id: string;
+  venue_id: string;
   name: string;
   description?: string;
   max_people?: number;
