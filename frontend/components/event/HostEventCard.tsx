@@ -89,7 +89,13 @@ export default function HostEventCard({ event, onUpdate }: HostEventCardProps) {
   const isOngoing = !isUpcoming && !isPast;
 
   return (
-    <div className="bg-card border border-border rounded-xl p-5 sm:p-6 hover:shadow-md transition-shadow space-y-4">
+    <div className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+      {/* Cover Image */}
+      {event.cover_image && (
+        <img src={event.cover_image} alt={event.name} className="w-full h-36 object-cover" />
+      )}
+
+      <div className="p-5 sm:p-6 space-y-4">
       {/* Status Badge */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1">
@@ -287,6 +293,7 @@ export default function HostEventCard({ event, onUpdate }: HostEventCardProps) {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

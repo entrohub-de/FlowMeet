@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import type { Event } from '@/types/domain';
-import { Calendar, MapPin, QrCode, CheckCircle2 } from 'lucide-react';
+import { Calendar, MapPin, QrCode, CheckCircle2, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { signupForEvent, cancelSignup, getUserSignupStatus } from '@/lib/api/signup';
 import { getUserCheckinStatus } from '@/lib/api/checkin';
 import { supabase } from '@/lib/supabase/client';
 import { QRCodeSVG } from 'qrcode.react';
 import PreferencesModal from './PreferencesModal';
+import SwipeToSignup from './SwipeToSignup';
 
 function generateNumericCode(eventId: string, userId: string, checkinCode: string): string {
   const raw = `${eventId}/${userId}/${checkinCode}`;
@@ -153,24 +154,32 @@ export default function EventCard({ event, locale, t, initialSignedUp, onSignupC
         </div>
       </div>
 
-      {/* Sign Up Button */}
-      <button
-        onClick={handleSignup}
-        disabled={loading || signingUp}
-        className={`font-medium text-sm transition-colors ${
-          signedUp
-            ? 'px-3 py-1 rounded-full bg-green-100 text-green-700 hover:bg-green-200 border border-green-200'
-            : 'w-full px-button h-button rounded-button bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed'
-        }`}
-      >
-        {loading
-          ? t('common.loading')
-          : signingUp
-            ? '...'
-            : signedUp
-              ? <><CheckCircle2 className="w-3.5 h-3.5 inline-block mr-1" />{t('user.signedUp')}</>
-              : t('user.signupBtn')}
-      </button>
+      {/* Sign Up */}
+      {loading ? (
+        <div className="w-full h-button flex items-center justify-center text-sm text-muted-foreground">
+          {t('common.loading')}
+        </div>
+      ) : signedUp ? (
+        <div className="flex items-center gap-2">
+          <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 border border-green-200 font-medium text-sm inline-flex items-center">
+            <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
+            {t('user.signedUp')}
+          </span>
+          <button
+            onClick={handleSignup}
+            disabled={signingUp}
+            className="px-3 py-1 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 border border-border hover:border-destructive/30 font-medium text-sm transition-colors inline-flex items-center gap-1"
+          >
+            {signingUp ? '...' : <><X className="w-3.5 h-3.5" />{t('user.cancelSignup')}</>}
+          </button>
+        </div>
+      ) : (
+        <SwipeToSignup
+          label={t('user.swipeToSignup')}
+          disabled={signingUp || !userId}
+          onSwipeComplete={handleSignup}
+        />
+      )}
 
       {/* Checkin Section - only for signed-up users with checkin code */}
       {signedUp && event.checkin_code && userId && (
