@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Globe, Sparkles, Target, Briefcase, TrendingUp } from 'lucide-react';
+import { Globe, Sparkles, Briefcase, TrendingUp, Rocket } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 import { supabase } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
@@ -80,7 +80,7 @@ export default function MatchDetailCard({ matchId, partnerId }: MatchDetailCardP
 
   const hasPreferences = preferences && (
     preferences.languages || preferences.interests ||
-    preferences.purpose || preferences.industry_background
+    preferences.industry_background || preferences.startup_stage
   );
 
   if (matchScore === null && !matchReasons?.length && !hasPreferences) {
@@ -163,12 +163,12 @@ export default function MatchDetailCard({ matchId, partnerId }: MatchDetailCardP
                 </div>
               </div>
             )}
-            {preferences.purpose && (
+            {preferences.startup_stage && (
               <div className="flex items-start gap-2 text-sm">
-                <Target className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                <Rocket className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
                 <div>
-                  <span className="text-xs text-muted-foreground">{t('matchDetail.purpose')}</span>
-                  <p className="text-foreground">{preferences.purpose}</p>
+                  <span className="text-xs text-muted-foreground">{t('matchDetail.startupStage')}</span>
+                  <p className="text-foreground">{preferences.startup_stage}</p>
                 </div>
               </div>
             )}
@@ -176,7 +176,7 @@ export default function MatchDetailCard({ matchId, partnerId }: MatchDetailCardP
               <div className="flex items-start gap-2 text-sm">
                 <Briefcase className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
                 <div>
-                  <span className="text-xs text-muted-foreground">{t('matchDetail.industry')}</span>
+                  <span className="text-xs text-muted-foreground">{t('matchDetail.professionalBackground')}</span>
                   <p className="text-foreground">{preferences.industry_background}</p>
                 </div>
               </div>

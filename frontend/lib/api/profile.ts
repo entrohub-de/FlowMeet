@@ -50,7 +50,7 @@ export async function getPreferences(userId: string): Promise<Preferences | null
 
 export async function upsertPreferences(
   userId: string,
-  prefs: Partial<Pick<Preferences, 'languages' | 'interests' | 'purpose' | 'industry_background'>>
+  prefs: Partial<Pick<Preferences, 'languages' | 'interests' | 'industry_background' | 'startup_stage'>>
 ): Promise<Preferences> {
   const { data, error } = await supabase
     .from('usr_preferences')

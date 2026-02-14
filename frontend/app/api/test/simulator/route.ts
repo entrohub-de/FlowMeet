@@ -17,7 +17,7 @@ const NICKNAMES = [
 ];
 const GENDERS = ['男', '女'];
 const AGE_GROUPS = ['18-24', '25-34', '35-44', '45-54'];
-const INDUSTRIES = ['科技', '金融', '教育', '医疗', '设计', '咨询'];
+const PROFESSIONAL_BACKGROUNDS = ['engineer', 'marketing_sales', 'student_research', 'founder', 'product_manager', 'designer', 'finance_legal'];
 const pick = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
 export async function POST(req: NextRequest) {
@@ -74,12 +74,14 @@ export async function POST(req: NextRequest) {
           }, { onConflict: 'user_id' });
 
           // Create preferences
+          const INTEREST_POOL = ['startup', 'tech_ai', 'career', 'cross_cultural', 'investment', 'product', 'design', 'marketing'];
+          const interests = [pick(INTEREST_POOL), pick(INTEREST_POOL)].filter((v, i, a) => a.indexOf(v) === i).join(',');
           await adminClient.from('usr_preferences').upsert({
             user_id: userId,
-            industry: pick(INDUSTRIES),
-            purpose: pick(['networking', 'learning', 'collaboration', 'fun']),
-            languages: 'zh,en',
-            interests: '社交,学习,创业',
+            industry_background: pick(PROFESSIONAL_BACKGROUNDS),
+            startup_stage: pick(['not_started', 'idea', 'seed', 'growth', 'mature', 'not_entrepreneur']),
+            languages: 'chinese,english',
+            interests,
           }, { onConflict: 'user_id' });
 
           users.push({ email, userId, nickname });

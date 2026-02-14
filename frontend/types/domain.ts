@@ -12,6 +12,7 @@ export interface Event {
   created_at: string;
   checkin_code?: string | null;
   checkin_qr_enabled?: boolean;
+  cover_image?: string | null;
   venue?: Venue;
 }
 
@@ -101,10 +102,14 @@ export interface Preferences {
   id: number;
   created_at: string;
   user_id: string;
+  /** Comma-separated language codes (chinese, english, german, etc.) */
   languages: string | null;
+  /** Comma-separated interest topics (startup, tech_ai, career, cross_cultural, etc.) */
   interests: string | null;
-  purpose: string | null;
+  /** Comma-separated professional roles (engineer, founder, marketing_sales, etc.) */
   industry_background: string | null;
+  /** Single value: not_started | idea | seed | growth | mature | not_entrepreneur */
+  startup_stage: string | null;
 }
 
 export interface Expectation {

@@ -33,7 +33,9 @@
       "groups": "Groups",
       "topics": "Topics",
       "rating": "Rating",
-      "flow": "Event Flow"
+      "flow": "Event Flow",
+      "onlineConnect": "Online Connect",
+      "connections": "My Connections"
     }
   },
   "userFlow": {
@@ -113,6 +115,9 @@
     "signupPage": "Event signup page",
     "noEvents": "No events available",
     "noEventsDesc": "There are no events open for signup at the moment. Check back later.",
+    "myEvents": "My Events",
+    "noSignedUpEvents": "You haven't signed up for any events yet. Discover events below!",
+    "discoverEvents": "Discover Events",
     "eventTime": "Time",
     "eventLocation": "Location",
     "locationTbd": "TBD",
@@ -123,6 +128,8 @@
     "checkinStatus": "Check-in Status",
     "checkedIn": "Checked In",
     "notCheckedIn": "Not Checked In",
+    "showCheckinCode": "Show Check-in Code",
+    "hideCheckinCode": "Hide Check-in Code",
     "scanQRCode": "Scan QR code with your phone to check in",
     "enterShortCode": "Or enter the following 6-digit code",
     "todayEvents": "Today's Events",
@@ -236,6 +243,9 @@
       "location": "Location",
       "selectVenue": "Select a venue (optional)",
       "fillRequiredFields": "Please fill in all required fields",
+      "coverImage": "Cover Image",
+      "uploadCover": "Click to upload a cover image",
+      "coverUploadFailed": "Failed to upload cover image",
       "create": "Create Event",
       "creating": "Creating...",
       "createFailed": "Failed to create event. Please try again.",
@@ -416,13 +426,9 @@
     },
     "preferences": "Preferences",
     "languages": "Languages",
-    "languagesPlaceholder": "e.g. Chinese, English, Japanese",
     "interests": "Interests",
-    "interestsPlaceholder": "e.g. Tech, Design, Product",
-    "purpose": "Purpose",
-    "purposePlaceholder": "e.g. Networking, Learning, Collaboration",
-    "industryBackground": "Industry",
-    "industryBackgroundPlaceholder": "e.g. Internet, Finance, Education",
+    "professionalBackground": "Professional Background",
+    "startupStage": "Startup Stage",
     "save": "Save",
     "saving": "Saving...",
     "saved": "Saved",
@@ -626,14 +632,15 @@
     "customText": "Additional notes (optional)",
     "editExpectations": "Edit my expectations",
     "tags": {
-      "meetFriends": "Meet new friends",
-      "learnSkills": "Learn new skills",
-      "findCollaborators": "Find collaborators",
-      "expandNetwork": "Expand network",
+      "networking": "Networking",
+      "learnMarket": "Learn about markets",
+      "findCofounder": "Find co-founders",
+      "justSocial": "Just curious / social",
+      "shareExperience": "Share experience",
       "getInspiration": "Get inspiration",
-      "industryExchange": "Industry exchange",
       "findMentors": "Find mentors",
-      "shareExperience": "Share experience"
+      "learnSkills": "Learn new skills",
+      "industryExchange": "Industry exchange"
     },
     "tpl": {
       "pageTitle": "My Expectation Templates",
@@ -755,8 +762,8 @@
     "noPreferences": "No preference info available",
     "languages": "Languages",
     "interests": "Interests",
-    "purpose": "Purpose",
-    "industry": "Industry"
+    "professionalBackground": "Professional Background",
+    "startupStage": "Startup Stage"
   },
   "groupDetail": {
     "groupName": "Group Name",
@@ -766,8 +773,8 @@
     "noPreferences": "No preference info available",
     "languages": "Languages",
     "interests": "Interests",
-    "purpose": "Purpose",
-    "industry": "Industry"
+    "professionalBackground": "Professional Background",
+    "startupStage": "Startup Stage"
   },
   "hostActions": {
     "historyToggle": "History",
@@ -844,5 +851,53 @@
     "skip": "Skip",
     "submit": "Submit",
     "placeholder": "Share your thoughts..."
+  },
+  "connections": {
+    "title": "Online Connections",
+    "description": "View people you've connected with at events and stay in touch",
+    "empty": "No connections yet",
+    "emptyHint": "Join events and complete matches to see your connections here",
+    "totalCount": "{count} connections",
+    "connectedAt": "Connected on {time}"
+  },
+  "preferenceOptions": {
+    "languages": {
+      "chinese": "Chinese",
+      "english": "English",
+      "japanese": "Japanese",
+      "korean": "Korean",
+      "german": "German",
+      "french": "French",
+      "spanish": "Spanish"
+    },
+    "interests": {
+      "startup": "Startup & Entrepreneurship",
+      "tech_ai": "Tech / AI / Robotics",
+      "career": "Career & Jobs",
+      "cross_cultural": "Cross-cultural Exchange",
+      "investment": "Investment",
+      "product": "Product",
+      "design": "Design",
+      "marketing": "Marketing"
+    },
+    "professionalBackground": {
+      "engineer": "Engineer / Developer",
+      "marketing_sales": "Marketing / Sales",
+      "student_research": "Student / Researcher",
+      "founder": "Entrepreneur / Founder",
+      "product_manager": "Product Manager",
+      "designer": "Designer",
+      "finance_legal": "Finance / Legal",
+      "operations": "Operations",
+      "other": "Other"
+    },
+    "startupStages": {
+      "not_started": "Not Started",
+      "idea": "Idea Validation",
+      "seed": "Seed Stage",
+      "growth": "Growth Stage",
+      "mature": "Mature Stage",
+      "not_entrepreneur": "Not an Entrepreneur"
+    }
   }
 }

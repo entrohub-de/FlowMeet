@@ -14,8 +14,30 @@ export interface MatchScore {
 }
 
 /**
+ * 职业背景互补对照表
+ * 基于 Entrohub 问卷数据：Engineer↔Marketing 是最有价值的互补组合
+ */
+const COMPLEMENTARY_PAIRS: Record<string, string[]> = {
+  engineer: ['marketing_sales', 'product_manager', 'designer', 'founder'],
+  marketing_sales: ['engineer', 'product_manager', 'designer', 'founder'],
+  founder: ['engineer', 'marketing_sales', 'finance_legal'],
+  student_research: ['founder', 'engineer', 'marketing_sales'],
+  product_manager: ['engineer', 'designer', 'marketing_sales'],
+  designer: ['engineer', 'product_manager', 'marketing_sales'],
+  finance_legal: ['founder', 'engineer'],
+  operations: ['founder', 'engineer', 'marketing_sales'],
+};
+
+/**
  * 计算两个用户之间的匹配分数
  * 分数范围：0-100
+ *
+ * 权重分配（基于问卷分析）：
+ * - 职业背景（互补）：30分
+ * - 兴趣话题（重叠）：25分
+ * - 创业阶段（相似）：15分
+ * - 语言（重叠）：10分
+ * - 基础分：20分（保底）
  */
 export function calculateMatchScore(
   user1: UserWithPreferences,
@@ -24,84 +46,82 @@ export function calculateMatchScore(
   let score = 0;
   const reasons: string[] = [];
 
-  // 1. 年龄段匹配 (权重: 15分)
-  if (user1.profile.age_group && user2.profile.age_group) {
-    if (user1.profile.age_group === user2.profile.age_group) {
+  const prefs1 = user1.preferences;
+  const prefs2 = user2.preferences;
+
+  // 1. 职业背景 — 互补匹配 (权重: 30分)
+  if (prefs1?.industry_background && prefs2?.industry_background) {
+    const bg1 = prefs1.industry_background.split(',').map(s => s.trim()).filter(Boolean);
+    const bg2 = prefs2.industry_background.split(',').map(s => s.trim()).filter(Boolean);
+
+    let complementaryCount = 0;
+    let sameCount = 0;
+
+    for (const b1 of bg1) {
+      const complements = COMPLEMENTARY_PAIRS[b1] ?? [];
+      for (const b2 of bg2) {
+        if (complements.includes(b2)) {
+          complementaryCount++;
+        }
+        if (b1 === b2) {
+          sameCount++;
+        }
+      }
+    }
+
+    if (complementaryCount > 0) {
+      const pts = Math.min(30, complementaryCount * 15);
+      score += pts;
+      reasons.push('互补职业背景');
+    } else if (sameCount > 0) {
+      score += Math.min(10, sameCount * 5);
+      reasons.push('相同职业背景');
+    }
+  }
+
+  // 2. 兴趣话题 — 重叠匹配 (权重: 25分)
+  if (prefs1?.interests && prefs2?.interests) {
+    const int1 = prefs1.interests.split(',').map(s => s.trim()).filter(Boolean);
+    const int2 = prefs2.interests.split(',').map(s => s.trim()).filter(Boolean);
+    const common = int1.filter(i => int2.includes(i));
+
+    if (common.length > 0) {
+      score += Math.min(25, common.length * 10);
+      reasons.push(`共同兴趣: ${common.slice(0, 2).join(', ')}`);
+    }
+  }
+
+  // 3. 创业阶段 — 相似匹配 (权重: 15分)
+  if (prefs1?.startup_stage && prefs2?.startup_stage) {
+    if (prefs1.startup_stage === prefs2.startup_stage) {
       score += 15;
-      reasons.push('相同年龄段');
+      reasons.push('相同创业阶段');
     } else {
-      // 相邻年龄段给一半分数
-      const ageGroups = ['18-24', '25-34', '35-44', '45+'];
-      const idx1 = ageGroups.indexOf(user1.profile.age_group);
-      const idx2 = ageGroups.indexOf(user2.profile.age_group);
-      if (Math.abs(idx1 - idx2) === 1) {
+      const stages = ['not_started', 'idea', 'seed', 'growth', 'mature'];
+      const idx1 = stages.indexOf(prefs1.startup_stage);
+      const idx2 = stages.indexOf(prefs2.startup_stage);
+      if (idx1 >= 0 && idx2 >= 0 && Math.abs(idx1 - idx2) === 1) {
         score += 8;
-        reasons.push('相近年龄段');
+        reasons.push('相近创业阶段');
       }
     }
   }
 
-  // 2. 语言能力匹配 (权重: 20分)
-  if (user1.preferences?.languages && user2.preferences?.languages) {
-    const langs1 = user1.preferences.languages.toLowerCase().split(/[,，、]+/).map(s => s.trim());
-    const langs2 = user2.preferences.languages.toLowerCase().split(/[,，、]+/).map(s => s.trim());
-    const commonLangs = langs1.filter(lang => langs2.some(l => l.includes(lang) || lang.includes(l)));
+  // 4. 语言 — 重叠匹配 (权重: 10分)
+  if (prefs1?.languages && prefs2?.languages) {
+    const langs1 = prefs1.languages.split(',').map(s => s.trim()).filter(Boolean);
+    const langs2 = prefs2.languages.split(',').map(s => s.trim()).filter(Boolean);
+    const commonLangs = langs1.filter(l => langs2.includes(l));
 
     if (commonLangs.length > 0) {
-      score += Math.min(20, commonLangs.length * 10);
+      score += Math.min(10, commonLangs.length * 5);
       reasons.push(`共同语言: ${commonLangs.slice(0, 2).join(', ')}`);
     }
   }
 
-  // 3. 兴趣领域匹配 (权重: 25分)
-  if (user1.preferences?.interests && user2.preferences?.interests) {
-    const interests1 = user1.preferences.interests.toLowerCase().split(/[,，、]+/).map(s => s.trim());
-    const interests2 = user2.preferences.interests.toLowerCase().split(/[,，、]+/).map(s => s.trim());
-    const commonInterests = interests1.filter(interest =>
-      interests2.some(i => i.includes(interest) || interest.includes(i))
-    );
-
-    if (commonInterests.length > 0) {
-      score += Math.min(25, commonInterests.length * 8);
-      reasons.push(`共同兴趣: ${commonInterests.slice(0, 2).join(', ')}`);
-    }
-  }
-
-  // 4. 参会目的匹配 (权重: 20分)
-  if (user1.preferences?.purpose && user2.preferences?.purpose) {
-    const purpose1 = user1.preferences.purpose.toLowerCase().split(/[,，、]+/).map(s => s.trim());
-    const purpose2 = user2.preferences.purpose.toLowerCase().split(/[,，、]+/).map(s => s.trim());
-    const commonPurpose = purpose1.filter(p =>
-      purpose2.some(p2 => p2.includes(p) || p.includes(p2))
-    );
-
-    if (commonPurpose.length > 0) {
-      score += Math.min(20, commonPurpose.length * 10);
-      reasons.push(`共同目的: ${commonPurpose.slice(0, 2).join(', ')}`);
-    }
-  }
-
-  // 5. 行业背景匹配 (权重: 20分)
-  if (user1.preferences?.industry_background && user2.preferences?.industry_background) {
-    const industry1 = user1.preferences.industry_background.toLowerCase().split(/[,，、]+/).map(s => s.trim());
-    const industry2 = user2.preferences.industry_background.toLowerCase().split(/[,，、]+/).map(s => s.trim());
-    const commonIndustry = industry1.filter(ind =>
-      industry2.some(i => i.includes(ind) || ind.includes(i))
-    );
-
-    if (commonIndustry.length > 0) {
-      score += Math.min(20, commonIndustry.length * 10);
-      reasons.push(`相似行业: ${commonIndustry.slice(0, 2).join(', ')}`);
-    } else {
-      // 不同行业也可能有价值（跨界交流）
-      score += 5;
-      reasons.push('跨界交流机会');
-    }
-  }
-
-  // 如果没有任何匹配原因，给一个基础分
+  // 基础分：保底 20 分
   if (reasons.length === 0) {
-    score = 30;
+    score = 20;
     reasons.push('探索新朋友');
   }
 
@@ -126,7 +146,7 @@ export function generateMatchRecommendations(
 ): MatchScore[] {
   const recommendations = availableUsers
     .map(user => calculateMatchScore(currentUser, user))
-    .sort((a, b) => b.score - a.score); // 按分数降序排序
+    .sort((a, b) => b.score - a.score);
 
   return recommendations;
 }

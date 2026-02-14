@@ -5,8 +5,17 @@ import { useAuth } from '@/features/auth/useAuth';
 import { useTranslation } from '@/lib/i18n/context';
 import { getProfile, upsertProfile, getPreferences, upsertPreferences } from '@/lib/api/profile';
 import { getUserRole, upgradeToHost, type UserRole } from '@/lib/api/role';
-import { Crown, User, Pencil, Check, Mail, Globe, Heart, Briefcase, Target } from 'lucide-react';
+import { Crown, User, Pencil, Check, Mail, Globe, Heart, Briefcase, Rocket } from 'lucide-react';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import {
+  LANGUAGE_OPTIONS,
+  INTEREST_OPTIONS,
+  PROFESSIONAL_BACKGROUND_OPTIONS,
+  STARTUP_STAGE_OPTIONS,
+  parsePreferenceString,
+  serializePreferenceArray,
+} from '@/lib/preference-options';
 
 const GENDER_OPTIONS = ['male', 'female', 'other'] as const;
 const AGE_GROUP_OPTIONS = ['18-24', '25-34', '35-44', '45+'] as const;
@@ -18,10 +27,10 @@ export default function ProfilePage() {
   const [nickname, setNickname] = useState('');
   const [gender, setGender] = useState('');
   const [ageGroup, setAgeGroup] = useState('');
-  const [languages, setLanguages] = useState('');
-  const [interests, setInterests] = useState('');
-  const [purpose, setPurpose] = useState('');
-  const [industryBackground, setIndustryBackground] = useState('');
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
+  const [selectedStartupStage, setSelectedStartupStage] = useState('');
 
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -44,10 +53,10 @@ export default function ProfilePage() {
         setAgeGroup(profile.age_group ?? '');
       }
       if (prefs) {
-        setLanguages(prefs.languages ?? '');
-        setInterests(prefs.interests ?? '');
-        setPurpose(prefs.purpose ?? '');
-        setIndustryBackground(prefs.industry_background ?? '');
+        setSelectedLanguages(parsePreferenceString(prefs.languages));
+        setSelectedInterests(parsePreferenceString(prefs.interests));
+        setSelectedIndustries(parsePreferenceString(prefs.industry_background));
+        setSelectedStartupStage(prefs.startup_stage ?? '');
       }
       setUserRole(role);
     } finally {
@@ -58,6 +67,10 @@ export default function ProfilePage() {
   useEffect(() => {
     if (user?.id) loadData(user.id);
   }, [user?.id, loadData]);
+
+  const toggleItem = (list: string[], item: string, setter: (v: string[]) => void) => {
+    setter(list.includes(item) ? list.filter((i) => i !== item) : [...list, item]);
+  };
 
   const handleSave = async () => {
     if (!user?.id) return;
@@ -70,10 +83,10 @@ export default function ProfilePage() {
           age_group: ageGroup || null,
         }),
         upsertPreferences(user.id, {
-          languages: languages || null,
-          interests: interests || null,
-          purpose: purpose || null,
-          industry_background: industryBackground || null,
+          languages: serializePreferenceArray(selectedLanguages),
+          interests: serializePreferenceArray(selectedInterests),
+          industry_background: serializePreferenceArray(selectedIndustries),
+          startup_stage: selectedStartupStage || null,
         }),
       ]);
       toast.success(t('profile.saved'));
@@ -121,6 +134,60 @@ export default function ProfilePage() {
   const inputClass = isEditing
     ? 'w-full px-3 py-2.5 bg-background border border-input rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ring transition-colors'
     : 'w-full px-3 py-2.5 bg-muted/50 border border-transparent rounded-xl text-sm text-foreground cursor-default';
+
+  const chipClass = (selected: boolean) =>
+    cn(
+      'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+      selected
+        ? 'bg-primary/10 text-primary border-primary/30'
+        : 'bg-muted/50 text-muted-foreground border-transparent',
+      isEditing && 'cursor-pointer hover:bg-primary/5',
+      !isEditing && 'cursor-default'
+    );
+
+  /** Render a multi-select chip group */
+  const renderChipGroup = (
+    options: readonly string[],
+    selected: string[],
+    i18nPrefix: string,
+    setter: (v: string[]) => void
+  ) => (
+    <div className="flex flex-wrap gap-1.5">
+      {options.map((opt) => (
+        <button
+          key={opt}
+          type="button"
+          disabled={!isEditing}
+          onClick={() => isEditing && toggleItem(selected, opt, setter)}
+          className={chipClass(selected.includes(opt))}
+        >
+          {t(`preferenceOptions.${i18nPrefix}.${opt}`)}
+        </button>
+      ))}
+    </div>
+  );
+
+  /** Render a single-select chip group */
+  const renderSingleChipGroup = (
+    options: readonly string[],
+    selected: string,
+    i18nPrefix: string,
+    setter: (v: string) => void
+  ) => (
+    <div className="flex flex-wrap gap-1.5">
+      {options.map((opt) => (
+        <button
+          key={opt}
+          type="button"
+          disabled={!isEditing}
+          onClick={() => isEditing && setter(selected === opt ? '' : opt)}
+          className={chipClass(selected === opt)}
+        >
+          {t(`preferenceOptions.${i18nPrefix}.${opt}`)}
+        </button>
+      ))}
+    </div>
+  );
 
   return (
     <div className="min-h-[calc(100vh-60px)] p-4 bg-muted/30">
@@ -240,65 +307,37 @@ export default function ProfilePage() {
             {t('profile.preferences')}
           </h2>
 
-          <div className="space-y-3">
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground flex items-center gap-1" htmlFor="languages">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
                 <Globe className="w-3 h-3" />
                 {t('profile.languages')}
               </label>
-              <input
-                id="languages"
-                className={inputClass}
-                value={languages}
-                onChange={(e) => setLanguages(e.target.value)}
-                placeholder={t('profile.languagesPlaceholder')}
-                readOnly={!isEditing}
-              />
+              {renderChipGroup(LANGUAGE_OPTIONS, selectedLanguages, 'languages', setSelectedLanguages)}
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground flex items-center gap-1" htmlFor="interests">
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
                 <Heart className="w-3 h-3" />
                 {t('profile.interests')}
               </label>
-              <input
-                id="interests"
-                className={inputClass}
-                value={interests}
-                onChange={(e) => setInterests(e.target.value)}
-                placeholder={t('profile.interestsPlaceholder')}
-                readOnly={!isEditing}
-              />
+              {renderChipGroup(INTEREST_OPTIONS, selectedInterests, 'interests', setSelectedInterests)}
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground flex items-center gap-1" htmlFor="purpose">
-                <Target className="w-3 h-3" />
-                {t('profile.purpose')}
-              </label>
-              <input
-                id="purpose"
-                className={inputClass}
-                value={purpose}
-                onChange={(e) => setPurpose(e.target.value)}
-                placeholder={t('profile.purposePlaceholder')}
-                readOnly={!isEditing}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground flex items-center gap-1" htmlFor="industry">
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
                 <Briefcase className="w-3 h-3" />
-                {t('profile.industryBackground')}
+                {t('profile.professionalBackground')}
               </label>
-              <input
-                id="industry"
-                className={inputClass}
-                value={industryBackground}
-                onChange={(e) => setIndustryBackground(e.target.value)}
-                placeholder={t('profile.industryBackgroundPlaceholder')}
-                readOnly={!isEditing}
-              />
+              {renderChipGroup(PROFESSIONAL_BACKGROUND_OPTIONS, selectedIndustries, 'professionalBackground', setSelectedIndustries)}
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                <Rocket className="w-3 h-3" />
+                {t('profile.startupStage')}
+              </label>
+              {renderSingleChipGroup(STARTUP_STAGE_OPTIONS, selectedStartupStage, 'startupStages', setSelectedStartupStage)}
             </div>
           </div>
         </div>

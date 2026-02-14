@@ -11,14 +11,15 @@
 // ── Predefined tags ──
 
 export const EXPECTATION_TAGS = [
-  'meetFriends',
-  'learnSkills',
-  'findCollaborators',
-  'expandNetwork',
-  'getInspiration',
-  'industryExchange',
-  'findMentors',
+  'networking',
+  'learnMarket',
+  'findCofounder',
+  'justSocial',
   'shareExperience',
+  'getInspiration',
+  'findMentors',
+  'learnSkills',
+  'industryExchange',
 ] as const;
 
 export type ExpectationTag = typeof EXPECTATION_TAGS[number];

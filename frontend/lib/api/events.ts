@@ -44,10 +44,28 @@ export async function getEventByCode(eventCode: string): Promise<Event | null> {
 }
 
 /**
+ * 更新活动
+ */
+export async function updateEvent(
+  eventId: string,
+  updates: Partial<Pick<Event, 'name' | 'description' | 'start_time' | 'end_time' | 'venue_id' | 'cover_image'>>
+): Promise<Event> {
+  const { data, error } = await supabase
+    .from('evt_events')
+    .update(updates)
+    .eq('event_id', eventId)
+    .select('*, venue:evt_venues(venue_id, name, capacity, created_at)')
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+/**
  * 创建活动
  */
 export async function createEvent(
-  event: Pick<Event, 'name' | 'description' | 'start_time' | 'end_time' | 'venue_id'>
+  event: Pick<Event, 'name' | 'description' | 'start_time' | 'end_time' | 'venue_id'> & { cover_image?: string | null }
 ): Promise<Event> {
   const { data, error } = await supabase
     .from('evt_events')

@@ -35,7 +35,9 @@
       "groups": "小组配对",
       "topics": "对话话题",
       "rating": "活动评分",
-      "flow": "活动流程"
+      "flow": "活动流程",
+      "onlineConnect": "线上连接",
+      "connections": "我的连接"
     }
   },
   "userFlow": {
@@ -115,6 +117,9 @@
     "signupPage": "活动报名页面",
     "noEvents": "暂无可报名的活动",
     "noEventsDesc": "目前还没有活动开放报名，请稍后再来查看。",
+    "myEvents": "我的活动",
+    "noSignedUpEvents": "还没有报名任何活动，在下方发现活动并报名吧",
+    "discoverEvents": "发现活动",
     "eventTime": "活动时间",
     "eventLocation": "活动地点",
     "locationTbd": "待定",
@@ -125,6 +130,8 @@
     "checkinStatus": "签到状态",
     "checkedIn": "已签到",
     "notCheckedIn": "未签到",
+    "showCheckinCode": "显示签到码",
+    "hideCheckinCode": "收起签到码",
     "scanQRCode": "使用手机扫描二维码签到",
     "enterShortCode": "或输入以下6位短码",
     "todayEvents": "今日活动",
@@ -238,6 +245,9 @@
       "location": "活动地点",
       "selectVenue": "选择场地（可选）",
       "fillRequiredFields": "请填写所有必填项",
+      "coverImage": "封面图片",
+      "uploadCover": "点击上传封面图片",
+      "coverUploadFailed": "封面图片上传失败",
       "create": "创建活动",
       "creating": "创建中...",
       "createFailed": "创建活动失败，请重试。",
@@ -418,13 +428,9 @@
     },
     "preferences": "个人偏好",
     "languages": "语言能力",
-    "languagesPlaceholder": "如：中文、英文、日语",
     "interests": "兴趣领域",
-    "interestsPlaceholder": "如：技术、设计、产品",
-    "purpose": "参会目的",
-    "purposePlaceholder": "如：社交、学习、合作",
-    "industryBackground": "行业背景",
-    "industryBackgroundPlaceholder": "如：互联网、金融、教育",
+    "professionalBackground": "职业背景",
+    "startupStage": "创业阶段",
     "save": "保存",
     "saving": "保存中...",
     "saved": "已保存",
@@ -628,14 +634,15 @@
     "customText": "补充说明（可选）",
     "editExpectations": "编辑我的期待",
     "tags": {
-      "meetFriends": "认识新朋友",
-      "learnSkills": "学习新技能",
-      "findCollaborators": "寻找合作伙伴",
-      "expandNetwork": "拓展人脉",
+      "networking": "拓展人脉",
+      "learnMarket": "了解市场",
+      "findCofounder": "找合伙人",
+      "justSocial": "纯社交 / 好奇",
+      "shareExperience": "分享经验",
       "getInspiration": "获取灵感",
-      "industryExchange": "行业交流",
       "findMentors": "寻找导师",
-      "shareExperience": "分享经验"
+      "learnSkills": "学习新技能",
+      "industryExchange": "行业交流"
     },
     "tpl": {
       "pageTitle": "我的期待模板",
@@ -757,8 +764,8 @@
     "noPreferences": "暂无偏好信息",
     "languages": "语言",
     "interests": "兴趣",
-    "purpose": "参会目的",
-    "industry": "行业背景"
+    "professionalBackground": "职业背景",
+    "startupStage": "创业阶段"
   },
   "groupDetail": {
     "groupName": "小组名称",
@@ -768,8 +775,8 @@
     "noPreferences": "暂无偏好信息",
     "languages": "语言",
     "interests": "兴趣",
-    "purpose": "参会目的",
-    "industry": "行业背景"
+    "professionalBackground": "职业背景",
+    "startupStage": "创业阶段"
   },
   "hostActions": {
     "historyToggle": "操作记录",
@@ -846,5 +853,53 @@
     "skip": "跳过",
     "submit": "提交",
     "placeholder": "分享你的感受..."
+  },
+  "connections": {
+    "title": "线上连接",
+    "description": "查看你在活动中认识的伙伴，保持线上联系",
+    "empty": "还没有连接",
+    "emptyHint": "参加活动并完成配对后，你的连接会显示在这里",
+    "totalCount": "共 {count} 位连接",
+    "connectedAt": "连接于 {time}"
+  },
+  "preferenceOptions": {
+    "languages": {
+      "chinese": "中文",
+      "english": "English",
+      "japanese": "日本語",
+      "korean": "한국어",
+      "german": "Deutsch",
+      "french": "Français",
+      "spanish": "Español"
+    },
+    "interests": {
+      "startup": "创业",
+      "tech_ai": "科技 / AI",
+      "career": "职业发展",
+      "cross_cultural": "跨文化交流",
+      "investment": "投资",
+      "product": "产品",
+      "design": "设计",
+      "marketing": "市场营销"
+    },
+    "professionalBackground": {
+      "engineer": "工程师 / 开发者",
+      "marketing_sales": "市场 / 销售",
+      "student_research": "学生 / 研究员",
+      "founder": "创业者 / 创始人",
+      "product_manager": "产品经理",
+      "designer": "设计师",
+      "finance_legal": "金融 / 法务",
+      "operations": "运营",
+      "other": "其他"
+    },
+    "startupStages": {
+      "not_started": "还没开始",
+      "idea": "想法验证",
+      "seed": "初创期",
+      "growth": "成长期",
+      "mature": "成熟期",
+      "not_entrepreneur": "非创业者"
+    }
   }
 }

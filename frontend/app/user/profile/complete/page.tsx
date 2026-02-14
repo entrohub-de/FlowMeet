@@ -2,10 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, ChevronRight, ChevronLeft, Check } from 'lucide-react';
+import { User, ChevronRight, ChevronLeft, Check, Globe, Heart, Briefcase, Rocket } from 'lucide-react';
 import { useAuth } from '@/features/auth/useAuth';
 import { useTranslation } from '@/lib/i18n/context';
 import { upsertProfile, upsertPreferences, getProfile, getPreferences } from '@/lib/api/profile';
+import { cn } from '@/lib/utils';
+import {
+  LANGUAGE_OPTIONS,
+  INTEREST_OPTIONS,
+  PROFESSIONAL_BACKGROUND_OPTIONS,
+  STARTUP_STAGE_OPTIONS,
+  parsePreferenceString,
+  serializePreferenceArray,
+} from '@/lib/preference-options';
 
 const GENDER_OPTIONS = ['male', 'female', 'other'] as const;
 const AGE_GROUP_OPTIONS = ['18-24', '25-34', '35-44', '45+'] as const;
@@ -25,10 +34,10 @@ export default function ProfileCompletePage() {
   const [ageGroup, setAgeGroup] = useState('');
 
   // Step 2: Preferences (optional)
-  const [languages, setLanguages] = useState('');
-  const [interests, setInterests] = useState('');
-  const [purpose, setPurpose] = useState('');
-  const [industryBackground, setIndustryBackground] = useState('');
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
+  const [selectedStartupStage, setSelectedStartupStage] = useState('');
 
   useEffect(() => {
     if (!user?.id) return;
@@ -44,10 +53,10 @@ export default function ProfileCompletePage() {
           setAgeGroup(profile.age_group ?? '');
         }
         if (prefs) {
-          setLanguages(prefs.languages ?? '');
-          setInterests(prefs.interests ?? '');
-          setPurpose(prefs.purpose ?? '');
-          setIndustryBackground(prefs.industry_background ?? '');
+          setSelectedLanguages(parsePreferenceString(prefs.languages));
+          setSelectedInterests(parsePreferenceString(prefs.interests));
+          setSelectedIndustries(parsePreferenceString(prefs.industry_background));
+          setSelectedStartupStage(prefs.startup_stage ?? '');
         }
       } finally {
         setLoading(false);
@@ -57,6 +66,10 @@ export default function ProfileCompletePage() {
   }, [user?.id]);
 
   const canProceedStep1 = nickname.trim().length > 0;
+
+  const toggleItem = (list: string[], item: string, setter: (v: string[]) => void) => {
+    setter(list.includes(item) ? list.filter((i) => i !== item) : [...list, item]);
+  };
 
   const handleComplete = async () => {
     if (!user?.id || !canProceedStep1) return;
@@ -68,12 +81,14 @@ export default function ProfileCompletePage() {
         age_group: ageGroup || null,
       });
 
-      if (languages || interests || purpose || industryBackground) {
+      const hasPrefs = selectedLanguages.length > 0 || selectedInterests.length > 0 ||
+        selectedIndustries.length > 0 || selectedStartupStage;
+      if (hasPrefs) {
         await upsertPreferences(user.id, {
-          languages: languages || null,
-          interests: interests || null,
-          purpose: purpose || null,
-          industry_background: industryBackground || null,
+          languages: serializePreferenceArray(selectedLanguages),
+          interests: serializePreferenceArray(selectedInterests),
+          industry_background: serializePreferenceArray(selectedIndustries),
+          startup_stage: selectedStartupStage || null,
         });
       }
 
@@ -90,6 +105,54 @@ export default function ProfileCompletePage() {
       </div>
     );
   }
+
+  const chipClass = (selected: boolean) =>
+    cn(
+      'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer hover:bg-primary/5',
+      selected
+        ? 'bg-primary/10 text-primary border-primary/30'
+        : 'bg-muted/50 text-muted-foreground border-transparent'
+    );
+
+  const renderChipGroup = (
+    options: readonly string[],
+    selected: string[],
+    i18nPrefix: string,
+    setter: (v: string[]) => void
+  ) => (
+    <div className="flex flex-wrap gap-1.5">
+      {options.map((opt) => (
+        <button
+          key={opt}
+          type="button"
+          onClick={() => toggleItem(selected, opt, setter)}
+          className={chipClass(selected.includes(opt))}
+        >
+          {t(`preferenceOptions.${i18nPrefix}.${opt}`)}
+        </button>
+      ))}
+    </div>
+  );
+
+  const renderSingleChipGroup = (
+    options: readonly string[],
+    selected: string,
+    i18nPrefix: string,
+    setter: (v: string) => void
+  ) => (
+    <div className="flex flex-wrap gap-1.5">
+      {options.map((opt) => (
+        <button
+          key={opt}
+          type="button"
+          onClick={() => setter(selected === opt ? '' : opt)}
+          className={chipClass(selected === opt)}
+        >
+          {t(`preferenceOptions.${i18nPrefix}.${opt}`)}
+        </button>
+      ))}
+    </div>
+  );
 
   return (
     <div className="min-h-[calc(100vh-60px)] flex items-center justify-center p-4 bg-muted/30">
@@ -200,55 +263,35 @@ export default function ProfileCompletePage() {
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground" htmlFor="languages">
+                  <label className="text-sm font-medium text-foreground flex items-center gap-1">
+                    <Globe className="w-3.5 h-3.5" />
                     {t('profile.languages')}
                   </label>
-                  <input
-                    id="languages"
-                    className="w-full px-3 py-2 bg-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                    value={languages}
-                    onChange={(e) => setLanguages(e.target.value)}
-                    placeholder={t('profile.languagesPlaceholder')}
-                  />
+                  {renderChipGroup(LANGUAGE_OPTIONS, selectedLanguages, 'languages', setSelectedLanguages)}
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground" htmlFor="interests">
+                  <label className="text-sm font-medium text-foreground flex items-center gap-1">
+                    <Heart className="w-3.5 h-3.5" />
                     {t('profile.interests')}
                   </label>
-                  <input
-                    id="interests"
-                    className="w-full px-3 py-2 bg-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                    value={interests}
-                    onChange={(e) => setInterests(e.target.value)}
-                    placeholder={t('profile.interestsPlaceholder')}
-                  />
+                  {renderChipGroup(INTEREST_OPTIONS, selectedInterests, 'interests', setSelectedInterests)}
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground" htmlFor="purpose">
-                    {t('profile.purpose')}
+                  <label className="text-sm font-medium text-foreground flex items-center gap-1">
+                    <Briefcase className="w-3.5 h-3.5" />
+                    {t('profile.professionalBackground')}
                   </label>
-                  <input
-                    id="purpose"
-                    className="w-full px-3 py-2 bg-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                    value={purpose}
-                    onChange={(e) => setPurpose(e.target.value)}
-                    placeholder={t('profile.purposePlaceholder')}
-                  />
+                  {renderChipGroup(PROFESSIONAL_BACKGROUND_OPTIONS, selectedIndustries, 'professionalBackground', setSelectedIndustries)}
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground" htmlFor="industry">
-                    {t('profile.industryBackground')}
+                  <label className="text-sm font-medium text-foreground flex items-center gap-1">
+                    <Rocket className="w-3.5 h-3.5" />
+                    {t('profile.startupStage')}
                   </label>
-                  <input
-                    id="industry"
-                    className="w-full px-3 py-2 bg-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                    value={industryBackground}
-                    onChange={(e) => setIndustryBackground(e.target.value)}
-                    placeholder={t('profile.industryBackgroundPlaceholder')}
-                  />
+                  {renderSingleChipGroup(STARTUP_STAGE_OPTIONS, selectedStartupStage, 'startupStages', setSelectedStartupStage)}
                 </div>
               </div>
 

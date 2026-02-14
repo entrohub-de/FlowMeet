@@ -52,6 +52,14 @@ export default function ProfileAvatar() {
           >
             {t('profile.title')}
           </button>
+          {!pathname?.startsWith('/host') && (
+            <button
+              onClick={() => { setOpen(false); router.push('/user/expectations'); }}
+              className="w-full px-button h-button text-sm text-muted-foreground hover:bg-secondary transition-colors cursor-pointer rounded-button text-left"
+            >
+              {t('nav.user.expectations')}
+            </button>
+          )}
           <button
             onClick={() => setLocale(locale === 'zh' ? 'en' : 'zh')}
             className="w-full px-button h-button text-sm text-muted-foreground hover:bg-secondary transition-colors cursor-pointer rounded-button flex items-center justify-between"

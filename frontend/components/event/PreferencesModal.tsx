@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Save, SkipForward, Sparkles, BookmarkCheck } from 'lucide-react';
+import { X, Save, SkipForward, Sparkles, BookmarkCheck, Globe, Heart, Briefcase, Rocket } from 'lucide-react';
 import { toast } from 'sonner';
 import { getMatchPreference, saveMatchPreference } from '@/lib/api/matching';
 import { getPreferences, upsertPreferences } from '@/lib/api/profile';
@@ -15,6 +15,15 @@ import {
 import { getTemplates } from '@/lib/api/expectation-templates';
 import type { ExpectationTemplate } from '@/types/domain';
 import { ExpectationTagSelector } from '@/components/expectations/ExpectationTagSelector';
+import { cn } from '@/lib/utils';
+import {
+  LANGUAGE_OPTIONS,
+  INTEREST_OPTIONS,
+  PROFESSIONAL_BACKGROUND_OPTIONS,
+  STARTUP_STAGE_OPTIONS,
+  parsePreferenceString,
+  serializePreferenceArray,
+} from '@/lib/preference-options';
 
 interface PreferencesModalProps {
   eventId: string;
@@ -38,10 +47,10 @@ export default function PreferencesModal({ eventId, userId, t, onClose }: Prefer
   const [userTemplates, setUserTemplates] = useState<ExpectationTemplate[]>([]);
 
   // Global preferences
-  const [languages, setLanguages] = useState('');
-  const [interests, setInterests] = useState('');
-  const [purpose, setPurpose] = useState('');
-  const [industryBackground, setIndustryBackground] = useState('');
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
+  const [selectedStartupStage, setSelectedStartupStage] = useState('');
   const [hasGlobalPrefs, setHasGlobalPrefs] = useState(false);
 
   useEffect(() => {
@@ -64,12 +73,12 @@ export default function PreferencesModal({ eventId, userId, t, onClose }: Prefer
         }
 
         if (globalPrefs) {
-          setLanguages(globalPrefs.languages ?? '');
-          setInterests(globalPrefs.interests ?? '');
-          setPurpose(globalPrefs.purpose ?? '');
-          setIndustryBackground(globalPrefs.industry_background ?? '');
+          setSelectedLanguages(parsePreferenceString(globalPrefs.languages));
+          setSelectedInterests(parsePreferenceString(globalPrefs.interests));
+          setSelectedIndustries(parsePreferenceString(globalPrefs.industry_background));
+          setSelectedStartupStage(globalPrefs.startup_stage ?? '');
           setHasGlobalPrefs(
-            !!(globalPrefs.languages || globalPrefs.interests || globalPrefs.purpose || globalPrefs.industry_background)
+            !!(globalPrefs.languages || globalPrefs.interests || globalPrefs.industry_background || globalPrefs.startup_stage)
           );
         }
 
@@ -78,7 +87,6 @@ export default function PreferencesModal({ eventId, userId, t, onClose }: Prefer
           setSelectedTags(data.tags);
           setExpectationText(data.text);
         } else {
-          // Auto-populate with last-used tags for reuse
           setSelectedTags(getLastUsedTags());
         }
       } finally {
@@ -100,17 +108,19 @@ export default function PreferencesModal({ eventId, userId, t, onClose }: Prefer
     toast.success(t('expectations.tpl.templateLoaded'));
   };
 
+  const toggleItem = (list: string[], item: string, setter: (v: string[]) => void) => {
+    setter(list.includes(item) ? list.filter((i) => i !== item) : [...list, item]);
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
-      // Save match preferences
       await saveMatchPreference(eventId, userId, {
         preferred_topics: preferredTopics || undefined,
         availability: availability || undefined,
         notes: notes || undefined,
       });
 
-      // Save expectations if any tags or text provided
       if (selectedTags.length > 0 || expectationText.trim()) {
         const content = serializeExpectationContent({
           tags: selectedTags,
@@ -120,14 +130,17 @@ export default function PreferencesModal({ eventId, userId, t, onClose }: Prefer
         saveLastUsedTags(selectedTags);
       }
 
-      // Save global preferences if new
-      if (!hasGlobalPrefs && (languages || interests || purpose || industryBackground)) {
-        await upsertPreferences(userId, {
-          languages: languages || null,
-          interests: interests || null,
-          purpose: purpose || null,
-          industry_background: industryBackground || null,
-        });
+      if (!hasGlobalPrefs) {
+        const hasNew = selectedLanguages.length > 0 || selectedInterests.length > 0 ||
+          selectedIndustries.length > 0 || selectedStartupStage;
+        if (hasNew) {
+          await upsertPreferences(userId, {
+            languages: serializePreferenceArray(selectedLanguages),
+            interests: serializePreferenceArray(selectedInterests),
+            industry_background: serializePreferenceArray(selectedIndustries),
+            startup_stage: selectedStartupStage || null,
+          });
+        }
       }
 
       toast.success(t('eventPreferences.saved'));
@@ -141,6 +154,54 @@ export default function PreferencesModal({ eventId, userId, t, onClose }: Prefer
 
   const inputClass =
     'w-full px-3 py-2 bg-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring';
+
+  const chipClass = (selected: boolean) =>
+    cn(
+      'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer hover:bg-primary/5',
+      selected
+        ? 'bg-primary/10 text-primary border-primary/30'
+        : 'bg-muted/50 text-muted-foreground border-transparent'
+    );
+
+  const renderChipGroup = (
+    options: readonly string[],
+    selected: string[],
+    i18nPrefix: string,
+    setter: (v: string[]) => void
+  ) => (
+    <div className="flex flex-wrap gap-1.5">
+      {options.map((opt) => (
+        <button
+          key={opt}
+          type="button"
+          onClick={() => toggleItem(selected, opt, setter)}
+          className={chipClass(selected.includes(opt))}
+        >
+          {t(`preferenceOptions.${i18nPrefix}.${opt}`)}
+        </button>
+      ))}
+    </div>
+  );
+
+  const renderSingleChipGroup = (
+    options: readonly string[],
+    selected: string,
+    i18nPrefix: string,
+    setter: (v: string) => void
+  ) => (
+    <div className="flex flex-wrap gap-1.5">
+      {options.map((opt) => (
+        <button
+          key={opt}
+          type="button"
+          onClick={() => setter(selected === opt ? '' : opt)}
+          className={chipClass(selected === opt)}
+        >
+          {t(`preferenceOptions.${i18nPrefix}.${opt}`)}
+        </button>
+      ))}
+    </div>
+  );
 
   return (
     <div
@@ -170,12 +231,11 @@ export default function PreferencesModal({ eventId, userId, t, onClose }: Prefer
           </div>
         ) : (
           <div className="p-5 space-y-5">
-            {/* Hint */}
             <p className="text-sm text-muted-foreground">
               {t('eventPreferences.modalHint')}
             </p>
 
-            {/* Expectations section — tag-based */}
+            {/* Expectations section */}
             <div className="space-y-3">
               <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">
                 {t('expectations.sectionTitle')}
@@ -184,7 +244,6 @@ export default function PreferencesModal({ eventId, userId, t, onClose }: Prefer
                 {t('expectations.sectionHint')}
               </p>
 
-              {/* Quick-apply from saved templates */}
               {userTemplates.length > 0 && (
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
@@ -279,54 +338,37 @@ export default function PreferencesModal({ eventId, userId, t, onClose }: Prefer
                   {t('eventPreferences.globalPrefsHint')}
                 </p>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-3">
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-foreground" htmlFor="modal-languages">
+                    <label className="text-sm font-medium text-foreground flex items-center gap-1">
+                      <Globe className="w-3.5 h-3.5" />
                       {t('profile.languages')}
                     </label>
-                    <input
-                      id="modal-languages"
-                      className={inputClass}
-                      value={languages}
-                      onChange={(e) => setLanguages(e.target.value)}
-                      placeholder={t('profile.languagesPlaceholder')}
-                    />
+                    {renderChipGroup(LANGUAGE_OPTIONS, selectedLanguages, 'languages', setSelectedLanguages)}
                   </div>
+
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-foreground" htmlFor="modal-interests">
+                    <label className="text-sm font-medium text-foreground flex items-center gap-1">
+                      <Heart className="w-3.5 h-3.5" />
                       {t('profile.interests')}
                     </label>
-                    <input
-                      id="modal-interests"
-                      className={inputClass}
-                      value={interests}
-                      onChange={(e) => setInterests(e.target.value)}
-                      placeholder={t('profile.interestsPlaceholder')}
-                    />
+                    {renderChipGroup(INTEREST_OPTIONS, selectedInterests, 'interests', setSelectedInterests)}
                   </div>
+
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-foreground" htmlFor="modal-purpose">
-                      {t('profile.purpose')}
+                    <label className="text-sm font-medium text-foreground flex items-center gap-1">
+                      <Briefcase className="w-3.5 h-3.5" />
+                      {t('profile.professionalBackground')}
                     </label>
-                    <input
-                      id="modal-purpose"
-                      className={inputClass}
-                      value={purpose}
-                      onChange={(e) => setPurpose(e.target.value)}
-                      placeholder={t('profile.purposePlaceholder')}
-                    />
+                    {renderChipGroup(PROFESSIONAL_BACKGROUND_OPTIONS, selectedIndustries, 'professionalBackground', setSelectedIndustries)}
                   </div>
+
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-foreground" htmlFor="modal-industry">
-                      {t('profile.industryBackground')}
+                    <label className="text-sm font-medium text-foreground flex items-center gap-1">
+                      <Rocket className="w-3.5 h-3.5" />
+                      {t('profile.startupStage')}
                     </label>
-                    <input
-                      id="modal-industry"
-                      className={inputClass}
-                      value={industryBackground}
-                      onChange={(e) => setIndustryBackground(e.target.value)}
-                      placeholder={t('profile.industryBackgroundPlaceholder')}
-                    />
+                    {renderSingleChipGroup(STARTUP_STAGE_OPTIONS, selectedStartupStage, 'startupStages', setSelectedStartupStage)}
                   </div>
                 </div>
               </div>

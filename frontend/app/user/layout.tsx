@@ -22,15 +22,18 @@ export default function UserLayout({
       label: t('nav.user.eventSignup'),
       children: [
         { label: t('nav.user.signup'), href: '/user/event' },
-        { label: t('nav.user.checkin'), href: '/user/checkin' },
-        { label: t('nav.user.expectations'), href: '/user/expectations' },
       ]
     },
     {
       label: t('nav.user.eventLive'),
       children: [
         { label: t('nav.user.flow'), href: '/user/flow' },
-        { label: t('nav.user.rating'), href: '/user/rating' },
+      ]
+    },
+    {
+      label: t('nav.user.onlineConnect'),
+      children: [
+        { label: t('nav.user.connections'), href: '/user/connections' },
       ]
     },
   ];

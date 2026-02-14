@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ChevronDown, ChevronUp, Globe, Sparkles, Target, Briefcase, Info } from 'lucide-react';
+import { ChevronDown, ChevronUp, Globe, Sparkles, Briefcase, Info, Rocket } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 import { supabase } from '@/lib/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -85,7 +85,7 @@ export default function GroupDetailCard({ groupId, members }: GroupDetailCardPro
   }
 
   const hasAnyPreferences = Array.from(preferencesMap.values()).some(
-    p => p.languages || p.interests || p.purpose || p.industry_background
+    p => p.languages || p.interests || p.industry_background || p.startup_stage
   );
 
   if (!groupName && !hasAnyPreferences) {
@@ -117,7 +117,7 @@ export default function GroupDetailCard({ groupId, members }: GroupDetailCardPro
             {members.map(member => {
               const pref = preferencesMap.get(member.userId);
               const hasPref = pref && (
-                pref.languages || pref.interests || pref.purpose || pref.industry_background
+                pref.languages || pref.interests || pref.industry_background || pref.startup_stage
               );
               if (!hasPref) return null;
 
@@ -159,12 +159,12 @@ export default function GroupDetailCard({ groupId, members }: GroupDetailCardPro
                           </div>
                         </div>
                       )}
-                      {pref.purpose && (
+                      {pref.startup_stage && (
                         <div className="flex items-start gap-2 text-sm">
-                          <Target className="w-3.5 h-3.5 text-muted-foreground mt-0.5 shrink-0" />
+                          <Rocket className="w-3.5 h-3.5 text-muted-foreground mt-0.5 shrink-0" />
                           <div>
-                            <span className="text-xs text-muted-foreground">{t('groupDetail.purpose')}</span>
-                            <p className="text-foreground text-xs">{pref.purpose}</p>
+                            <span className="text-xs text-muted-foreground">{t('groupDetail.startupStage')}</span>
+                            <p className="text-foreground text-xs">{pref.startup_stage}</p>
                           </div>
                         </div>
                       )}
@@ -172,7 +172,7 @@ export default function GroupDetailCard({ groupId, members }: GroupDetailCardPro
                         <div className="flex items-start gap-2 text-sm">
                           <Briefcase className="w-3.5 h-3.5 text-muted-foreground mt-0.5 shrink-0" />
                           <div>
-                            <span className="text-xs text-muted-foreground">{t('groupDetail.industry')}</span>
+                            <span className="text-xs text-muted-foreground">{t('groupDetail.professionalBackground')}</span>
                             <p className="text-foreground text-xs">{pref.industry_background}</p>
                           </div>
                         </div>
