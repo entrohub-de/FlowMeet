@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import type { Event } from '@/types/domain';
-import { Calendar, MapPin, QrCode } from 'lucide-react';
+import { Calendar, MapPin, QrCode, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { signupForEvent, cancelSignup, getUserSignupStatus } from '@/lib/api/signup';
 import { getUserCheckinStatus } from '@/lib/api/checkin';
@@ -102,12 +102,14 @@ export default function EventCard({ event, locale, t, initialSignedUp, onSignupC
       if (success) {
         setSignedUp(false);
         onSignupChange?.(event.event_id, false);
+        toast.success(t('ux.toast.signupCancelled', { name: event.name }));
       }
     } else {
       const success = await signupForEvent(event.event_id, userId);
       if (success) {
         setSignedUp(true);
         onSignupChange?.(event.event_id, true);
+        toast.success(t('ux.toast.signupSuccess', { name: event.name }));
         setShowPreferencesModal(true);
         setSigningUp(false);
         return;
@@ -155,10 +157,10 @@ export default function EventCard({ event, locale, t, initialSignedUp, onSignupC
       <button
         onClick={handleSignup}
         disabled={loading || signingUp}
-        className={`w-full px-button h-button rounded-button font-medium text-sm transition-colors ${
+        className={`font-medium text-sm transition-colors ${
           signedUp
-            ? 'bg-green-100 text-green-800 hover:bg-green-200 border border-green-300'
-            : 'bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed'
+            ? 'px-3 py-1 rounded-full bg-green-100 text-green-700 hover:bg-green-200 border border-green-200'
+            : 'w-full px-button h-button rounded-button bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed'
         }`}
       >
         {loading
@@ -166,7 +168,7 @@ export default function EventCard({ event, locale, t, initialSignedUp, onSignupC
           : signingUp
             ? '...'
             : signedUp
-              ? t('user.signedUp')
+              ? <><CheckCircle2 className="w-3.5 h-3.5 inline-block mr-1" />{t('user.signedUp')}</>
               : t('user.signupBtn')}
       </button>
 

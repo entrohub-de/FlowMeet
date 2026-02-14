@@ -249,6 +249,10 @@
       "create": "Create Event",
       "creating": "Creating...",
       "createFailed": "Failed to create event. Please try again.",
+      "editEvent": "Edit Event",
+      "saving": "Saving...",
+      "updateSuccess": "Event updated",
+      "updateFailed": "Failed to update event. Please try again.",
       "notFound": "Event not found",
       "details": "Event Details",
       "signupStats": "Registration Statistics",
@@ -720,7 +724,9 @@
       "fillRequired": "Please fill in all required fields",
       "createEventFailed": "Failed to create event, please retry",
       "deleteEventFailed": "Failed to delete event",
-      "loginRequired": "Please login first"
+      "loginRequired": "Please login first",
+      "signupSuccess": "Signed up for \"{name}\"!",
+      "signupCancelled": "Cancelled signup for \"{name}\""
     },
     "matching": {
       "readyCount": "{count} people ready",

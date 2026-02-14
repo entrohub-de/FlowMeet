@@ -251,6 +251,10 @@
       "create": "创建活动",
       "creating": "创建中...",
       "createFailed": "创建活动失败，请重试。",
+      "editEvent": "编辑活动",
+      "saving": "保存中...",
+      "updateSuccess": "活动已更新",
+      "updateFailed": "更新活动失败，请重试",
       "notFound": "活动不存在",
       "details": "活动详情",
       "signupStats": "报名统计",
@@ -722,7 +726,9 @@
       "fillRequired": "请填写所有必填项",
       "createEventFailed": "创建活动失败，请重试",
       "deleteEventFailed": "删除活动失败",
-      "loginRequired": "请先登录"
+      "loginRequired": "请先登录",
+      "signupSuccess": "已成功报名「{name}」！",
+      "signupCancelled": "已取消报名「{name}」"
     },
     "matching": {
       "readyCount": "已有 {count} 人准备好",

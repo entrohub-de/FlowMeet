@@ -5,10 +5,10 @@ import type { Event, Signup } from '@/types/domain';
 import { Calendar, MapPin, Clock, Settings, Trash2, AlertTriangle, X, Users, ChevronDown, ChevronUp, UserCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from '@/lib/i18n/context';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { deleteEvent } from '@/lib/api/events';
 import { getCheckinStats, getEventSignups } from '@/lib/api/signup';
+import EditEventDialog from '@/components/event/EditEventDialog';
 
 function formatDateTime(dateStr: string, locale: string): string {
   const date = new Date(dateStr);
@@ -28,9 +28,9 @@ interface HostEventCardProps {
 
 export default function HostEventCard({ event, onUpdate }: HostEventCardProps) {
   const { t, locale } = useTranslation();
-  const router = useRouter();
   const [deleting, setDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const [stats, setStats] = useState({ checkedIn: 0, total: 0 });
   const [expanded, setExpanded] = useState(false);
   const [signups, setSignups] = useState<Signup[]>([]);
@@ -54,7 +54,7 @@ export default function HostEventCard({ event, onUpdate }: HostEventCardProps) {
   };
 
   const handleManage = () => {
-    router.push(`/host/event/${event.event_id}`);
+    setShowEditDialog(true);
   };
 
   const handleDeleteClick = () => {
@@ -222,6 +222,18 @@ export default function HostEventCard({ event, onUpdate }: HostEventCardProps) {
           <Trash2 className="w-4 h-4" />
         </button>
       </div>
+
+      {/* Edit Event Dialog */}
+      {showEditDialog && (
+        <EditEventDialog
+          event={event}
+          onClose={() => setShowEditDialog(false)}
+          onSuccess={() => {
+            setShowEditDialog(false);
+            onUpdate();
+          }}
+        />
+      )}
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
