@@ -9,6 +9,23 @@ import { supabase } from '@/lib/supabase/client';
 import type { Venue } from '@/types/domain';
 import { X, ImagePlus, Trash2 } from 'lucide-react';
 
+const DURATION_OPTIONS = [30, 60, 90, 120, 150, 180, 240, 300, 360];
+
+function formatDuration(minutes: number, t: (key: string, params?: Record<string, string | number>) => string): string {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (hours === 0) return t('host.events.durationMinutes', { n: mins });
+  if (mins === 0) return t('host.events.durationHours', { n: hours });
+  return t('host.events.durationHoursMinutes', { h: hours, m: mins });
+}
+
+function computeEndTime(startTime: string, durationMinutes: number): string {
+  const start = new Date(startTime);
+  const end = new Date(start.getTime() + durationMinutes * 60000);
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return `${end.getFullYear()}-${pad(end.getMonth() + 1)}-${pad(end.getDate())}T${pad(end.getHours())}:${pad(end.getMinutes())}`;
+}
+
 interface CreateEventDialogProps {
   onClose: () => void;
   onSuccess: () => void;
@@ -27,7 +44,7 @@ export default function CreateEventDialog({
     name: '',
     description: '',
     start_time: '',
-    end_time: '',
+    duration: 120,
     venue_id: '',
   });
 
@@ -48,18 +65,19 @@ export default function CreateEventDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.start_time || !formData.end_time) {
+    if (!formData.name || !formData.start_time) {
       toast.error(t('ux.toast.fillRequired'));
       return;
     }
 
     setLoading(true);
     try {
+      const endTime = computeEndTime(formData.start_time, formData.duration);
       const created = await createEvent({
         name: formData.name,
         description: formData.description || null,
         start_time: formData.start_time,
-        end_time: formData.end_time,
+        end_time: endTime,
         venue_id: formData.venue_id || null,
       });
 
@@ -186,20 +204,24 @@ export default function CreateEventDialog({
             />
           </div>
 
-          {/* End Time */}
+          {/* Duration */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
-              {t('host.events.endTime')} <span className="text-destructive">*</span>
+              {t('host.events.duration')} <span className="text-destructive">*</span>
             </label>
-            <input
-              type="datetime-local"
-              value={formData.end_time}
+            <select
+              value={formData.duration}
               onChange={(e) =>
-                setFormData({ ...formData, end_time: e.target.value })
+                setFormData({ ...formData, duration: Number(e.target.value) })
               }
               className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            />
+            >
+              {DURATION_OPTIONS.map((minutes) => (
+                <option key={minutes} value={minutes}>
+                  {formatDuration(minutes, t)}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Venue */}

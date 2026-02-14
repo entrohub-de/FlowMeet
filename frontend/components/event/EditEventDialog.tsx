@@ -16,6 +16,29 @@ function toLocalDatetime(dateStr: string): string {
   return local.toISOString().slice(0, 16);
 }
 
+const DURATION_OPTIONS = [30, 60, 90, 120, 150, 180, 240, 300, 360];
+
+function formatDuration(minutes: number, t: (key: string, params?: Record<string, string | number>) => string): string {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (hours === 0) return t('host.events.durationMinutes', { n: mins });
+  if (mins === 0) return t('host.events.durationHours', { n: hours });
+  return t('host.events.durationHoursMinutes', { h: hours, m: mins });
+}
+
+function computeEndTime(startTime: string, durationMinutes: number): string {
+  const start = new Date(startTime);
+  const end = new Date(start.getTime() + durationMinutes * 60000);
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return `${end.getFullYear()}-${pad(end.getMonth() + 1)}-${pad(end.getDate())}T${pad(end.getHours())}:${pad(end.getMinutes())}`;
+}
+
+function snapToNearestDuration(minutes: number): number {
+  return DURATION_OPTIONS.reduce((prev, curr) =>
+    Math.abs(curr - minutes) < Math.abs(prev - minutes) ? curr : prev
+  );
+}
+
 interface EditEventDialogProps {
   event: Event;
   onClose: () => void;
@@ -34,12 +57,15 @@ export default function EditEventDialog({
   const [coverPreview, setCoverPreview] = useState<string | null>(
     event.cover_image || null
   );
-  const [formData, setFormData] = useState({
-    name: event.name,
-    description: event.description || '',
-    start_time: toLocalDatetime(event.start_time),
-    end_time: toLocalDatetime(event.end_time),
-    venue_id: event.venue_id || '',
+  const [formData, setFormData] = useState(() => {
+    const diffMs = new Date(event.end_time).getTime() - new Date(event.start_time).getTime();
+    return {
+      name: event.name,
+      description: event.description || '',
+      start_time: toLocalDatetime(event.start_time),
+      duration: snapToNearestDuration(Math.round(diffMs / 60000)),
+      venue_id: event.venue_id || '',
+    };
   });
 
   useEffect(() => {
@@ -59,7 +85,7 @@ export default function EditEventDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.start_time || !formData.end_time) {
+    if (!formData.name || !formData.start_time) {
       toast.error(t('ux.toast.fillRequired'));
       return;
     }
@@ -80,11 +106,12 @@ export default function EditEventDialog({
         coverUrl = null;
       }
 
+      const endTime = computeEndTime(formData.start_time, formData.duration);
       const updated = await updateEvent(event.event_id, {
         name: formData.name,
         description: formData.description || null,
         start_time: formData.start_time,
-        end_time: formData.end_time,
+        end_time: endTime,
         venue_id: formData.venue_id || null,
         cover_image: coverUrl,
       });
@@ -213,21 +240,25 @@ export default function EditEventDialog({
             />
           </div>
 
-          {/* End Time */}
+          {/* Duration */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
-              {t('host.events.endTime')}{' '}
+              {t('host.events.duration')}{' '}
               <span className="text-destructive">*</span>
             </label>
-            <input
-              type="datetime-local"
-              value={formData.end_time}
+            <select
+              value={formData.duration}
               onChange={(e) =>
-                setFormData({ ...formData, end_time: e.target.value })
+                setFormData({ ...formData, duration: Number(e.target.value) })
               }
               className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            />
+            >
+              {DURATION_OPTIONS.map((minutes) => (
+                <option key={minutes} value={minutes}>
+                  {formatDuration(minutes, t)}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Venue */}

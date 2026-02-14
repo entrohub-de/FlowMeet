@@ -48,7 +48,7 @@ function formatDateRange(startStr: string, endStr: string, locale: string): stri
 interface EventCardProps {
   event: Event;
   locale: string;
-  t: (key: string) => string;
+  t: (key: string, params?: Record<string, string | number>) => string;
   initialSignedUp?: boolean;
   onSignupChange?: (eventId: string, signedUp: boolean) => void;
 }
