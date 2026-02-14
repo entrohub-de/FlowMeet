@@ -1,18 +1,26 @@
 'use client';
 
 import type { Event } from '@/types/domain';
-import { Calendar, MapPin, Clock } from 'lucide-react';
+import { Calendar, MapPin } from 'lucide-react';
 import Link from 'next/link';
 
-function formatDateTime(dateStr: string, locale: string): string {
-  const date = new Date(dateStr);
-  return date.toLocaleString(locale === 'zh' ? 'zh-CN' : 'en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+function formatDateRange(startStr: string, endStr: string, locale: string): string {
+  const loc = locale === 'zh' ? 'zh-CN' : 'en-US';
+  const start = new Date(startStr);
+  const end = new Date(endStr);
+  const dateOpts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+  const timeOpts: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit' };
+  const sameDay = start.toDateString() === end.toDateString();
+
+  const datePart = start.toLocaleDateString(loc, dateOpts);
+  const startTime = start.toLocaleTimeString(loc, timeOpts);
+  const endTime = end.toLocaleTimeString(loc, timeOpts);
+
+  if (sameDay) {
+    return `${datePart}  ${startTime} – ${endTime}`;
+  }
+  const endDate = end.toLocaleDateString(loc, dateOpts);
+  return `${datePart} ${startTime} – ${endDate} ${endTime}`;
 }
 
 interface PublicEventCardProps {
@@ -25,7 +33,14 @@ export default function PublicEventCard({ event, locale, t }: PublicEventCardPro
   const location = event.venue?.name || t('user.locationTbd');
 
   return (
-    <div className="bg-card border border-border rounded-xl p-5 sm:p-6 hover:shadow-md transition-shadow space-y-4">
+    <div className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+      {/* Cover Image */}
+      {event.cover_image && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={event.cover_image} alt={event.name} className="w-full h-32 object-cover" />
+      )}
+
+      <div className="p-5 sm:p-6 space-y-4">
       {/* Title & Description */}
       <div className="space-y-2">
         <h3 className="text-lg font-semibold text-foreground leading-tight">
@@ -42,12 +57,7 @@ export default function PublicEventCard({ event, locale, t }: PublicEventCardPro
       <div className="space-y-2 text-sm text-muted-foreground">
         <div className="flex items-center gap-2">
           <Calendar className="w-4 h-4 shrink-0 text-primary" />
-          <span>{formatDateTime(event.start_time, locale)}</span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 shrink-0 text-primary" />
-          <span>{formatDateTime(event.end_time, locale)}</span>
+          <span>{formatDateRange(event.start_time, event.end_time, locale)}</span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -67,6 +77,7 @@ export default function PublicEventCard({ event, locale, t }: PublicEventCardPro
         >
           {t('home.login')}
         </Link>
+      </div>
       </div>
     </div>
   );

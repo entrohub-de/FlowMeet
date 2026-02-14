@@ -1,23 +1,30 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { ListChecks, PauseCircle, ChevronDown, ChevronUp, TicketCheck } from 'lucide-react';
-import Link from 'next/link';
+import { ListChecks, PauseCircle, ChevronDown, ChevronUp, TicketCheck, X, BadgeCheck } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
+import FullscreenBadge from '@/components/event/FullscreenBadge';
 import { useActiveFlow } from '@/hooks/useActiveFlow';
 import { supabase } from '@/lib/supabase/client';
 import { getUserCheckinStatus } from '@/lib/api/checkin';
+import { getEvent } from '@/lib/api/events';
+import { EventCheckinCard } from '@/components/checkin/EventCheckinCard';
 import ActiveStepCard from '@/components/workflow/flow-control/ActiveStepCard';
 import FlowStepCardReadOnly from '@/components/workflow/flow-control/FlowStepCardReadOnly';
 import MatchingStepCard from '@/components/workflow/flow-control/MatchingStepCard';
 import GroupMatchingStepCard from '@/components/workflow/flow-control/GroupMatchingStepCard';
 import { FlowStepSkeleton } from '@/components/ui/skeleton';
+import type { Event } from '@/types/domain';
 
 export default function UserFlowPage() {
   const { t } = useTranslation();
   const [showAllSteps, setShowAllSteps] = useState(false);
   const [checkinChecked, setCheckinChecked] = useState(false);
   const [isCheckedIn, setIsCheckedIn] = useState(false);
+  const [showCheckinCard, setShowCheckinCard] = useState(false);
+  const [currentEvent, setCurrentEvent] = useState<Event | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string>('');
+  const [showBadge, setShowBadge] = useState(false);
   const {
     loading,
     selectedEventId,
@@ -39,7 +46,7 @@ export default function UserFlowPage() {
     [flowState?.steps]
   );
 
-  // Check if user has checked in for the selected event
+  // Check if user has checked in for the selected event and fetch event data
   useEffect(() => {
     if (!selectedEventId) return;
     let cancelled = false;
@@ -48,10 +55,15 @@ export default function UserFlowPage() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user || cancelled) return;
-        const statuses = await getUserCheckinStatus(user.id, selectedEventId);
+        setCurrentUserId(user.id);
+        const [statuses, event] = await Promise.all([
+          getUserCheckinStatus(user.id, selectedEventId),
+          getEvent(selectedEventId),
+        ]);
         if (!cancelled) {
           setIsCheckedIn(statuses.some(s => s.checked_in));
           setCheckinChecked(true);
+          setCurrentEvent(event);
         }
       } catch {
         if (!cancelled) setCheckinChecked(true);
@@ -103,6 +115,12 @@ export default function UserFlowPage() {
             <h1 className="text-3xl font-bold text-foreground">
               {t('userFlow.title')}
             </h1>
+            {checkinChecked && isCheckedIn && (
+              <span className="ml-auto inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-medium">
+                <TicketCheck className="w-4 h-4" />
+                {t('userFlow.checkedIn')}
+              </span>
+            )}
           </div>
           <p className="text-muted-foreground">{t('userFlow.description')}</p>
         </div>
@@ -117,13 +135,29 @@ export default function UserFlowPage() {
             <p className="text-amber-600 text-sm mb-4">
               {t('userFlow.notCheckedInHint')}
             </p>
-            <Link
-              href="/user/checkin"
+            <button
+              onClick={() => setShowCheckinCard(prev => !prev)}
               className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-full font-medium hover:opacity-90 transition-opacity touch-feedback"
             >
               <TicketCheck className="w-4 h-4" />
               {t('userFlow.goCheckin')}
-            </Link>
+            </button>
+
+            {showCheckinCard && currentEvent && currentUserId && (
+              <div className="mt-4 relative">
+                <button
+                  onClick={() => setShowCheckinCard(false)}
+                  className="absolute top-2 right-2 z-10 p-1 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                >
+                  <X className="w-4 h-4 text-gray-500" />
+                </button>
+                <EventCheckinCard
+                  event={currentEvent}
+                  userId={currentUserId}
+                  isCheckedIn={isCheckedIn}
+                />
+              </div>
+            )}
           </div>
         )}
 
@@ -251,6 +285,26 @@ export default function UserFlowPage() {
           </>
         )}
       </div>
+
+      {/* Fullscreen badge button */}
+      {checkinChecked && isCheckedIn && currentUserId && (
+        <button
+          onClick={() => setShowBadge(true)}
+          className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-5 py-3 bg-primary text-white rounded-full shadow-lg hover:opacity-90 transition-opacity touch-feedback"
+        >
+          <BadgeCheck className="w-5 h-5" />
+          <span className="font-medium text-sm">{t('userFlow.showBadge')}</span>
+        </button>
+      )}
+
+      {/* Fullscreen badge overlay */}
+      {currentUserId && (
+        <FullscreenBadge
+          userId={currentUserId}
+          open={showBadge}
+          onClose={() => setShowBadge(false)}
+        />
+      )}
     </div>
   );
 }

@@ -216,10 +216,18 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
                 <input
                   type="text"
                   value={manualCode}
-                  onChange={(e) => setManualCode(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setManualCode(val);
+                    if (val.length === 6) {
+                      handleCheckin(val);
+                    }
+                  }}
+                  maxLength={6}
                   placeholder={t('checkin.dialog.codePlaceholder')}
                   className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   disabled={loading}
+                  autoFocus
                 />
                 <p className="mt-2 text-xs text-muted-foreground">
                   {t('checkin.dialog.codeHint')}

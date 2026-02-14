@@ -9,14 +9,23 @@ import { deleteEvent } from '@/lib/api/events';
 import { getCheckinStats } from '@/lib/api/signup';
 import EditEventDialog from '@/components/event/EditEventDialog';
 
-function formatDateShort(dateStr: string, locale: string): string {
-  const date = new Date(dateStr);
-  return date.toLocaleString(locale === 'zh' ? 'zh-CN' : 'en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+function formatDateRange(startStr: string, endStr: string, locale: string): string {
+  const loc = locale === 'zh' ? 'zh-CN' : 'en-US';
+  const start = new Date(startStr);
+  const end = new Date(endStr);
+  const dateOpts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+  const timeOpts: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit' };
+  const sameDay = start.toDateString() === end.toDateString();
+
+  const datePart = start.toLocaleDateString(loc, dateOpts);
+  const startTime = start.toLocaleTimeString(loc, timeOpts);
+  const endTime = end.toLocaleTimeString(loc, timeOpts);
+
+  if (sameDay) {
+    return `${datePart}  ${startTime} – ${endTime}`;
+  }
+  const endDate = end.toLocaleDateString(loc, dateOpts);
+  return `${datePart} ${startTime} – ${endDate} ${endTime}`;
 }
 
 interface HostEventCardProps {
@@ -90,7 +99,7 @@ export default function HostEventCard({ event, onUpdate }: HostEventCardProps) {
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
             <Calendar className="w-3.5 h-3.5 text-primary" />
-            {formatDateShort(event.start_time, locale)} – {formatDateShort(event.end_time, locale)}
+            {formatDateRange(event.start_time, event.end_time, locale)}
           </span>
           <span className="flex items-center gap-1">
             <MapPin className="w-3.5 h-3.5 text-primary" />
