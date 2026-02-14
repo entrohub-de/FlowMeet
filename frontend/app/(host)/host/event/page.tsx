@@ -39,17 +39,18 @@ export default function HostEventPage() {
     loadEvents();
   }, []);
 
-  const { activeEvents, archivedEvents } = useMemo(() => {
+  const { activeEvents, endedEvents } = useMemo(() => {
+    const now = new Date();
     const active: Event[] = [];
-    const archived: Event[] = [];
+    const ended: Event[] = [];
     for (const event of events) {
-      if (event.status === 'passed' || event.status === 'cancelled') {
-        archived.push(event);
+      if (event.status === 'passed' || event.status === 'cancelled' || new Date(event.end_time) < now) {
+        ended.push(event);
       } else {
         active.push(event);
       }
     }
-    return { activeEvents: active, archivedEvents: archived };
+    return { activeEvents: active, endedEvents: ended };
   }, [events]);
 
   const handleEventCreated = () => {
@@ -110,7 +111,7 @@ export default function HostEventPage() {
                   />
                 ))}
               </div>
-            ) : archivedEvents.length > 0 ? (
+            ) : endedEvents.length > 0 ? (
               <div className="text-center py-8">
                 <p className="text-muted-foreground">
                   {t('host.events.noActiveEvents')}
@@ -118,20 +119,20 @@ export default function HostEventPage() {
               </div>
             ) : null}
 
-            {/* Archived Events (passed / cancelled) */}
-            {archivedEvents.length > 0 && (
+            {/* Ended Events (time past / passed / cancelled) */}
+            {endedEvents.length > 0 && (
               <div>
                 <button
                   onClick={() => setShowPastEvents(!showPastEvents)}
                   className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
                 >
                   <Archive className="w-4 h-4" />
-                  {t('host.events.archivedEvents', { count: archivedEvents.length })}
+                  {t('host.events.endedEvents', { count: endedEvents.length })}
                   <ChevronDown className={`w-4 h-4 transition-transform ${showPastEvents ? 'rotate-180' : ''}`} />
                 </button>
                 {showPastEvents && (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {archivedEvents.map((event) => (
+                    {endedEvents.map((event) => (
                       <HostEventCard
                         key={event.event_id}
                         event={event}

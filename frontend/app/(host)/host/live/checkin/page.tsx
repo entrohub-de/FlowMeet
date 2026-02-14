@@ -26,9 +26,14 @@ export default function CheckinPage() {
     const loadEvents = async () => {
       try {
         const eventsData = await getEvents();
-        setEvents(eventsData);
-        if (eventsData.length > 0) {
-          setSelectedEventId(eventsData[0].event_id);
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        const upcomingEvents = eventsData.filter(
+          (e) => new Date(e.start_time) >= todayStart
+        );
+        setEvents(upcomingEvents);
+        if (upcomingEvents.length > 0) {
+          setSelectedEventId(upcomingEvents[0].event_id);
         }
       } catch (error) {
         console.error('Failed to load events:', error);
@@ -185,9 +190,19 @@ export default function CheckinPage() {
                         onClick={() => setExpandedId(isExpanded ? null : signup.signup_id)}
                         className="w-full flex items-center gap-3 px-4 sm:px-6 py-3 hover:bg-muted/50 transition-colors text-left"
                       >
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                          <span className="text-xs font-medium text-primary">{index + 1}</span>
-                        </div>
+                        {signup.profile?.avatar_url ? (
+                          <img
+                            src={signup.profile.avatar_url}
+                            alt={signup.profile?.nickname || ''}
+                            className="w-8 h-8 rounded-full object-cover shrink-0"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                            <span className="text-xs font-medium text-primary">
+                              {signup.profile?.nickname?.[0]?.toUpperCase() || (index + 1)}
+                            </span>
+                          </div>
+                        )}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <span className="font-medium text-foreground truncate">

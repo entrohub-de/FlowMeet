@@ -3,6 +3,7 @@
 import type { Event } from '@/types/domain';
 import { Calendar, MapPin } from 'lucide-react';
 import Link from 'next/link';
+import ShareButton from './ShareButton';
 
 function formatDateRange(startStr: string, endStr: string, locale: string): string {
   const loc = locale === 'zh' ? 'zh-CN' : 'en-US';
@@ -33,7 +34,12 @@ export default function PublicEventCard({ event, locale, t }: PublicEventCardPro
   const location = event.venue?.name || t('user.locationTbd');
 
   return (
-    <div className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+    <div className="relative bg-card border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+      {/* Share Button */}
+      <div className="absolute top-3 right-3 z-10">
+        <ShareButton event={event} locale={locale} t={t} />
+      </div>
+
       {/* Cover Image */}
       {event.cover_image && (
         // eslint-disable-next-line @next/next/no-img-element

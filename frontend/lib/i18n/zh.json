@@ -245,6 +245,7 @@
         "passed": "已结束"
       },
       "archivedEvents": "已归档活动（{count}）",
+      "endedEvents": "已结束活动（{count}）",
       "noActiveEvents": "暂无进行中的活动",
       "reactivate": "重新激活",
       "markPassed": "标记为已结束",
@@ -930,5 +931,15 @@
       "mature": "成熟期",
       "not_entrepreneur": "非创业者"
     }
+  },
+  "share": {
+    "shareEvent": "分享活动",
+    "copyLink": "复制链接",
+    "linkCopied": "链接已复制",
+    "wechat": "微信",
+    "twitter": "Twitter/X",
+    "whatsapp": "WhatsApp",
+    "nativeShare": "更多分享",
+    "scanToShare": "扫码分享"
   }
 }

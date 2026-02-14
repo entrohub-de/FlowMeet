@@ -243,6 +243,7 @@
         "passed": "Ended"
       },
       "archivedEvents": "Archived Events ({count})",
+      "endedEvents": "Ended Events ({count})",
       "noActiveEvents": "No active events",
       "reactivate": "Reactivate",
       "markPassed": "Mark as Ended",
@@ -928,5 +929,15 @@
       "mature": "Mature Stage",
       "not_entrepreneur": "Not an Entrepreneur"
     }
+  },
+  "share": {
+    "shareEvent": "Share Event",
+    "copyLink": "Copy Link",
+    "linkCopied": "Link Copied",
+    "wechat": "WeChat",
+    "twitter": "Twitter/X",
+    "whatsapp": "WhatsApp",
+    "nativeShare": "More",
+    "scanToShare": "Scan to Share"
   }
 }

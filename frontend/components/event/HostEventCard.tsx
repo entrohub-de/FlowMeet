@@ -78,15 +78,16 @@ export default function HostEventCard({ event, onUpdate }: HostEventCardProps) {
   const isCancelled = event.status === 'cancelled';
   const isPassed = event.status === 'passed';
   const isArchived = isCancelled || isPassed;
+  const isTimePast = !isArchived && new Date(event.end_time) < new Date();
+  const isEnded = isArchived || isTimePast;
 
   // For active events, determine time-based sub-status
-  const isUpcoming = !isArchived && new Date(event.start_time) > new Date();
-  const isTimePast = !isArchived && new Date(event.end_time) < new Date();
-  const isOngoing = !isArchived && !isUpcoming && !isTimePast;
+  const isUpcoming = !isEnded && new Date(event.start_time) > new Date();
+  const isOngoing = !isEnded && !isUpcoming;
 
   const statusColor = isCancelled
     ? 'bg-red-100 text-red-800'
-    : isPassed
+    : isEnded
       ? 'bg-gray-100 text-gray-800'
       : isOngoing
         ? 'bg-green-100 text-green-800'
@@ -96,7 +97,7 @@ export default function HostEventCard({ event, onUpdate }: HostEventCardProps) {
 
   const statusText = isCancelled
     ? t('host.events.status.cancelled')
-    : isPassed
+    : isEnded
       ? t('host.events.status.passed')
       : isOngoing
         ? t('host.events.status.ongoing')
@@ -105,7 +106,7 @@ export default function HostEventCard({ event, onUpdate }: HostEventCardProps) {
           : t('host.events.status.past');
 
   return (
-    <div className={`bg-card border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow ${isArchived ? 'opacity-75' : ''}`}>
+    <div className={`bg-card border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow ${isEnded ? 'opacity-75' : ''}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {event.cover_image && (
         <img src={event.cover_image} alt={event.name} className="w-full h-32 object-cover" />
@@ -157,6 +158,14 @@ export default function HostEventCard({ event, onUpdate }: HostEventCardProps) {
               >
                 <RotateCcw className="w-3 h-3" />
                 {t('host.events.reactivate')}
+              </button>
+            ) : isTimePast ? (
+              <button
+                onClick={() => setShowEditDialog(true)}
+                className="flex items-center gap-1 h-7 px-2.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium text-xs"
+              >
+                <Settings className="w-3 h-3" />
+                {t('host.events.manage')}
               </button>
             ) : (
               <>

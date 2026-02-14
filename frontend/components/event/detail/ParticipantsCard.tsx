@@ -42,9 +42,19 @@ export default function ParticipantsCard({ signups }: ParticipantsCardProps) {
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-3 flex-1">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <span className="text-sm font-medium text-primary">{index + 1}</span>
-                  </div>
+                  {signup.profile?.avatar_url ? (
+                    <img
+                      src={signup.profile.avatar_url}
+                      alt={signup.profile?.nickname || ''}
+                      className="w-8 h-8 rounded-full object-cover shrink-0"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <span className="text-sm font-medium text-primary">
+                        {signup.profile?.nickname?.[0]?.toUpperCase() || (index + 1)}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-foreground truncate">
                       {signup.profile?.nickname || t('user.anonymous')}
