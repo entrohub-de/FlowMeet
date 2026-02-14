@@ -224,6 +224,7 @@
       "deleteFailed": "Failed to delete event. Please try again.",
       "deleteModalTitle": "Delete Event",
       "deleteModalMessage": "Are you sure you want to delete this event? This action cannot be undone.",
+      "eventDescription": "Description",
       "signupCount": "{count} Signups",
       "checkedInCount": "{count} Checked In",
       "noSignups": "No signups yet",
@@ -445,6 +446,10 @@
     "saveFailed": "Save failed, please try again",
     "basicInfo": "Basic Info",
     "unnamed": "No nickname set",
+    "avatarUpload": "Tap to upload avatar",
+    "avatarUploading": "Uploading...",
+    "avatarUploadFailed": "Avatar upload failed",
+    "avatarRemove": "Remove avatar",
     "roleUpgrade": {
       "title": "Account Role",
       "currentRole": "Current Role",

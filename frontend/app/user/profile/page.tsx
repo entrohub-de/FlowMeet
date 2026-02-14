@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/features/auth/useAuth';
 import { useTranslation } from '@/lib/i18n/context';
 import { getProfile, upsertProfile, getPreferences, upsertPreferences } from '@/lib/api/profile';
 import { getUserRole, upgradeToHost, type UserRole } from '@/lib/api/role';
-import { Crown, User, Pencil, Check, Mail, Globe, Heart, Briefcase, Rocket } from 'lucide-react';
+import { uploadUserAvatar } from '@/lib/api/storage';
+import { Crown, User, Pencil, Check, Mail, Globe, Heart, Briefcase, Rocket, ChevronDown, Camera, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import {
@@ -32,9 +33,17 @@ export default function ProfilePage() {
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [selectedStartupStage, setSelectedStartupStage] = useState('');
 
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [isBasicEditing, setIsBasicEditing] = useState(false);
+  const [isPrefsExpanded, setIsPrefsExpanded] = useState(false);
+  const [isPrefsEditing, setIsPrefsEditing] = useState(false);
+  const [prefsSaving, setPrefsSaving] = useState(false);
 
   // Role upgrade states
   const [userRole, setUserRole] = useState<UserRole>('user');
@@ -51,12 +60,19 @@ export default function ProfilePage() {
         setNickname(profile.nickname ?? '');
         setGender(profile.gender ?? '');
         setAgeGroup(profile.age_group ?? '');
+        setAvatarUrl(profile.avatar_url ?? null);
       }
       if (prefs) {
-        setSelectedLanguages(parsePreferenceString(prefs.languages));
-        setSelectedInterests(parsePreferenceString(prefs.interests));
-        setSelectedIndustries(parsePreferenceString(prefs.industry_background));
-        setSelectedStartupStage(prefs.startup_stage ?? '');
+        const filterValid = (values: string[], options: readonly string[]) =>
+          values.filter((v) => options.includes(v));
+        setSelectedLanguages(filterValid(parsePreferenceString(prefs.languages), LANGUAGE_OPTIONS));
+        setSelectedInterests(filterValid(parsePreferenceString(prefs.interests), INTEREST_OPTIONS));
+        setSelectedIndustries(filterValid(parsePreferenceString(prefs.industry_background), PROFESSIONAL_BACKGROUND_OPTIONS));
+        setSelectedStartupStage(
+          STARTUP_STAGE_OPTIONS.includes(prefs.startup_stage as typeof STARTUP_STAGE_OPTIONS[number])
+            ? (prefs.startup_stage ?? '')
+            : ''
+        );
       }
       setUserRole(role);
     } finally {
@@ -76,25 +92,37 @@ export default function ProfilePage() {
     if (!user?.id) return;
     setSaving(true);
     try {
-      await Promise.all([
-        upsertProfile(user.id, {
-          nickname: nickname || null,
-          gender: gender || null,
-          age_group: ageGroup || null,
-        }),
-        upsertPreferences(user.id, {
-          languages: serializePreferenceArray(selectedLanguages),
-          interests: serializePreferenceArray(selectedInterests),
-          industry_background: serializePreferenceArray(selectedIndustries),
-          startup_stage: selectedStartupStage || null,
-        }),
-      ]);
+      await upsertProfile(user.id, {
+        nickname: nickname || null,
+        gender: gender || null,
+        age_group: ageGroup || null,
+      });
       toast.success(t('profile.saved'));
-      setIsEditing(false);
+      setIsBasicEditing(false);
     } catch {
       toast.error(t('profile.saveFailed'));
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSavePrefs = async () => {
+    if (!user?.id) return;
+    setPrefsSaving(true);
+    try {
+      await upsertPreferences(user.id, {
+        languages: serializePreferenceArray(selectedLanguages),
+        interests: serializePreferenceArray(selectedInterests),
+        industry_background: serializePreferenceArray(selectedIndustries),
+        startup_stage: selectedStartupStage || null,
+      });
+      toast.success(t('profile.saved'));
+      setIsPrefsEditing(false);
+    } catch (err) {
+      console.error('[SavePrefs]', err);
+      toast.error(t('profile.saveFailed'));
+    } finally {
+      setPrefsSaving(false);
     }
   };
 
@@ -119,6 +147,25 @@ export default function ProfilePage() {
     }
   };
 
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user?.id) return;
+    setAvatarUploading(true);
+    try {
+      console.log('[Avatar] uploading', file.name, file.type, file.size);
+      const url = await uploadUserAvatar(file, user.id);
+      console.log('[Avatar] uploaded, url:', url);
+      await upsertProfile(user.id, { avatar_url: url });
+      setAvatarUrl(url);
+    } catch (err) {
+      console.error('[Avatar] upload failed:', err);
+      toast.error(t('profile.avatarUploadFailed'));
+    } finally {
+      setAvatarUploading(false);
+      if (avatarInputRef.current) avatarInputRef.current.value = '';
+    }
+  };
+
   if (authLoading || loading) {
     return (
       <div className="min-h-[calc(100vh-60px)] flex items-center justify-center">
@@ -131,7 +178,7 @@ export default function ProfilePage() {
     );
   }
 
-  const inputClass = isEditing
+  const inputClass = isBasicEditing
     ? 'w-full px-3 py-2.5 bg-background border border-input rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ring transition-colors'
     : 'w-full px-3 py-2.5 bg-muted/50 border border-transparent rounded-xl text-sm text-foreground cursor-default';
 
@@ -141,8 +188,8 @@ export default function ProfilePage() {
       selected
         ? 'bg-primary/10 text-primary border-primary/30'
         : 'bg-muted/50 text-muted-foreground border-transparent',
-      isEditing && 'cursor-pointer hover:bg-primary/5',
-      !isEditing && 'cursor-default'
+      isPrefsEditing && 'cursor-pointer hover:bg-primary/5',
+      !isPrefsEditing && 'cursor-default'
     );
 
   /** Render a multi-select chip group */
@@ -157,8 +204,8 @@ export default function ProfilePage() {
         <button
           key={opt}
           type="button"
-          disabled={!isEditing}
-          onClick={() => isEditing && toggleItem(selected, opt, setter)}
+          disabled={!isPrefsEditing}
+          onClick={() => isPrefsEditing && toggleItem(selected, opt, setter)}
           className={chipClass(selected.includes(opt))}
         >
           {t(`preferenceOptions.${i18nPrefix}.${opt}`)}
@@ -179,8 +226,8 @@ export default function ProfilePage() {
         <button
           key={opt}
           type="button"
-          disabled={!isEditing}
-          onClick={() => isEditing && setter(selected === opt ? '' : opt)}
+          disabled={!isPrefsEditing}
+          onClick={() => isPrefsEditing && setter(selected === opt ? '' : opt)}
           className={chipClass(selected === opt)}
         >
           {t(`preferenceOptions.${i18nPrefix}.${opt}`)}
@@ -194,9 +241,41 @@ export default function ProfilePage() {
       <div className="max-w-lg mx-auto space-y-5">
         {/* Profile Header Card */}
         <div className="bg-card border border-border rounded-2xl p-6 text-center relative">
-          <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-            <User className="w-10 h-10 text-primary" />
-          </div>
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleAvatarChange}
+          />
+          <button
+            type="button"
+            disabled={avatarUploading || !isEditing}
+            onClick={() => isEditing && avatarInputRef.current?.click()}
+            className={cn(
+              'w-20 h-20 rounded-full mx-auto mb-3 relative overflow-hidden group',
+              isEditing && 'cursor-pointer',
+              !isEditing && 'cursor-default'
+            )}
+          >
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full bg-primary/10 flex items-center justify-center">
+                <User className="w-10 h-10 text-primary" />
+              </div>
+            )}
+            {isEditing && !avatarUploading && (
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <Camera className="w-5 h-5 text-white" />
+              </div>
+            )}
+            {avatarUploading && (
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                <Loader2 className="w-5 h-5 text-white animate-spin" />
+              </div>
+            )}
+          </button>
           <h1 className="text-xl font-bold text-foreground">
             {nickname || t('profile.unnamed')}
           </h1>
@@ -236,10 +315,23 @@ export default function ProfilePage() {
 
         {/* Basic Info Card */}
         <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide flex items-center gap-2">
-            <User className="w-4 h-4 text-primary" />
-            {t('profile.basicInfo')}
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide flex items-center gap-2">
+              <User className="w-4 h-4 text-primary" />
+              {t('profile.basicInfo')}
+            </h2>
+            <button
+              type="button"
+              onClick={() => setIsBasicEditing(!isBasicEditing)}
+              className="p-1.5 rounded-lg hover:bg-muted transition-colors"
+            >
+              {isBasicEditing ? (
+                <Check className="w-4 h-4 text-primary" />
+              ) : (
+                <Pencil className="w-4 h-4 text-muted-foreground" />
+              )}
+            </button>
+          </div>
 
           <div className="space-y-3">
             <div className="space-y-1.5">
@@ -252,14 +344,14 @@ export default function ProfilePage() {
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
                 placeholder={t('profile.nicknamePlaceholder')}
-                readOnly={!isEditing}
+                readOnly={!isBasicEditing}
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-muted-foreground">{t('profile.gender')}</label>
-                {isEditing ? (
+                {isBasicEditing ? (
                   <select
                     className={inputClass}
                     value={gender}
@@ -279,7 +371,7 @@ export default function ProfilePage() {
 
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-muted-foreground">{t('profile.ageGroup')}</label>
-                {isEditing ? (
+                {isBasicEditing ? (
                   <select
                     className={inputClass}
                     value={ageGroup}
@@ -298,61 +390,104 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
+
+          {isBasicEditing && (
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="w-full px-4 py-2.5 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 touch-feedback text-sm"
+            >
+              <Check className="w-4 h-4" />
+              {saving ? t('profile.saving') : t('profile.save')}
+            </button>
+          )}
         </div>
 
-        {/* Preferences Card */}
-        <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide flex items-center gap-2">
-            <Heart className="w-4 h-4 text-primary" />
-            {t('profile.preferences')}
-          </h2>
+        {/* Preferences Card — collapsible & independently editable */}
+        <div className="bg-card border border-border rounded-2xl p-5">
+          <div className="flex items-center justify-between">
+            <button
+              type="button"
+              onClick={() => {
+                if (isPrefsExpanded) setIsPrefsEditing(false);
+                setIsPrefsExpanded(!isPrefsExpanded);
+              }}
+              className="flex items-center gap-2 flex-1 text-left"
+            >
+              <Heart className="w-4 h-4 text-primary" />
+              <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">
+                {t('profile.preferences')}
+              </h2>
+              <ChevronDown
+                className={cn(
+                  'w-4 h-4 text-muted-foreground transition-transform duration-200',
+                  isPrefsExpanded && 'rotate-180'
+                )}
+              />
+            </button>
 
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                <Globe className="w-3 h-3" />
-                {t('profile.languages')}
-              </label>
-              {renderChipGroup(LANGUAGE_OPTIONS, selectedLanguages, 'languages', setSelectedLanguages)}
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                <Heart className="w-3 h-3" />
-                {t('profile.interests')}
-              </label>
-              {renderChipGroup(INTEREST_OPTIONS, selectedInterests, 'interests', setSelectedInterests)}
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                <Briefcase className="w-3 h-3" />
-                {t('profile.professionalBackground')}
-              </label>
-              {renderChipGroup(PROFESSIONAL_BACKGROUND_OPTIONS, selectedIndustries, 'professionalBackground', setSelectedIndustries)}
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                <Rocket className="w-3 h-3" />
-                {t('profile.startupStage')}
-              </label>
-              {renderSingleChipGroup(STARTUP_STAGE_OPTIONS, selectedStartupStage, 'startupStages', setSelectedStartupStage)}
-            </div>
+            {isPrefsExpanded && (
+              <button
+                type="button"
+                onClick={() => setIsPrefsEditing(!isPrefsEditing)}
+                className="p-1.5 rounded-lg hover:bg-muted transition-colors"
+              >
+                {isPrefsEditing ? (
+                  <Check className="w-4 h-4 text-primary" />
+                ) : (
+                  <Pencil className="w-4 h-4 text-muted-foreground" />
+                )}
+              </button>
+            )}
           </div>
-        </div>
 
-        {/* Save Button (only in edit mode) */}
-        {isEditing && (
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="w-full px-4 py-3 bg-primary text-primary-foreground rounded-2xl font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 touch-feedback"
-          >
-            <Check className="w-4 h-4" />
-            {saving ? t('profile.saving') : t('profile.save')}
-          </button>
-        )}
+          {isPrefsExpanded && (
+            <div className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                  <Globe className="w-3 h-3" />
+                  {t('profile.languages')}
+                </label>
+                {renderChipGroup(LANGUAGE_OPTIONS, selectedLanguages, 'languages', setSelectedLanguages)}
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                  <Heart className="w-3 h-3" />
+                  {t('profile.interests')}
+                </label>
+                {renderChipGroup(INTEREST_OPTIONS, selectedInterests, 'interests', setSelectedInterests)}
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                  <Briefcase className="w-3 h-3" />
+                  {t('profile.professionalBackground')}
+                </label>
+                {renderChipGroup(PROFESSIONAL_BACKGROUND_OPTIONS, selectedIndustries, 'professionalBackground', setSelectedIndustries)}
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                  <Rocket className="w-3 h-3" />
+                  {t('profile.startupStage')}
+                </label>
+                {renderSingleChipGroup(STARTUP_STAGE_OPTIONS, selectedStartupStage, 'startupStages', setSelectedStartupStage)}
+              </div>
+
+              {isPrefsEditing && (
+                <button
+                  onClick={handleSavePrefs}
+                  disabled={prefsSaving}
+                  className="w-full px-4 py-2.5 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 touch-feedback text-sm"
+                >
+                  <Check className="w-4 h-4" />
+                  {prefsSaving ? t('profile.saving') : t('profile.save')}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Role Upgrade Section */}
         {userRole === 'user' && (

@@ -108,20 +108,20 @@ export default function FlowStepCard({
   };
 
   return (
-    <div className={`p-4 rounded-lg border-2 transition-all ${cardStyles[status]}`}>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-4">
+    <div className={`p-3 rounded-lg border-2 transition-all ${cardStyles[status]}`}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-3">
           <div
-            className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${badgeStyles[status]}`}
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${badgeStyles[status]}`}
           >
             {status === 'completed' ? (
-              <CheckCircle className="w-5 h-5" />
+              <CheckCircle className="w-4 h-4" />
             ) : (
               index + 1
             )}
           </div>
           <div>
-            <div className="flex items-center gap-2 font-semibold text-foreground">
+            <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
               {title}
               {pairingMode === '1v1' && (
                 <span className="px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 text-xs font-medium">
@@ -134,8 +134,8 @@ export default function FlowStepCard({
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Clock className="w-4 h-4" />
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Clock className="w-3.5 h-3.5" />
               {status === 'active' || status === 'paused' ? (
                 <span
                   className={`font-mono font-semibold ${
@@ -172,7 +172,7 @@ export default function FlowStepCard({
             <button
               type="button"
               onClick={() => onStatusChange(id, 'active')}
-              className="px-4 py-2 rounded-button bg-primary text-white hover:bg-primary/90 transition-colors flex items-center gap-2 touch-feedback"
+              className="px-3 py-1.5 rounded-button text-sm bg-primary text-white hover:bg-primary/90 transition-colors flex items-center gap-2 touch-feedback"
             >
               <Play className="w-4 h-4" />
               {t('host.flowControl.start')}
@@ -183,7 +183,7 @@ export default function FlowStepCard({
               <button
                 type="button"
                 onClick={() => onStatusChange(id, 'paused')}
-                className="px-4 py-2 rounded-button border border-border hover:bg-muted transition-colors flex items-center gap-2 touch-feedback"
+                className="px-3 py-1.5 rounded-button text-sm border border-border hover:bg-muted transition-colors flex items-center gap-2 touch-feedback"
               >
                 <Pause className="w-4 h-4" />
                 {t('host.flowControl.pause')}
@@ -191,7 +191,7 @@ export default function FlowStepCard({
               <button
                 type="button"
                 onClick={handleCompleteClick}
-                className="px-4 py-2 rounded-button bg-green-500 text-white hover:bg-green-600 transition-colors flex items-center gap-2 touch-feedback"
+                className="px-3 py-1.5 rounded-button text-sm bg-green-500 text-white hover:bg-green-600 transition-colors flex items-center gap-2 touch-feedback"
               >
                 <CheckCircle className="w-4 h-4" />
                 {t('host.flowControl.complete')}
@@ -203,7 +203,7 @@ export default function FlowStepCard({
               <button
                 type="button"
                 onClick={() => onStatusChange(id, 'active')}
-                className="px-4 py-2 rounded-button bg-primary text-white hover:bg-primary/90 transition-colors flex items-center gap-2 touch-feedback"
+                className="px-3 py-1.5 rounded-button text-sm bg-primary text-white hover:bg-primary/90 transition-colors flex items-center gap-2 touch-feedback"
               >
                 <Play className="w-4 h-4" />
                 {t('host.flowControl.resume')}
@@ -211,7 +211,7 @@ export default function FlowStepCard({
               <button
                 type="button"
                 onClick={handleCompleteClick}
-                className="px-4 py-2 rounded-button bg-green-500 text-white hover:bg-green-600 transition-colors flex items-center gap-2 touch-feedback"
+                className="px-3 py-1.5 rounded-button text-sm bg-green-500 text-white hover:bg-green-600 transition-colors flex items-center gap-2 touch-feedback"
               >
                 <CheckCircle className="w-4 h-4" />
                 {t('host.flowControl.complete')}
@@ -222,7 +222,7 @@ export default function FlowStepCard({
             <button
               type="button"
               onClick={() => onStatusChange(id, 'pending')}
-              className="px-4 py-2 rounded-button bg-green-100 text-green-700 font-medium hover:bg-green-200 transition-colors"
+              className="px-3 py-1.5 rounded-button text-sm bg-green-100 text-green-700 font-medium hover:bg-green-200 transition-colors"
             >
               {t('host.flowControl.completed')}
             </button>
@@ -251,7 +251,7 @@ export default function FlowStepCard({
             type="button"
             onClick={() => onTriggerMatching?.(id)}
             disabled={isMatching || (matchingReadyCount ?? 0) < 2}
-            className="ml-auto px-4 py-2 rounded-button bg-violet-600 text-white hover:bg-violet-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed touch-feedback"
+            className="ml-auto px-3 py-1.5 rounded-button text-sm bg-violet-600 text-white hover:bg-violet-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed touch-feedback"
           >
             <Zap className="w-4 h-4" />
             {isMatching ? t('flowMatching.matching') : t('flowMatching.matchNow')}
@@ -359,7 +359,7 @@ export default function FlowStepCard({
             type="button"
             onClick={() => onTriggerGrouping?.(4)}
             disabled={isGrouping || (groupReadyCount ?? 0) < 2}
-            className="ml-auto px-4 py-2 rounded-button bg-emerald-600 text-white hover:bg-emerald-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed touch-feedback"
+            className="ml-auto px-3 py-1.5 rounded-button text-sm bg-emerald-600 text-white hover:bg-emerald-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed touch-feedback"
           >
             <Zap className="w-4 h-4" />
             {isGrouping ? t('flowGroupMatching.grouping') : t('flowGroupMatching.groupNow')}
@@ -402,14 +402,14 @@ export default function FlowStepCard({
               <button
                 type="button"
                 onClick={() => setShowCompleteConfirm(false)}
-                className="flex-1 px-4 py-2 rounded-button border border-border hover:bg-muted transition-colors font-medium"
+                className="flex-1 px-3 py-1.5 rounded-button text-sm border border-border hover:bg-muted transition-colors font-medium"
               >
                 {t('common.cancel')}
               </button>
               <button
                 type="button"
                 onClick={handleConfirmComplete}
-                className="flex-1 px-4 py-2 rounded-button bg-green-500 text-white hover:bg-green-600 transition-colors font-medium"
+                className="flex-1 px-3 py-1.5 rounded-button text-sm bg-green-500 text-white hover:bg-green-600 transition-colors font-medium"
               >
                 {t('ux.host.confirm')}
               </button>

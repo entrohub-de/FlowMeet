@@ -451,10 +451,10 @@ export default function FlowControlPage() {
     return (
       <div className="min-h-[calc(100vh-60px)] p-4 bg-muted/30">
         <div className="max-w-6xl mx-auto">
-          <div className="mb-6">
-            <div className="flex items-center gap-3 mb-4">
-              <ListChecks className="w-8 h-8 text-primary" />
-              <h1 className="text-3xl font-bold text-foreground">
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-3">
+              <ListChecks className="w-6 h-6 text-primary" />
+              <h1 className="text-2xl font-bold text-foreground">
                 {t('host.flowControl.title')}
               </h1>
             </div>
@@ -473,10 +473,10 @@ export default function FlowControlPage() {
   return (
     <div className="min-h-[calc(100vh-60px)] p-4 bg-muted/30">
       <div className="max-w-6xl mx-auto">
-        <div className="mb-6">
-          <div className="flex items-center gap-3 mb-4">
-            <ListChecks className="w-8 h-8 text-primary" />
-            <h1 className="text-3xl font-bold text-foreground">
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-3">
+            <ListChecks className="w-6 h-6 text-primary" />
+            <h1 className="text-2xl font-bold text-foreground">
               {t('host.flowControl.title')}
             </h1>
             {/* ── Checkin Stats Badge ── */}
@@ -502,11 +502,11 @@ export default function FlowControlPage() {
 
         {/* ── Global Pause & End Event Buttons ── */}
         {flowSteps.length > 0 && !flowSteps.every((s) => s.status === 'completed') && (
-          <div className="mb-4 flex gap-3">
+          <div className="mb-3 flex gap-2">
             <button
               type="button"
               onClick={handleToggleGlobalPause}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${
+              className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
                 isGloballyPaused
                   ? 'bg-red-500 text-white hover:bg-red-600'
                   : 'bg-primary text-primary-foreground hover:bg-primary/90'
@@ -527,7 +527,7 @@ export default function FlowControlPage() {
             <button
               type="button"
               onClick={() => setShowEndConfirm(true)}
-              className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold border border-red-300 text-red-600 bg-white hover:bg-red-50 transition-colors"
+              className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold border border-red-300 text-red-600 bg-white hover:bg-red-50 transition-colors"
             >
               <StopCircle className="w-5 h-5" />
               {t('globalPause.endEvent')}
@@ -603,18 +603,18 @@ export default function FlowControlPage() {
         />
 
         <div className="bg-card border border-border rounded-xl shadow-sm">
-          <div className="p-6 border-b border-border">
-            <h2 className="text-xl font-semibold text-foreground">
+          <div className="px-4 py-3 border-b border-border">
+            <h2 className="text-base font-semibold text-foreground">
               {t('host.flowControl.flowProcess')}
             </h2>
           </div>
-          <div className="p-6">
+          <div className="p-4">
             {flowSteps.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-border p-8 text-center text-muted-foreground">
+              <div className="rounded-lg border border-dashed border-border p-6 text-center text-muted-foreground">
                 {t('host.flowControl.emptyFlow')}
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {flowSteps.map((step, index) => (
                   <div
                     key={step.id}

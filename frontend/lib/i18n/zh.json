@@ -226,6 +226,7 @@
       "deleteFailed": "删除活动失败，请重试。",
       "deleteModalTitle": "删除活动",
       "deleteModalMessage": "确定要删除这个活动吗？此操作无法撤销。",
+      "eventDescription": "活动介绍",
       "signupCount": "{count} 人报名",
       "checkedInCount": "{count} 人签到",
       "noSignups": "暂无报名",
@@ -447,6 +448,10 @@
     "saveFailed": "保存失败，请重试",
     "basicInfo": "基本信息",
     "unnamed": "未设置昵称",
+    "avatarUpload": "点击上传头像",
+    "avatarUploading": "上传中...",
+    "avatarUploadFailed": "头像上传失败",
+    "avatarRemove": "移除头像",
     "roleUpgrade": {
       "title": "账户角色",
       "currentRole": "当前角色",

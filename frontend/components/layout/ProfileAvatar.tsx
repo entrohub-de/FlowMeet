@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/features/auth/useAuth';
 import { supabase } from '@/lib/supabase/client';
 import { useTranslation } from '@/lib/i18n/context';
+import { getProfile } from '@/lib/api/profile';
 
 export default function ProfileAvatar() {
   const { user } = useAuth();
@@ -12,6 +13,7 @@ export default function ProfileAvatar() {
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -23,6 +25,11 @@ export default function ProfileAvatar() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    getProfile(user.id).then((p) => setAvatarUrl(p?.avatar_url ?? null)).catch(() => {});
+  }, [user?.id]);
 
   if (!user) return null;
 
@@ -39,9 +46,13 @@ export default function ProfileAvatar() {
     <div ref={menuRef} className="relative ml-auto">
       <button
         onClick={() => setOpen(!open)}
-        className="w-9 h-9 rounded-full bg-gray-500 text-white flex items-center justify-center text-sm font-semibold cursor-pointer hover:opacity-90 transition-opacity"
+        className="w-9 h-9 rounded-full bg-gray-500 text-white flex items-center justify-center text-sm font-semibold cursor-pointer hover:opacity-90 transition-opacity overflow-hidden"
       >
-        {initial}
+        {avatarUrl ? (
+          <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+        ) : (
+          initial
+        )}
       </button>
 
       {open && (

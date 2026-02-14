@@ -96,6 +96,7 @@ export interface Profile {
   nickname: string | null;
   gender: string | null;
   age_group: string | null;
+  avatar_url?: string | null;
 }
 
 export interface Preferences {

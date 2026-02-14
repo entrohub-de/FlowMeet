@@ -19,10 +19,16 @@ export function RecommendationCard({
     <div className="bg-card border-2 border-border rounded-xl p-5 hover:shadow-lg transition-all hover:border-primary/30">
       {/* 用户信息 */}
       <div className="flex items-start gap-4 mb-4">
-        <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-          <span className="text-2xl font-semibold text-primary">
-            {recommendation.profile.nickname?.[0] || '?'}
-          </span>
+        <div className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden">
+          {recommendation.profile.avatar_url ? (
+            <img src={recommendation.profile.avatar_url} alt="" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+              <span className="text-2xl font-semibold text-primary">
+                {recommendation.profile.nickname?.[0] || '?'}
+              </span>
+            </div>
+          )}
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-foreground mb-1">

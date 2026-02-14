@@ -84,9 +84,8 @@ export default function CheckinPage() {
   return (
     <div className="min-h-[calc(100vh-60px)] p-4 bg-muted/30">
       <div className="max-w-6xl mx-auto">
-        {/* Event Selection */}
-        <div className="mb-6 space-y-4">
-          {/* Event Selector */}
+        {/* Event Selection + Checkin Button */}
+        <div className="mb-4 space-y-2">
           {events.length > 0 && (
             <CustomSelect
               options={events.map((event) => ({
@@ -100,13 +99,12 @@ export default function CheckinPage() {
             />
           )}
 
-          {/* Checkin Button */}
           {selectedEventId && (
             <button
               onClick={() => setShowCheckinDialog(true)}
-              className="w-full flex items-center justify-center gap-2 px-4 h-12 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
+              className="w-full flex items-center justify-center gap-2 px-4 h-10 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm"
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="w-4 h-4" />
               {t('checkin.checkinParticipant')}
             </button>
           )}
@@ -114,24 +112,19 @@ export default function CheckinPage() {
 
         {/* Stats Cards */}
         {selectedEvent && (
-          <div className="space-y-4 mb-6">
-            {/* First Row - Checked In */}
-            <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-              <div className="text-sm text-muted-foreground mb-2">{t('user.checkedIn')}</div>
-              <div className="text-3xl font-bold text-primary">{checkedInCount}</div>
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="bg-card border border-border rounded-xl px-4 py-3 shadow-sm">
+              <div className="text-xs text-muted-foreground mb-0.5">{t('user.checkedIn')}</div>
+              <div className="text-2xl font-bold text-primary">{checkedInCount}</div>
             </div>
-
-            {/* Second Row - Total Signups and Check-in Rate */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-                <div className="text-sm text-muted-foreground mb-2">{t('host.events.totalSignups')}</div>
-                <div className="text-3xl font-bold text-foreground">{signups.length}</div>
-              </div>
-              <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-                <div className="text-sm text-muted-foreground mb-2">{t('checkin.checkinRate')}</div>
-                <div className="text-3xl font-bold text-foreground">
-                  {signups.length > 0 ? Math.round((checkedInCount / signups.length) * 100) : 0}%
-                </div>
+            <div className="bg-card border border-border rounded-xl px-4 py-3 shadow-sm">
+              <div className="text-xs text-muted-foreground mb-0.5">{t('host.events.totalSignups')}</div>
+              <div className="text-2xl font-bold text-foreground">{signups.length}</div>
+            </div>
+            <div className="bg-card border border-border rounded-xl px-4 py-3 shadow-sm">
+              <div className="text-xs text-muted-foreground mb-0.5">{t('checkin.checkinRate')}</div>
+              <div className="text-2xl font-bold text-foreground">
+                {signups.length > 0 ? Math.round((checkedInCount / signups.length) * 100) : 0}%
               </div>
             </div>
           </div>

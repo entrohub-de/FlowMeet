@@ -25,7 +25,7 @@ export async function getProfile(userId: string): Promise<Profile | null> {
 
 export async function upsertProfile(
   userId: string,
-  profile: Partial<Pick<Profile, 'nickname' | 'gender' | 'age_group'>>
+  profile: Partial<Pick<Profile, 'nickname' | 'gender' | 'age_group' | 'avatar_url'>>
 ): Promise<Profile> {
   const { data, error } = await supabase
     .from('usr_profiles')
@@ -52,12 +52,15 @@ export async function upsertPreferences(
   userId: string,
   prefs: Partial<Pick<Preferences, 'languages' | 'interests' | 'industry_background' | 'startup_stage'>>
 ): Promise<Preferences> {
-  const { data, error } = await supabase
+  const payload = { user_id: userId, ...prefs };
+  console.log('[upsertPreferences] payload:', payload);
+  const { data, error, status, statusText } = await supabase
     .from('usr_preferences')
-    .upsert({ user_id: userId, ...prefs }, { onConflict: 'user_id' })
+    .upsert(payload, { onConflict: 'user_id' })
     .select()
     .single();
 
+  console.log('[upsertPreferences] status:', status, statusText, 'data:', data, 'error:', error);
   if (error) throw error;
   return data;
 }

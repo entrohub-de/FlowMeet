@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import type { Event } from '@/types/domain';
-import { Calendar, MapPin, Settings, Trash2, AlertTriangle, X, Users, UserCheck } from 'lucide-react';
+import { Calendar, MapPin, Settings, Trash2, AlertTriangle, X, Users, UserCheck, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from '@/lib/i18n/context';
 import { deleteEvent } from '@/lib/api/events';
@@ -29,6 +29,7 @@ export default function HostEventCard({ event, onUpdate }: HostEventCardProps) {
   const [deleting, setDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDescription, setShowDescription] = useState(false);
   const [stats, setStats] = useState({ checkedIn: 0, total: 0 });
 
   useEffect(() => {
@@ -97,35 +98,53 @@ export default function HostEventCard({ event, onUpdate }: HostEventCardProps) {
           </span>
         </div>
 
-        {/* Stats inline */}
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <Users className="w-3.5 h-3.5 text-primary" />
-            {t('host.events.signupCount', { count: stats.total })}
-          </span>
-          <span className="flex items-center gap-1">
-            <UserCheck className="w-3.5 h-3.5 text-green-600" />
-            {t('host.events.checkedInCount', { count: stats.checkedIn })}
-          </span>
+        {/* Stats + Actions inline */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <Users className="w-3.5 h-3.5 text-primary" />
+              {t('host.events.signupCount', { count: stats.total })}
+            </span>
+            <span className="flex items-center gap-1">
+              <UserCheck className="w-3.5 h-3.5 text-green-600" />
+              {t('host.events.checkedInCount', { count: stats.checkedIn })}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setShowEditDialog(true)}
+              className="flex items-center gap-1 h-7 px-2.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium text-xs"
+            >
+              <Settings className="w-3 h-3" />
+              {t('host.events.manage')}
+            </button>
+            <button
+              onClick={() => setShowDeleteModal(true)}
+              disabled={deleting}
+              className="h-7 px-2 rounded-md border border-border hover:bg-destructive/10 hover:border-destructive hover:text-destructive transition-colors disabled:opacity-50"
+            >
+              <Trash2 className="w-3 h-3" />
+            </button>
+          </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex gap-2">
-          <button
-            onClick={() => setShowEditDialog(true)}
-            className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium text-sm"
-          >
-            <Settings className="w-3.5 h-3.5" />
-            {t('host.events.manage')}
-          </button>
-          <button
-            onClick={() => setShowDeleteModal(true)}
-            disabled={deleting}
-            className="h-9 px-3 rounded-lg border border-border hover:bg-destructive/10 hover:border-destructive hover:text-destructive transition-colors disabled:opacity-50"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
-        </div>
+        {/* Collapsible Description */}
+        {event.description && (
+          <div>
+            <button
+              onClick={() => setShowDescription(!showDescription)}
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showDescription ? 'rotate-180' : ''}`} />
+              {t('host.events.eventDescription')}
+            </button>
+            {showDescription && (
+              <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                {event.description}
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {showEditDialog && (
