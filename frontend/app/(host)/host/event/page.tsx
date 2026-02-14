@@ -1,18 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from '@/lib/i18n/context';
 import { getEvents } from '@/lib/api/events';
 import type { Event } from '@/types/domain';
 import HostEventCard from '@/components/event/HostEventCard';
 import CreateEventDialog from '@/components/event/CreateEventDialog';
-import { Plus } from 'lucide-react';
+import { Plus, ChevronDown, Archive } from 'lucide-react';
 
 export default function HostEventPage() {
   const { t } = useTranslation();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showPastEvents, setShowPastEvents] = useState(false);
 
   const loadEvents = async () => {
     try {
@@ -37,6 +38,19 @@ export default function HostEventPage() {
   useEffect(() => {
     loadEvents();
   }, []);
+
+  const { activeEvents, archivedEvents } = useMemo(() => {
+    const active: Event[] = [];
+    const archived: Event[] = [];
+    for (const event of events) {
+      if (event.status === 'passed' || event.status === 'cancelled') {
+        archived.push(event);
+      } else {
+        active.push(event);
+      }
+    }
+    return { activeEvents: active, archivedEvents: archived };
+  }, [events]);
 
   const handleEventCreated = () => {
     setShowCreateDialog(false);
@@ -84,14 +98,50 @@ export default function HostEventPage() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {events.map((event) => (
-              <HostEventCard
-                key={event.event_id}
-                event={event}
-                onUpdate={loadEvents}
-              />
-            ))}
+          <div className="space-y-8">
+            {/* Active Events */}
+            {activeEvents.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {activeEvents.map((event) => (
+                  <HostEventCard
+                    key={event.event_id}
+                    event={event}
+                    onUpdate={loadEvents}
+                  />
+                ))}
+              </div>
+            ) : archivedEvents.length > 0 ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">
+                  {t('host.events.noActiveEvents')}
+                </p>
+              </div>
+            ) : null}
+
+            {/* Archived Events (passed / cancelled) */}
+            {archivedEvents.length > 0 && (
+              <div>
+                <button
+                  onClick={() => setShowPastEvents(!showPastEvents)}
+                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+                >
+                  <Archive className="w-4 h-4" />
+                  {t('host.events.archivedEvents', { count: archivedEvents.length })}
+                  <ChevronDown className={`w-4 h-4 transition-transform ${showPastEvents ? 'rotate-180' : ''}`} />
+                </button>
+                {showPastEvents && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {archivedEvents.map((event) => (
+                      <HostEventCard
+                        key={event.event_id}
+                        event={event}
+                        onUpdate={loadEvents}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -240,8 +240,16 @@
       "status": {
         "upcoming": "即将开始",
         "ongoing": "进行中",
-        "past": "已结束"
+        "past": "已结束",
+        "cancelled": "已取消",
+        "passed": "已结束"
       },
+      "archivedEvents": "已归档活动（{count}）",
+      "noActiveEvents": "暂无进行中的活动",
+      "reactivate": "重新激活",
+      "markPassed": "标记为已结束",
+      "markCancelled": "标记为取消",
+      "statusUpdateFailed": "更新状态失败",
       "eventName": "活动名称",
       "eventNamePlaceholder": "请输入活动名称",
       "eventDescription": "活动描述",

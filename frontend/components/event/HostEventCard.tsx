@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { Event } from '@/types/domain';
-import { Calendar, MapPin, Settings, Trash2, AlertTriangle, X, Users, UserCheck, ChevronDown } from 'lucide-react';
+import type { Event, EventStatus } from '@/types/domain';
+import { Calendar, MapPin, Settings, Trash2, AlertTriangle, X, Users, UserCheck, ChevronDown, Archive, RotateCcw, Ban } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from '@/lib/i18n/context';
-import { deleteEvent } from '@/lib/api/events';
+import { deleteEvent, updateEventStatus } from '@/lib/api/events';
 import { getCheckinStats } from '@/lib/api/signup';
 import EditEventDialog from '@/components/event/EditEventDialog';
 
@@ -36,6 +36,7 @@ interface HostEventCardProps {
 export default function HostEventCard({ event, onUpdate }: HostEventCardProps) {
   const { t, locale } = useTranslation();
   const [deleting, setDeleting] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDescription, setShowDescription] = useState(false);
@@ -60,25 +61,51 @@ export default function HostEventCard({ event, onUpdate }: HostEventCardProps) {
     }
   };
 
+  const handleStatusChange = async (newStatus: EventStatus) => {
+    setUpdatingStatus(true);
+    try {
+      await updateEventStatus(event.event_id, newStatus);
+      onUpdate();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      toast.error(`${t('host.events.statusUpdateFailed')}: ${errorMessage}`);
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
   const location = event.venue?.name || t('user.locationTbd');
-  const isUpcoming = new Date(event.start_time) > new Date();
-  const isPast = new Date(event.end_time) < new Date();
-  const isOngoing = !isUpcoming && !isPast;
+  const isCancelled = event.status === 'cancelled';
+  const isPassed = event.status === 'passed';
+  const isArchived = isCancelled || isPassed;
 
-  const statusColor = isOngoing
-    ? 'bg-green-100 text-green-800'
-    : isUpcoming
-      ? 'bg-blue-100 text-blue-800'
-      : 'bg-gray-100 text-gray-800';
+  // For active events, determine time-based sub-status
+  const isUpcoming = !isArchived && new Date(event.start_time) > new Date();
+  const isTimePast = !isArchived && new Date(event.end_time) < new Date();
+  const isOngoing = !isArchived && !isUpcoming && !isTimePast;
 
-  const statusText = isOngoing
-    ? t('host.events.status.ongoing')
-    : isUpcoming
-      ? t('host.events.status.upcoming')
-      : t('host.events.status.past');
+  const statusColor = isCancelled
+    ? 'bg-red-100 text-red-800'
+    : isPassed
+      ? 'bg-gray-100 text-gray-800'
+      : isOngoing
+        ? 'bg-green-100 text-green-800'
+        : isUpcoming
+          ? 'bg-blue-100 text-blue-800'
+          : 'bg-gray-100 text-gray-800';
+
+  const statusText = isCancelled
+    ? t('host.events.status.cancelled')
+    : isPassed
+      ? t('host.events.status.passed')
+      : isOngoing
+        ? t('host.events.status.ongoing')
+        : isUpcoming
+          ? t('host.events.status.upcoming')
+          : t('host.events.status.past');
 
   return (
-    <div className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+    <div className={`bg-card border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow ${isArchived ? 'opacity-75' : ''}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {event.cover_image && (
         <img src={event.cover_image} alt={event.name} className="w-full h-32 object-cover" />
@@ -120,13 +147,44 @@ export default function HostEventCard({ event, onUpdate }: HostEventCardProps) {
             </span>
           </div>
           <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => setShowEditDialog(true)}
-              className="flex items-center gap-1 h-7 px-2.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium text-xs"
-            >
-              <Settings className="w-3 h-3" />
-              {t('host.events.manage')}
-            </button>
+            {/* Status action buttons */}
+            {isArchived ? (
+              <button
+                onClick={() => handleStatusChange('active')}
+                disabled={updatingStatus}
+                className="flex items-center gap-1 h-7 px-2.5 rounded-md border border-border hover:bg-primary/10 hover:border-primary hover:text-primary transition-colors font-medium text-xs disabled:opacity-50"
+                title={t('host.events.reactivate')}
+              >
+                <RotateCcw className="w-3 h-3" />
+                {t('host.events.reactivate')}
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => setShowEditDialog(true)}
+                  className="flex items-center gap-1 h-7 px-2.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium text-xs"
+                >
+                  <Settings className="w-3 h-3" />
+                  {t('host.events.manage')}
+                </button>
+                <button
+                  onClick={() => handleStatusChange('passed')}
+                  disabled={updatingStatus}
+                  className="h-7 px-2 rounded-md border border-border hover:bg-muted transition-colors disabled:opacity-50"
+                  title={t('host.events.markPassed')}
+                >
+                  <Archive className="w-3 h-3" />
+                </button>
+                <button
+                  onClick={() => handleStatusChange('cancelled')}
+                  disabled={updatingStatus}
+                  className="h-7 px-2 rounded-md border border-border hover:bg-orange-50 hover:border-orange-400 hover:text-orange-600 transition-colors disabled:opacity-50"
+                  title={t('host.events.markCancelled')}
+                >
+                  <Ban className="w-3 h-3" />
+                </button>
+              </>
+            )}
             <button
               onClick={() => setShowDeleteModal(true)}
               disabled={deleting}

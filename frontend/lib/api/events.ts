@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase/client';
-import type { Event } from '@/types/domain';
+import type { Event, EventStatus } from '@/types/domain';
 
 /**
  * 获取所有活动（关联场地信息）
@@ -48,7 +48,7 @@ export async function getEventByCode(eventCode: string): Promise<Event | null> {
  */
 export async function updateEvent(
   eventId: string,
-  updates: Partial<Pick<Event, 'name' | 'description' | 'start_time' | 'end_time' | 'venue_id' | 'cover_image'>>
+  updates: Partial<Pick<Event, 'name' | 'description' | 'start_time' | 'end_time' | 'venue_id' | 'cover_image' | 'status'>>
 ): Promise<Event> {
   const { data, error } = await supabase
     .from('evt_events')
@@ -75,6 +75,13 @@ export async function createEvent(
 
   if (error) throw error;
   return data;
+}
+
+/**
+ * 更新活动状态
+ */
+export async function updateEventStatus(eventId: string, status: EventStatus): Promise<Event> {
+  return updateEvent(eventId, { status });
 }
 
 /**

@@ -2,6 +2,8 @@
  * Domain Types - 核心业务实体定义
  */
 
+export type EventStatus = 'active' | 'cancelled' | 'passed';
+
 export interface Event {
   event_id: string;
   venue_id: string | null;
@@ -9,6 +11,7 @@ export interface Event {
   description: string | null;
   start_time: string;
   end_time: string;
+  status: EventStatus;
   created_at: string;
   checkin_code?: string | null;
   checkin_qr_enabled?: boolean;

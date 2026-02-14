@@ -22,6 +22,13 @@ export default function CheckinPage() {
   const [showOtherEvents, setShowOtherEvents] = useState(false);
 
   const { todayEvents, otherEvents } = useMemo(() => {
+    const now = Date.now();
+    const sortByProximity = (a: Event, b: Event) => {
+      const diffA = Math.abs(new Date(a.start_time).getTime() - now);
+      const diffB = Math.abs(new Date(b.start_time).getTime() - now);
+      return diffA - diffB;
+    };
+
     const today: Event[] = [];
     const other: Event[] = [];
 
@@ -32,6 +39,9 @@ export default function CheckinPage() {
         other.push(event);
       }
     });
+
+    today.sort(sortByProximity);
+    other.sort(sortByProximity);
 
     return { todayEvents: today, otherEvents: other };
   }, [events]);

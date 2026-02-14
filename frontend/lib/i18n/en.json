@@ -238,8 +238,16 @@
       "status": {
         "upcoming": "Upcoming",
         "ongoing": "Ongoing",
-        "past": "Past"
+        "past": "Past",
+        "cancelled": "Cancelled",
+        "passed": "Ended"
       },
+      "archivedEvents": "Archived Events ({count})",
+      "noActiveEvents": "No active events",
+      "reactivate": "Reactivate",
+      "markPassed": "Mark as Ended",
+      "markCancelled": "Mark as Cancelled",
+      "statusUpdateFailed": "Failed to update status",
       "eventName": "Event Name",
       "eventNamePlaceholder": "Enter event name",
       "eventDescription": "Description",

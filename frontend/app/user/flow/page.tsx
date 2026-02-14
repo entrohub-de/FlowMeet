@@ -6,9 +6,10 @@ import { useTranslation } from '@/lib/i18n/context';
 import FullscreenBadge from '@/components/event/FullscreenBadge';
 import { useActiveFlow } from '@/hooks/useActiveFlow';
 import { supabase } from '@/lib/supabase/client';
-import { getUserCheckinStatus } from '@/lib/api/checkin';
-import { getEvent } from '@/lib/api/events';
-import { EventCheckinCard } from '@/components/checkin/EventCheckinCard';
+import { getUserCheckinStatus, getAllUserCheckinStatuses } from '@/lib/api/checkin';
+import { getUserSignedUpEvents } from '@/lib/api/signup';
+
+import CheckinCardWallet from '@/components/checkin/CheckinCardWallet';
 import ActiveStepCard from '@/components/workflow/flow-control/ActiveStepCard';
 import FlowStepCardReadOnly from '@/components/workflow/flow-control/FlowStepCardReadOnly';
 import MatchingStepCard from '@/components/workflow/flow-control/MatchingStepCard';
@@ -22,9 +23,10 @@ export default function UserFlowPage() {
   const [checkinChecked, setCheckinChecked] = useState(false);
   const [isCheckedIn, setIsCheckedIn] = useState(false);
   const [showCheckinCard, setShowCheckinCard] = useState(false);
-  const [currentEvent, setCurrentEvent] = useState<Event | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string>('');
   const [showBadge, setShowBadge] = useState(false);
+  const [signedUpEvents, setSignedUpEvents] = useState<Event[]>([]);
+  const [checkedInMap, setCheckedInMap] = useState<Map<string, boolean>>(new Map());
   const {
     loading,
     selectedEventId,
@@ -56,14 +58,24 @@ export default function UserFlowPage() {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user || cancelled) return;
         setCurrentUserId(user.id);
-        const [statuses, event] = await Promise.all([
+        const [statuses, allEvents, allStatuses] = await Promise.all([
           getUserCheckinStatus(user.id, selectedEventId),
-          getEvent(selectedEventId),
+          getUserSignedUpEvents(user.id),
+          getAllUserCheckinStatuses(user.id),
         ]);
         if (!cancelled) {
           setIsCheckedIn(statuses.some(s => s.checked_in));
           setCheckinChecked(true);
-          setCurrentEvent(event);
+          setCheckedInMap(allStatuses);
+
+          // 按最临近当下日期排序（|start_time - now| 最小的排前面）
+          const now = Date.now();
+          const sorted = [...allEvents].sort((a, b) => {
+            const diffA = Math.abs(new Date(a.start_time).getTime() - now);
+            const diffB = Math.abs(new Date(b.start_time).getTime() - now);
+            return diffA - diffB;
+          });
+          setSignedUpEvents(sorted);
         }
       } catch {
         if (!cancelled) setCheckinChecked(true);
@@ -143,18 +155,18 @@ export default function UserFlowPage() {
               {t('userFlow.goCheckin')}
             </button>
 
-            {showCheckinCard && currentEvent && currentUserId && (
+            {showCheckinCard && currentUserId && signedUpEvents.length > 0 && (
               <div className="mt-4 relative">
                 <button
                   onClick={() => setShowCheckinCard(false)}
-                  className="absolute top-2 right-2 z-10 p-1 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                  className="absolute -top-1 right-1 z-20 p-1 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
                 >
                   <X className="w-4 h-4 text-gray-500" />
                 </button>
-                <EventCheckinCard
-                  event={currentEvent}
+                <CheckinCardWallet
+                  events={signedUpEvents}
                   userId={currentUserId}
-                  isCheckedIn={isCheckedIn}
+                  checkedInMap={checkedInMap}
                 />
               </div>
             )}
