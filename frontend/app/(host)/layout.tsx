@@ -34,7 +34,7 @@ export default function HostLayout({
   return (
     <RoleRouteGuard area="host">
       <div>
-        <Navigation items={navItems} rightSlot={<ProfileAvatar />} />
+        <Navigation items={navItems} rightSlot={<ProfileAvatar />} logoHref="/host" />
         {children}
       </div>
     </RoleRouteGuard>

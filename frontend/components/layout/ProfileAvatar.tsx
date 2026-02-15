@@ -40,7 +40,9 @@ export default function ProfileAvatar() {
     router.push('/');
   };
 
-  const profileHref = pathname?.startsWith('/host') ? '/host/profile' : '/user/profile';
+  const isAdmin = pathname?.startsWith('/admin');
+  const isHost = pathname?.startsWith('/host');
+  const profileHref = isHost ? '/host/profile' : '/user/profile';
 
   return (
     <div ref={menuRef} className="relative ml-auto">
@@ -63,7 +65,7 @@ export default function ProfileAvatar() {
           >
             {t('profile.title')}
           </button>
-          {!pathname?.startsWith('/host') && (
+          {!isHost && !isAdmin && (
             <button
               onClick={() => { setOpen(false); router.push('/user/expectations'); }}
               className="w-full px-button h-button text-sm text-muted-foreground hover:bg-secondary transition-colors cursor-pointer rounded-button text-left"

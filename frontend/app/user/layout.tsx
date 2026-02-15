@@ -31,6 +31,10 @@ export default function UserLayout({
       ]
     },
     {
+      label: t('nav.user.myEvents'),
+      href: '/user/my-events',
+    },
+    {
       label: t('nav.user.onlineConnect'),
       children: [
         { label: t('nav.user.connections'), href: '/user/connections' },

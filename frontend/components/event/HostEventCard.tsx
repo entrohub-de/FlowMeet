@@ -61,10 +61,17 @@ export default function HostEventCard({ event, onUpdate }: HostEventCardProps) {
     }
   };
 
+  const statusLabel: Record<string, string> = {
+    passed: t('host.events.statusPassed'),
+    cancelled: t('host.events.statusCancelled'),
+    active: t('host.events.statusReactivated'),
+  };
+
   const handleStatusChange = async (newStatus: EventStatus) => {
     setUpdatingStatus(true);
     try {
       await updateEventStatus(event.event_id, newStatus);
+      toast.success(t('host.events.statusUpdateSuccess', { name: event.name, status: statusLabel[newStatus] }));
       onUpdate();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -149,7 +156,7 @@ export default function HostEventCard({ event, onUpdate }: HostEventCardProps) {
           </div>
           <div className="flex items-center gap-1.5">
             {/* Status action buttons */}
-            {isArchived ? (
+            {isCancelled ? (
               <button
                 onClick={() => handleStatusChange('active')}
                 disabled={updatingStatus}
@@ -159,15 +166,7 @@ export default function HostEventCard({ event, onUpdate }: HostEventCardProps) {
                 <RotateCcw className="w-3 h-3" />
                 {t('host.events.reactivate')}
               </button>
-            ) : isTimePast ? (
-              <button
-                onClick={() => setShowEditDialog(true)}
-                className="flex items-center gap-1 h-7 px-2.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium text-xs"
-              >
-                <Settings className="w-3 h-3" />
-                {t('host.events.manage')}
-              </button>
-            ) : (
+            ) : !isEnded ? (
               <>
                 <button
                   onClick={() => setShowEditDialog(true)}
@@ -193,7 +192,7 @@ export default function HostEventCard({ event, onUpdate }: HostEventCardProps) {
                   <Ban className="w-3 h-3" />
                 </button>
               </>
-            )}
+            ) : null}
             <button
               onClick={() => setShowDeleteModal(true)}
               disabled={deleting}

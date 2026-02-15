@@ -20,7 +20,7 @@ function normalizeRole(rawRole: string | null | undefined): AppRole {
 }
 
 function getHomeByRole(role: AppRole): string {
-  if (role === 'admin') return '/admin/test/simulator';
+  if (role === 'admin') return '/admin/hosts';
   if (role === 'host') return '/host';
   return '/user';
 }

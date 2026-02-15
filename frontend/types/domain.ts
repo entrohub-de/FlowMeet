@@ -16,6 +16,8 @@ export interface Event {
   checkin_code?: string | null;
   checkin_qr_enabled?: boolean;
   cover_image?: string | null;
+  created_by?: string | null;
+  max_participants?: number | null;
   venue?: Venue;
 }
 
