@@ -328,8 +328,8 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
                 </div>
               )}
 
-              {/* video/canvas 始终挂载，保证 ref 可用；未启动时隐藏 */}
-              <div className={`${scanning ? (isFullscreen ? 'flex-1 flex flex-col gap-3' : 'space-y-4') : 'hidden'}`}>
+              {/* video/canvas 始终挂载，保证 ref 可用；未启动时用 opacity-0 隐藏（hidden 会导致视频不加载） */}
+              <div className={`${scanning ? (isFullscreen ? 'flex-1 flex flex-col gap-3' : 'space-y-4') : 'opacity-0 absolute pointer-events-none'}`}>
                 <div className={`relative bg-black rounded-lg overflow-hidden transition-all duration-300 ${
                   isFullscreen ? 'flex-1 min-h-0' : 'aspect-video'
                 } ${
