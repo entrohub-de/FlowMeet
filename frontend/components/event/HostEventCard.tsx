@@ -4,29 +4,11 @@ import { useState, useEffect } from 'react';
 import type { Event, EventStatus } from '@/types/domain';
 import { Calendar, MapPin, Settings, Trash2, AlertTriangle, X, Users, UserCheck, ChevronDown, Archive, RotateCcw, Ban } from 'lucide-react';
 import { toast } from 'sonner';
+import { formatDateRange } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n/context';
 import { deleteEvent, updateEventStatus } from '@/lib/api/events';
 import { getCheckinStats } from '@/lib/api/signup';
 import EditEventDialog from '@/components/event/EditEventDialog';
-
-function formatDateRange(startStr: string, endStr: string, locale: string): string {
-  const loc = locale === 'zh' ? 'zh-CN' : 'en-US';
-  const start = new Date(startStr);
-  const end = new Date(endStr);
-  const dateOpts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
-  const timeOpts: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit' };
-  const sameDay = start.toDateString() === end.toDateString();
-
-  const datePart = start.toLocaleDateString(loc, dateOpts);
-  const startTime = start.toLocaleTimeString(loc, timeOpts);
-  const endTime = end.toLocaleTimeString(loc, timeOpts);
-
-  if (sameDay) {
-    return `${datePart}  ${startTime} – ${endTime}`;
-  }
-  const endDate = end.toLocaleDateString(loc, dateOpts);
-  return `${datePart} ${startTime} – ${endDate} ${endTime}`;
-}
 
 interface HostEventCardProps {
   event: Event;

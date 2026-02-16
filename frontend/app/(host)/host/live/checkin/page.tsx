@@ -26,14 +26,12 @@ export default function CheckinPage() {
     const loadEvents = async () => {
       try {
         const eventsData = await getEvents();
-        const todayStart = new Date();
-        todayStart.setHours(0, 0, 0, 0);
-        const upcomingEvents = eventsData.filter(
-          (e) => new Date(e.start_time) >= todayStart
+        const activeEvents = eventsData.filter(
+          (e) => e.status === 'active'
         );
-        setEvents(upcomingEvents);
-        if (upcomingEvents.length > 0) {
-          setSelectedEventId(upcomingEvents[0].event_id);
+        setEvents(activeEvents);
+        if (activeEvents.length > 0) {
+          setSelectedEventId(activeEvents[0].event_id);
         }
       } catch (error) {
         console.error('Failed to load events:', error);
@@ -93,10 +91,17 @@ export default function CheckinPage() {
         <div className="mb-4 space-y-2">
           {events.length > 0 && (
             <CustomSelect
-              options={events.map((event) => ({
-                value: event.event_id,
-                label: event.name,
-              }))}
+              options={events.map((event) => {
+                const date = new Date(event.start_time);
+                const dateStr = date.toLocaleString(
+                  locale === 'zh' ? 'zh-CN' : 'en-US',
+                  { month: 'short', day: 'numeric', weekday: 'short', hour: '2-digit', minute: '2-digit' }
+                );
+                return {
+                  value: event.event_id,
+                  label: `${event.name}（${dateStr}）`,
+                };
+              })}
               value={selectedEventId}
               onChange={setSelectedEventId}
               placeholder={t('checkin.selectEvent')}

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import type { Event } from '@/types/domain';
 import { Calendar, MapPin, QrCode, CheckCircle2, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { formatDateRange } from '@/lib/utils';
 import { signupForEvent, cancelSignup, getUserSignupStatus } from '@/lib/api/signup';
 import { getUserCheckinStatus } from '@/lib/api/checkin';
 import { supabase } from '@/lib/supabase/client';
@@ -24,25 +25,6 @@ function generateNumericCode(eventId: string, userId: string, checkinCode: strin
 
 function generateQRValue(eventId: string, userId: string, checkinCode: string): string {
   return btoa(`${eventId}/${userId}/${checkinCode}`);
-}
-
-function formatDateRange(startStr: string, endStr: string, locale: string): string {
-  const loc = locale === 'zh' ? 'zh-CN' : 'en-US';
-  const start = new Date(startStr);
-  const end = new Date(endStr);
-  const dateOpts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
-  const timeOpts: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit' };
-  const sameDay = start.toDateString() === end.toDateString();
-
-  const datePart = start.toLocaleDateString(loc, dateOpts);
-  const startTime = start.toLocaleTimeString(loc, timeOpts);
-  const endTime = end.toLocaleTimeString(loc, timeOpts);
-
-  if (sameDay) {
-    return `${datePart}  ${startTime} – ${endTime}`;
-  }
-  const endDate = end.toLocaleDateString(loc, dateOpts);
-  return `${datePart} ${startTime} – ${endDate} ${endTime}`;
 }
 
 interface EventCardProps {
