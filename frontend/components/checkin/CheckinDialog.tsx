@@ -30,6 +30,7 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
   const streamRef = useRef<MediaStream | null>(null);
   const scanIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const processingRef = useRef(false);
+  const handleCheckinRef = useRef<(code: string) => Promise<void>>(null!);
 
   // 清理摄像头
   const cleanupCamera = useCallback(() => {
@@ -82,7 +83,7 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
 
       setTimeout(() => {
         setScanStatus('processing');
-        handleCheckin(code.data);
+        handleCheckinRef.current(code.data);
       }, 300);
     } else {
       setQrDetected(false);
@@ -208,6 +209,7 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
       setLoading(false);
     }
   };
+  handleCheckinRef.current = handleCheckin;
 
   const handleManualSubmit = (e: React.FormEvent) => {
     e.preventDefault();
