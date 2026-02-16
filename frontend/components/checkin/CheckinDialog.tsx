@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { X, QrCode, Keyboard, Camera, CheckCircle } from 'lucide-react';
 import { checkInByCode } from '@/lib/api/checkin';
 import { useTranslation } from '@/lib/i18n/context';
@@ -16,13 +16,14 @@ type TabType = 'scan' | 'manual';
 
 export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProps) {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<TabType>('manual');
+  const [activeTab, setActiveTab] = useState<TabType>('scan');
   const [manualCode, setManualCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [scanning, setScanning] = useState(false);
   const [qrDetected, setQrDetected] = useState(false);
   const [scanStatus, setScanStatus] = useState<'idle' | 'scanning' | 'detected' | 'processing'>('idle');
+  const [checkinCount, setCheckinCount] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -30,7 +31,7 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
   const processingRef = useRef(false);
 
   // 清理摄像头
-  const cleanupCamera = () => {
+  const cleanupCamera = useCallback(() => {
     if (scanIntervalRef.current) {
       clearInterval(scanIntervalRef.current);
       scanIntervalRef.current = null;
@@ -43,44 +44,14 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
     setQrDetected(false);
     setScanStatus('idle');
     processingRef.current = false;
-  };
+  }, []);
 
   useEffect(() => {
     return cleanupCamera;
-  }, []);
-
-  // 启动摄像头
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: 'environment',
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        }
-      });
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        streamRef.current = stream;
-        setScanning(true);
-        setScanStatus('scanning');
-
-        // 等待视频加载完成后开始扫描
-        videoRef.current.onloadedmetadata = () => {
-          scanIntervalRef.current = setInterval(() => {
-            scanQRCode();
-          }, 100); // 更频繁的扫描以获得更好的响应
-        };
-      }
-    } catch (error) {
-      console.error('Failed to start camera:', error);
-      setMessage({ type: 'error', text: t('checkin.dialog.cameraError') });
-    }
-  };
+  }, [cleanupCamera]);
 
   // 扫描二维码
-  const scanQRCode = () => {
+  const scanQRCode = useCallback(() => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
 
@@ -100,18 +71,14 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
     });
 
     if (code && code.data) {
-      // 检测到二维码
       setQrDetected(true);
       setScanStatus('detected');
-
-      // 停止扫描并处理
       processingRef.current = true;
       if (scanIntervalRef.current) {
         clearInterval(scanIntervalRef.current);
         scanIntervalRef.current = null;
       }
 
-      // 给用户视觉反馈后处理签到
       setTimeout(() => {
         setScanStatus('processing');
         handleCheckin(code.data);
@@ -119,7 +86,59 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
     } else {
       setQrDetected(false);
     }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventId]);
+
+  // 启动摄像头
+  const startCamera = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: 'environment',
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
+      });
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        streamRef.current = stream;
+        setScanning(true);
+        setScanStatus('scanning');
+
+        videoRef.current.onloadedmetadata = () => {
+          scanIntervalRef.current = setInterval(() => {
+            scanQRCode();
+          }, 100);
+        };
+      }
+    } catch (error) {
+      console.error('Failed to start camera:', error);
+      setMessage({ type: 'error', text: t('checkin.dialog.cameraError') });
+    }
+  }, [scanQRCode, t]);
+
+  // 打开时自动启动相机
+  useEffect(() => {
+    if (activeTab === 'scan' && !scanning && scanStatus === 'idle') {
+      startCamera();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  // 重置扫描状态（连续扫描）
+  const resumeScanning = useCallback(() => {
+    setMessage(null);
+    setQrDetected(false);
+    setScanStatus('scanning');
+    processingRef.current = false;
+
+    if (videoRef.current && streamRef.current && !scanIntervalRef.current) {
+      scanIntervalRef.current = setInterval(() => {
+        scanQRCode();
+      }, 100);
+    }
+  }, [scanQRCode]);
 
   // 处理签到
   const handleCheckin = async (code: string) => {
@@ -135,20 +154,36 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
       const result = await checkInByCode(eventId, code);
 
       if (result.success) {
+        setCheckinCount(prev => prev + 1);
+        onSuccess();
         setMessage({
           type: 'success',
           text: t('checkin.dialog.checkinSuccess', { userName: result.userName || t('checkin.dialog.defaultUser') })
         });
         setManualCode('');
-        setTimeout(() => {
-          onSuccess();
-          onClose();
-        }, 1500);
+
+        // 扫描模式下 2 秒后自动恢复扫描
+        if (activeTab === 'scan') {
+          setTimeout(() => {
+            resumeScanning();
+          }, 2000);
+        }
       } else {
         setMessage({ type: 'error', text: result.message });
+        // 错误时也恢复扫描
+        if (activeTab === 'scan') {
+          setTimeout(() => {
+            resumeScanning();
+          }, 2000);
+        }
       }
     } catch {
       setMessage({ type: 'error', text: t('checkin.dialog.checkinError') });
+      if (activeTab === 'scan') {
+        setTimeout(() => {
+          resumeScanning();
+        }, 2000);
+      }
     } finally {
       setLoading(false);
     }
@@ -159,14 +194,33 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
     handleCheckin(manualCode);
   };
 
+  const handleClose = () => {
+    cleanupCamera();
+    onClose();
+  };
+
+  // 手机上扫描模式时全屏显示
+  const isFullscreen = activeTab === 'scan' && scanning;
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-card border border-border rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-0 md:p-4">
+      <div className={`bg-card border border-border shadow-xl w-full overflow-hidden transition-all duration-300 ${
+        isFullscreen
+          ? 'h-full md:h-auto md:max-h-[90vh] md:max-w-lg md:rounded-xl'
+          : 'h-full md:h-auto md:max-h-[90vh] max-w-lg md:rounded-xl'
+      }`}>
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-border">
-          <h2 className="text-xl font-semibold text-foreground">{t('checkin.dialog.title')}</h2>
+        <div className="flex items-center justify-between px-4 py-3 md:p-6 border-b border-border">
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg md:text-xl font-semibold text-foreground">{t('checkin.dialog.title')}</h2>
+            {checkinCount > 0 && (
+              <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                {checkinCount}
+              </span>
+            )}
+          </div>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="p-2 hover:bg-muted rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
@@ -180,7 +234,7 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
               setActiveTab('manual');
               cleanupCamera();
             }}
-            className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 font-medium transition-colors ${
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 md:px-6 md:py-4 font-medium transition-colors ${
               activeTab === 'manual'
                 ? 'text-primary border-b-2 border-primary'
                 : 'text-muted-foreground hover:text-foreground'
@@ -194,7 +248,7 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
               setActiveTab('scan');
               setMessage(null);
             }}
-            className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 font-medium transition-colors ${
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 md:px-6 md:py-4 font-medium transition-colors ${
               activeTab === 'scan'
                 ? 'text-primary border-b-2 border-primary'
                 : 'text-muted-foreground hover:text-foreground'
@@ -206,7 +260,7 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className={`${isFullscreen ? 'flex-1 flex flex-col p-3 md:p-6' : 'p-4 md:p-6'}`}>
           {activeTab === 'manual' ? (
             <form onSubmit={handleManualSubmit} className="space-y-4">
               <div>
@@ -243,25 +297,20 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
               </button>
             </form>
           ) : (
-            <div className="space-y-4">
+            <div className={`${isFullscreen ? 'flex-1 flex flex-col' : 'space-y-4'}`}>
               {!scanning ? (
                 <div className="text-center py-8">
-                  <QrCode className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground mb-4">
+                  <Camera className="w-16 h-16 mx-auto mb-4 text-muted-foreground animate-pulse" />
+                  <p className="text-muted-foreground">
                     {t('checkin.dialog.startCameraHint')}
                   </p>
-                  <button
-                    onClick={startCamera}
-                    className="px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors inline-flex items-center gap-2"
-                  >
-                    <Camera className="w-5 h-5" />
-                    {t('checkin.dialog.startCameraButton')}
-                  </button>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  <div className={`relative bg-black rounded-lg overflow-hidden aspect-video transition-all duration-300 ${
-                    qrDetected ? 'ring-4 ring-green-500' : 'ring-2 ring-border'
+                <div className={`${isFullscreen ? 'flex-1 flex flex-col gap-3' : 'space-y-4'}`}>
+                  <div className={`relative bg-black rounded-lg overflow-hidden transition-all duration-300 ${
+                    isFullscreen ? 'flex-1 min-h-0' : 'aspect-video'
+                  } ${
+                    qrDetected ? 'ring-4 ring-green-500' : ''
                   }`}>
                     <video
                       ref={videoRef}
@@ -272,9 +321,9 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
                     />
                     <canvas ref={canvasRef} className="hidden" />
 
-                    {/* 扫描框 */}
+                    {/* 扫描框 - 响应式尺寸 */}
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="relative w-64 h-64 border-2 border-white/50 rounded-lg">
+                      <div className="relative w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 border-2 border-white/50 rounded-lg">
                         {/* 四角标记 */}
                         <div className="absolute -top-1 -left-1 w-8 h-8 border-t-4 border-l-4 border-primary rounded-tl-lg"></div>
                         <div className="absolute -top-1 -right-1 w-8 h-8 border-t-4 border-r-4 border-primary rounded-tr-lg"></div>
@@ -298,8 +347,8 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
                     </div>
 
                     {/* 状态提示 */}
-                    <div className="absolute top-4 left-4 right-4">
-                      <div className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    <div className="absolute top-3 left-3 right-3">
+                      <div className={`inline-flex px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
                         scanStatus === 'scanning' ? 'bg-blue-500/80 text-white' :
                         scanStatus === 'detected' ? 'bg-green-500/80 text-white' :
                         scanStatus === 'processing' ? 'bg-yellow-500/80 text-white' :
@@ -310,26 +359,39 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
                         {scanStatus === 'processing' && t('checkin.dialog.processing')}
                       </div>
                     </div>
+
+                    {/* 签到结果浮层 */}
+                    {message && (
+                      <div className="absolute bottom-3 left-3 right-3">
+                        <div className={`px-4 py-3 rounded-lg text-sm font-medium ${
+                          message.type === 'success'
+                            ? 'bg-green-500/90 text-white'
+                            : 'bg-red-500/90 text-white'
+                        }`}>
+                          {message.text}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  <p className="text-sm text-muted-foreground text-center">
+                  <p className="text-sm text-muted-foreground text-center shrink-0">
                     {t('checkin.dialog.alignQrCode')}
                   </p>
 
                   <button
-                    onClick={cleanupCamera}
+                    onClick={handleClose}
                     disabled={loading}
-                    className="w-full px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors disabled:opacity-50"
+                    className="w-full px-4 py-2.5 border border-border rounded-lg hover:bg-muted transition-colors disabled:opacity-50 shrink-0 font-medium"
                   >
-                    {t('checkin.dialog.stopScanButton')}
+                    {t('checkin.dialog.closeDialog')}
                   </button>
                 </div>
               )}
             </div>
           )}
 
-          {/* Message */}
-          {message && (
+          {/* Message - 仅在非扫描模式下显示在底部 */}
+          {message && activeTab !== 'scan' && (
             <div
               className={`mt-4 p-4 rounded-lg ${
                 message.type === 'success'
