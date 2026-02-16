@@ -25,6 +25,10 @@ export default function AdminLayout({
       ],
     },
     {
+      label: t('nav.admin.adManagement'),
+      href: '/admin/ads',
+    },
+    {
       label: t('nav.admin.test'),
       children: [
         { label: t('nav.admin.simulator'), href: '/admin/test/simulator' },

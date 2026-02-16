@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase/client';
 import type { Event } from '@/types/domain';
 import EventCard from '@/components/event/EventCard';
 import PastEventCard from '@/components/event/PastEventCard';
+import AdBanner from '@/components/ads/AdBanner';
 import { CalendarCheck, Search, History, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function EventPage() {
@@ -95,6 +96,9 @@ export default function EventPage() {
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-4xl space-y-8">
+      {/* Ad Banner */}
+      <AdBanner />
+
       {/* My Upcoming Events */}
       <section className="space-y-4">
         <div className="flex items-center gap-2">

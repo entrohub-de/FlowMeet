@@ -14,6 +14,7 @@
     "deleting": "删除中...",
     "confirmDelete": "确认删除",
     "save": "保存",
+    "saving": "保存中...",
     "saved": "已保存"
   },
   "nav": {
@@ -31,6 +32,7 @@
       "userManagement": "用户管理",
       "allUsers": "所有用户",
       "eventOverview": "活动总览",
+      "adManagement": "广告管理",
       "simulator": "多用户模拟器"
     },
     "user": {
@@ -92,6 +94,23 @@
     "deleteConfirm": "删除后无法恢复，确定要删除这个活动吗？",
     "deleteSuccess": "活动已删除",
     "deleteFailed": "删除失败"
+  },
+  "dashboard": {
+    "greeting": "Hi {name}",
+    "greetingDefault": "Hi，欢迎回来",
+    "upcomingSummary": "你有 {count} 个即将开始的活动",
+    "noUpcomingSummary": "目前没有即将开始的活动",
+    "liveNow": "正在进行中",
+    "pendingConnections": "你有 {count} 个待处理的连接请求",
+    "myUpcoming": "我的活动",
+    "viewAll": "查看全部",
+    "noUpcomingEvents": "还没有报名任何活动",
+    "goDiscover": "去发现活动",
+    "myConnections": "我的连接",
+    "noConnections": "还没有建立连接，参加活动后即可认识新朋友",
+    "connectionCount": "{count} 个连接",
+    "today": "今天",
+    "tomorrow": "明天"
   },
   "userFlow": {
     "title": "活动流程",
@@ -742,6 +761,41 @@
         "passed": "已结束",
         "cancelled": "已取消"
       }
+    },
+    "ads": {
+      "title": "广告管理",
+      "create": "新建广告",
+      "edit": "编辑广告",
+      "adTitle": "广告标题",
+      "titlePlaceholder": "输入广告标题",
+      "description": "描述",
+      "descriptionPlaceholder": "输入广告描述...",
+      "imageUrl": "广告图片",
+      "uploadImage": "上传图片",
+      "linkUrl": "链接地址",
+      "eventScope": "投放范围",
+      "global": "全局（所有活动）",
+      "specificEvent": "指定活动",
+      "sortOrder": "排序权重",
+      "startDate": "开始日期",
+      "endDate": "结束日期",
+      "isActive": "启用状态",
+      "active": "启用",
+      "inactive": "禁用",
+      "activate": "启用",
+      "deactivate": "停用",
+      "noAds": "暂无广告",
+      "noImage": "无图片",
+      "confirmDelete": "确定删除此广告？",
+      "created": "广告创建成功",
+      "updated": "广告更新成功",
+      "deleted": "广告已删除",
+      "createFailed": "广告创建失败",
+      "updateFailed": "广告更新失败",
+      "deleteFailed": "广告删除失败",
+      "loadFailed": "加载广告失败",
+      "imageUploadFailed": "图片上传失败",
+      "sponsored": "Ad"
     },
     "eventDetail": {
       "feedbackTab": "评价反馈",

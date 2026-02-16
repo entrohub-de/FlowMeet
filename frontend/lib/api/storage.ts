@@ -69,3 +69,21 @@ export async function deleteUserAvatar(userId: string): Promise<void> {
     await supabase.storage.from(AVATAR_BUCKET).remove(paths);
   }
 }
+
+/* ── 广告图片 ── */
+
+const AD_BUCKET = 'ad-images';
+
+export async function uploadAdImage(file: File, adId: string): Promise<string> {
+  const ext = file.name.split('.').pop() || 'jpg';
+  const path = `${adId}/image.${ext}`;
+
+  const { error } = await supabase.storage
+    .from(AD_BUCKET)
+    .upload(path, file, { upsert: true });
+
+  if (error) throw error;
+
+  const { data } = supabase.storage.from(AD_BUCKET).getPublicUrl(path);
+  return data.publicUrl;
+}
