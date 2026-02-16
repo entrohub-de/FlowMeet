@@ -2,8 +2,9 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { X, QrCode, Keyboard, Camera, CheckCircle } from 'lucide-react';
-import { checkInByCode } from '@/lib/api/checkin';
+import { checkInByCode, type CheckinErrorCode } from '@/lib/api/checkin';
 import { useTranslation } from '@/lib/i18n/context';
+import { toast } from 'sonner';
 import jsQR from 'jsqr';
 
 interface CheckinDialogProps {
@@ -140,6 +141,21 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
     }
   }, [scanQRCode]);
 
+  // 错误码 → i18n key 映射
+  const getErrorMessage = (errorCode?: CheckinErrorCode): string => {
+    const map: Record<CheckinErrorCode, string> = {
+      EVENT_NOT_FOUND: t('checkin.dialog.errors.eventNotFound'),
+      INVALID_CODE: t('checkin.dialog.errors.invalidCode'),
+      INVALID_CODE_FORMAT: t('checkin.dialog.errors.invalidCodeFormat'),
+      WRONG_EVENT: t('checkin.dialog.errors.wrongEvent'),
+      NOT_SIGNED_UP: t('checkin.dialog.errors.notSignedUp'),
+      ALREADY_CHECKED_IN: t('checkin.dialog.errors.alreadyCheckedIn'),
+      SIGNUP_FETCH_FAILED: t('checkin.dialog.errors.fetchFailed'),
+      CHECKIN_FAILED: t('checkin.dialog.checkinError'),
+    };
+    return errorCode ? map[errorCode] : t('checkin.dialog.checkinError');
+  };
+
   // 处理签到
   const handleCheckin = async (code: string) => {
     if (!code.trim()) {
@@ -154,12 +170,14 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
       const result = await checkInByCode(eventId, code);
 
       if (result.success) {
+        const userName = result.userName || t('checkin.dialog.defaultUser');
         setCheckinCount(prev => prev + 1);
         onSuccess();
         setMessage({
           type: 'success',
-          text: t('checkin.dialog.checkinSuccess', { userName: result.userName || t('checkin.dialog.defaultUser') })
+          text: t('checkin.dialog.checkinSuccess', { userName })
         });
+        toast.success(t('checkin.dialog.checkinSuccess', { userName }));
         setManualCode('');
 
         // 扫描模式下 2 秒后自动恢复扫描
@@ -169,7 +187,9 @@ export function CheckinDialog({ eventId, onClose, onSuccess }: CheckinDialogProp
           }, 2000);
         }
       } else {
-        setMessage({ type: 'error', text: result.message });
+        const errorText = getErrorMessage(result.errorCode);
+        // "已签到"属于提示类信息，用 warning 风格但仍走 error 通道
+        setMessage({ type: 'error', text: errorText });
         // 错误时也恢复扫描
         if (activeTab === 'scan') {
           setTimeout(() => {

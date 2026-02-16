@@ -94,7 +94,7 @@ export async function checkIn(
 export async function checkInParticipant(
   eventId: string,
   userId: string
-): Promise<{ success: boolean; message: string }> {
+): Promise<{ success: boolean; message: string; errorCode?: CheckinErrorCode }> {
   try {
     console.log('[checkInParticipant] 开始签到:', { eventId, userId });
 
@@ -115,12 +115,12 @@ export async function checkInParticipant(
     }
     if (!signup) {
       console.warn('[checkInParticipant] 用户未报名');
-      return { success: false, message: '用户未报名此活动' };
+      return { success: false, message: '用户未报名此活动', errorCode: 'NOT_SIGNED_UP' };
     }
 
     if (signup.checked_in) {
       console.warn('[checkInParticipant] 用户已签到');
-      return { success: false, message: '该用户已签到' };
+      return { success: false, message: '该用户已签到', errorCode: 'ALREADY_CHECKED_IN' };
     }
 
     // 执行签到 - 直接更新 evt_signups
@@ -146,7 +146,7 @@ export async function checkInParticipant(
     return { success: true, message: '签到成功' };
   } catch (error) {
     console.error('[checkInParticipant] 捕获异常:', error);
-    return { success: false, message: '签到失败，请重试' };
+    return { success: false, message: '签到失败，请重试', errorCode: 'CHECKIN_FAILED' };
   }
 }
 
@@ -202,10 +202,20 @@ function decodeCheckinCode(code: string): { eventId: string; userId: string; che
 /**
  * 主办方通过签到码为参与者签到
  */
+export type CheckinErrorCode =
+  | 'EVENT_NOT_FOUND'
+  | 'INVALID_CODE'
+  | 'INVALID_CODE_FORMAT'
+  | 'WRONG_EVENT'
+  | 'NOT_SIGNED_UP'
+  | 'ALREADY_CHECKED_IN'
+  | 'SIGNUP_FETCH_FAILED'
+  | 'CHECKIN_FAILED';
+
 export async function checkInByCode(
   eventId: string,
   code: string
-): Promise<{ success: boolean; message: string; userName?: string }> {
+): Promise<{ success: boolean; message: string; userName?: string; errorCode?: CheckinErrorCode }> {
   try {
     const trimmedCode = code.trim();
 
@@ -219,7 +229,7 @@ export async function checkInByCode(
         .single();
 
       if (eventError || !event) {
-        return { success: false, message: '活动不存在' };
+        return { success: false, message: '活动不存在', errorCode: 'EVENT_NOT_FOUND' };
       }
 
       // 获取所有报名用户
@@ -230,7 +240,7 @@ export async function checkInByCode(
         .eq('status', 'active');
 
       if (signupsError || !signups) {
-        return { success: false, message: '获取报名信息失败' };
+        return { success: false, message: '获取报名信息失败', errorCode: 'SIGNUP_FETCH_FAILED' };
       }
 
       // 查找匹配的用户
@@ -244,7 +254,7 @@ export async function checkInByCode(
       }
 
       if (!matchedUserId) {
-        return { success: false, message: '无效的签到码' };
+        return { success: false, message: '无效的签到码', errorCode: 'INVALID_CODE' };
       }
 
       // 获取用户信息
@@ -269,14 +279,14 @@ export async function checkInByCode(
     const decoded = decodeCheckinCode(trimmedCode);
 
     if (!decoded) {
-      return { success: false, message: '无效的签到码格式' };
+      return { success: false, message: '无效的签到码格式', errorCode: 'INVALID_CODE_FORMAT' };
     }
 
     const { eventId: codeEventId, userId, checkinCode } = decoded;
 
     // 验证活动ID
     if (codeEventId !== eventId) {
-      return { success: false, message: '签到码不属于此活动' };
+      return { success: false, message: '签到码不属于此活动', errorCode: 'WRONG_EVENT' };
     }
 
     // 验证签到码
@@ -287,7 +297,7 @@ export async function checkInByCode(
       .single();
 
     if (eventError || !event || event.checkin_code !== checkinCode) {
-      return { success: false, message: '无效的签到码' };
+      return { success: false, message: '无效的签到码', errorCode: 'INVALID_CODE' };
     }
 
     // 获取用户信息
@@ -308,6 +318,6 @@ export async function checkInByCode(
     };
   } catch (error) {
     console.error('Error checking in by code:', error);
-    return { success: false, message: '签到失败，请重试' };
+    return { success: false, message: '签到失败，请重试', errorCode: 'CHECKIN_FAILED' };
   }
 }

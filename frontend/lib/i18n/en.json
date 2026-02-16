@@ -887,7 +887,16 @@
       "enterCodeError": "Please enter check-in code",
       "checkinSuccess": "{userName} checked in successfully!",
       "checkinError": "Check-in failed, please retry",
-      "defaultUser": "User"
+      "defaultUser": "User",
+      "errors": {
+        "eventNotFound": "Event not found",
+        "invalidCode": "Invalid check-in code",
+        "invalidCodeFormat": "Invalid QR code",
+        "wrongEvent": "This QR code is not for the current event",
+        "notSignedUp": "User not signed up for this event",
+        "alreadyCheckedIn": "User already checked in",
+        "fetchFailed": "Failed to fetch signup info"
+      }
     }
   },
   "recovery": {
