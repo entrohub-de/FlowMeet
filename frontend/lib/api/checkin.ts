@@ -169,34 +169,36 @@ function generateNumericCode(eventId: string, userId: string, checkinCode: strin
  * 解码签到码（支持Base64和旧格式）
  */
 function decodeCheckinCode(code: string): { eventId: string; userId: string; checkinCode: string } | null {
+  // 先尝试 Base64 解码（Base64 输出可能包含 /，所以不能用 includes('/') 判断）
   try {
-    // 尝试 Base64 解码
-    if (!code.includes('/')) {
-      const decoded = atob(code);
-      const parts = decoded.split('/');
-      if (parts.length === 3) {
-        return {
-          eventId: parts[0],
-          userId: parts[1],
-          checkinCode: parts[2],
-        };
-      }
-    }
-
-    // 旧格式：直接用斜杠分割
-    const parts = code.split('/');
-    if (parts.length === 3) {
+    const decoded = atob(code);
+    const parts = decoded.split('/');
+    if (parts.length === 3 && parts[0].length > 0 && parts[1].length > 0 && parts[2].length > 0) {
       return {
         eventId: parts[0],
         userId: parts[1],
         checkinCode: parts[2],
       };
     }
-
-    return null;
   } catch {
-    return null;
+    // atob 失败，继续尝试其他格式
   }
+
+  // 旧格式：直接用斜杠分割（明文 eventId/userId/checkinCode）
+  try {
+    const parts = code.split('/');
+    if (parts.length === 3 && parts[0].length > 0 && parts[1].length > 0 && parts[2].length > 0) {
+      return {
+        eventId: parts[0],
+        userId: parts[1],
+        checkinCode: parts[2],
+      };
+    }
+  } catch {
+    // ignore
+  }
+
+  return null;
 }
 
 /**
