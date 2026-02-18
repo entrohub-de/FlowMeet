@@ -4,6 +4,7 @@ import './globals.css';
 import { LocaleProvider } from '@/lib/i18n/context';
 import { AuthProvider } from '@/lib/auth/context';
 import { Toaster } from '@/components/ui/toaster';
+import CookieBanner from '@/components/CookieBanner';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -43,6 +44,7 @@ export default function RootLayout({
           <LocaleProvider>
             <main>{children}</main>
             <Toaster />
+            <CookieBanner />
           </LocaleProvider>
         </AuthProvider>
       </body>

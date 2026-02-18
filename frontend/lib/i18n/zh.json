@@ -1210,6 +1210,29 @@
       "get_inspiration": "找灵感"
     }
   },
+  "privacy": {
+    "consent": "我已阅读并同意",
+    "consentRequired": "请先同意隐私政策",
+    "cookieBanner": {
+      "message": "本网站使用必要的 Cookie 来保障网站功能正常运行。",
+      "learnMore": "了解更多",
+      "acceptAll": "接受",
+      "essentialOnly": "仅必要"
+    },
+    "policy": {
+      "title": "隐私政策",
+      "lastUpdated": "最后更新",
+      "controllerTitle": "1. 数据控制者",
+      "dataCollectedTitle": "2. 我们收集的数据",
+      "legalBasisTitle": "3. 法律依据",
+      "purposeTitle": "4. 数据处理目的",
+      "cookiesTitle": "5. Cookie 使用",
+      "thirdPartyTitle": "6. 第三方服务",
+      "rightsTitle": "7. 您的权利",
+      "retentionTitle": "8. 数据保留",
+      "contactTitle": "9. 联系方式"
+    }
+  },
   "share": {
     "shareEvent": "分享活动",
     "copyLink": "复制链接",

@@ -1208,6 +1208,29 @@
       "get_inspiration": "Get Inspiration"
     }
   },
+  "privacy": {
+    "consent": "I have read and agree to the",
+    "consentRequired": "Please agree to the privacy policy first",
+    "cookieBanner": {
+      "message": "This website uses essential cookies to ensure proper functionality.",
+      "learnMore": "Learn more",
+      "acceptAll": "Accept",
+      "essentialOnly": "Essential only"
+    },
+    "policy": {
+      "title": "Privacy Policy",
+      "lastUpdated": "Last updated",
+      "controllerTitle": "1. Data Controller",
+      "dataCollectedTitle": "2. Data We Collect",
+      "legalBasisTitle": "3. Legal Basis",
+      "purposeTitle": "4. Purpose of Processing",
+      "cookiesTitle": "5. Cookies",
+      "thirdPartyTitle": "6. Third-Party Services",
+      "rightsTitle": "7. Your Rights",
+      "retentionTitle": "8. Data Retention",
+      "contactTitle": "9. Contact"
+    }
+  },
   "share": {
     "shareEvent": "Share Event",
     "copyLink": "Copy Link",

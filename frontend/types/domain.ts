@@ -349,6 +349,14 @@ export interface ParticipantState {
   updated_at: string;
 }
 
+export interface Consent {
+  id: number;
+  user_id: string;
+  privacy_consent_at: string;
+  privacy_consent_version: string;
+  created_at: string;
+}
+
 export interface Advertisement {
   ad_id: string;
   title: string;
