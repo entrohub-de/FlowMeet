@@ -1,12 +1,33 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useAuth } from '@/lib/auth/context';
 import { useTranslation } from '@/lib/i18n/context';
+import { getUserRole } from '@/lib/api/role';
 import { Globe } from 'lucide-react';
 
 export default function Home() {
+  const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const { t, locale, setLocale } = useTranslation();
+
+  // Redirect logged-in users to their dashboard
+  useEffect(() => {
+    if (authLoading || !user) return;
+
+    getUserRole(user.id).then((role) => {
+      if (role === 'admin') {
+        router.push('/admin/test/simulator');
+      } else if (role === 'host') {
+        router.push('/host');
+      } else {
+        router.push('/user');
+      }
+    });
+  }, [authLoading, user, router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background relative">
