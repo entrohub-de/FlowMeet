@@ -51,7 +51,7 @@ function AuthCallbackContent() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // OAuth providers (Google etc.) use query param `code`
+        // 1. PKCE flow: OAuth providers may return a `code` query param
         const code = searchParams.get('code');
         if (code) {
           const { data: sessionData, error: sessionError } =
@@ -62,17 +62,13 @@ function AuthCallbackContent() {
             return;
           }
 
-          if (!sessionData?.user) {
-            setError(t('auth.callbackNoUser'));
+          if (sessionData?.user) {
+            await ensureRoleAndRedirect(sessionData.user.id, router);
             return;
           }
-
-          await ensureRoleAndRedirect(sessionData.user.id, router);
-          return;
         }
 
-        // Implicit flow: magic link, email verification, or OAuth (Google etc.)
-        // OAuth implicit flow returns tokens in hash WITHOUT a type param
+        // 2. Implicit flow: tokens in hash fragment (magic link, email verify, OAuth)
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         const accessToken = hashParams.get('access_token');
         const refreshToken = hashParams.get('refresh_token');
@@ -88,15 +84,30 @@ function AuthCallbackContent() {
             return;
           }
 
-          if (!sessionData?.user) {
-            setError(t('auth.callbackNoUser'));
+          if (sessionData?.user) {
+            await ensureRoleAndRedirect(sessionData.user.id, router);
             return;
           }
-
-          await ensureRoleAndRedirect(sessionData.user.id, router);
-        } else {
-          setError(t('auth.callbackInvalidLink'));
         }
+
+        // 3. Fallback: Supabase client may have auto-detected the session
+        //    (it consumes hash fragments on init before our useEffect runs)
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          await ensureRoleAndRedirect(session.user.id, router);
+          return;
+        }
+
+        // 4. None of the above worked — wait briefly for onAuthStateChange
+        //    then check once more
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        const { data: { session: retrySession } } = await supabase.auth.getSession();
+        if (retrySession?.user) {
+          await ensureRoleAndRedirect(retrySession.user.id, router);
+          return;
+        }
+
+        setError(t('auth.callbackInvalidLink'));
       } catch (err) {
         setError(err instanceof Error ? err.message : t('auth.callbackError'));
       }
