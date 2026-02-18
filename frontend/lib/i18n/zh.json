@@ -634,7 +634,16 @@
     "checkInboxVerify": "请查看收件箱以验证邮箱。",
     "newToFlowMeet": "还没有账号？",
     "createAnAccount": "创建账号",
-    "alreadyHaveAccount": "已有账号？"
+    "alreadyHaveAccount": "已有账号？",
+    "failed": "失败",
+    "authenticating": "认证中...",
+    "pleaseWait": "请稍候，正在为您登录。",
+    "callbackError": "认证失败。",
+    "callbackNoUser": "无法加载用户数据。",
+    "callbackInvalidLink": "无效的认证链接。",
+    "callbackErrorTitle": "认证错误",
+    "backToLogin": "返回登录",
+    "signOut": "退出登录"
   },
   "topicsPage": {
     "title": "对话话题生成",

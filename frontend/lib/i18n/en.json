@@ -632,7 +632,16 @@
     "checkInboxVerify": "Check your inbox to verify your email.",
     "newToFlowMeet": "New to FlowMeet?",
     "createAnAccount": "Create an account",
-    "alreadyHaveAccount": "Already have an account?"
+    "alreadyHaveAccount": "Already have an account?",
+    "failed": "failed",
+    "authenticating": "Authenticating...",
+    "pleaseWait": "Please wait while we sign you in.",
+    "callbackError": "Authentication failed.",
+    "callbackNoUser": "Unable to load user data.",
+    "callbackInvalidLink": "Invalid authentication link.",
+    "callbackErrorTitle": "Authentication Error",
+    "backToLogin": "Back to login",
+    "signOut": "Sign out"
   },
   "topicsPage": {
     "title": "Conversation Starters",

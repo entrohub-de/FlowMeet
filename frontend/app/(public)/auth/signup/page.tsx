@@ -1,14 +1,16 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/lib/auth/context';
 import { useTranslation } from '@/lib/i18n/context';
 import { Eye, EyeOff } from 'lucide-react';
 
 export default function SignupPage() {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const { t, locale, setLocale } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -17,6 +19,13 @@ export default function SignupPage() {
   const [success, setSuccess] = useState(false);
   const [useMagicLink, setUseMagicLink] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.push('/user');
+    }
+  }, [authLoading, user, router]);
 
   const handleMagicLinkSignUp = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -62,20 +71,12 @@ export default function SignupPage() {
       }
 
       if (authData?.user) {
-        const { error: roleError } = await supabase
+        await supabase
           .from('usr_role')
           .upsert(
-            {
-              user_id: authData.user.id,
-              role: 'user',
-            },
+            { user_id: authData.user.id, role: 'user' },
             { onConflict: 'user_id', ignoreDuplicates: true }
           );
-
-        if (roleError) {
-          setError(roleError.message || 'Unable to assign user role.');
-          return;
-        }
       }
 
       setSuccess(true);
@@ -88,6 +89,9 @@ export default function SignupPage() {
   };
 
   const handleSubmit = useMagicLink ? handleMagicLinkSignUp : handlePasswordSignUp;
+
+  if (authLoading) return null;
+  if (user) return null;
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background relative">

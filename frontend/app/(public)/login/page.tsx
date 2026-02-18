@@ -1,14 +1,28 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/lib/auth/context';
 import { useTranslation } from '@/lib/i18n/context';
+import { getUserRole } from '@/lib/api/role';
 import { Eye, EyeOff } from 'lucide-react';
+
+function redirectByRole(role: string, router: ReturnType<typeof useRouter>) {
+  const normalized = typeof role === 'string' ? role.trim().toLowerCase() : '';
+  if (normalized === 'admin') {
+    router.push('/admin/test/simulator');
+  } else if (normalized === 'host') {
+    router.push('/host');
+  } else {
+    router.push('/user');
+  }
+}
 
 export default function LoginPage() {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const { t, locale, setLocale } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -17,6 +31,15 @@ export default function LoginPage() {
   const [useMagicLink, setUseMagicLink] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (authLoading || !user) return;
+
+    getUserRole(user.id).then((role) => {
+      redirectByRole(role, router);
+    });
+  }, [authLoading, user, router]);
 
   const handleMagicLinkSignIn = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -50,96 +73,60 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      console.log('尝试登录...', { email: email.trim() });
-
       const { data: authData, error: signInError } =
         await supabase.auth.signInWithPassword({
           email: email.trim(),
           password,
         });
 
-      console.log('登录响应:', { authData, signInError });
-
       if (signInError) {
-        console.error('登录错误:', signInError);
-        setError(`登录失败: ${signInError.message}`);
+        setError(`${t('auth.signIn')}${t('auth.failed') || '失败'}: ${signInError.message}`);
         return;
       }
 
       if (!authData?.user) {
-        console.error('没有用户数据');
         setError('Unable to load user role.');
         return;
       }
 
-      console.log('查询用户角色...', authData.user.id);
-
+      // Ensure role exists
       const { data: roleData, error: roleError } = await supabase
         .from('usr_role')
         .select('role')
         .eq('user_id', authData.user.id)
         .maybeSingle();
 
-      console.log('角色查询结果:', { roleData, roleError });
-
       if (roleError) {
-        console.error('角色查询错误:', roleError);
         setError(roleError.message || 'Unable to load user role.');
         return;
       }
 
       if (!roleData) {
-        console.log('用户无角色，创建默认角色...');
-        const { error: upsertError } = await supabase
+        await supabase
           .from('usr_role')
           .upsert(
-            {
-              user_id: authData.user.id,
-              role: 'user',
-            },
+            { user_id: authData.user.id, role: 'user' },
             { onConflict: 'user_id', ignoreDuplicates: true }
           );
-
-        if (upsertError) {
-          console.error('创建角色失败:', upsertError);
-          setError(upsertError.message || 'Unable to assign user role.');
-          return;
-        }
-
-        console.log('跳转到 /user');
         router.push('/user');
         return;
       }
 
-      const normalizedRole =
-        typeof roleData.role === 'string' ? roleData.role.trim().toLowerCase() : '';
-
-      console.log('用户角色:', normalizedRole);
-
-      if (normalizedRole === 'admin') {
-        console.log('跳转到 /admin/test/simulator');
-        router.push('/admin/test/simulator');
-        return;
-      }
-
-      if (normalizedRole === 'host') {
-        console.log('跳转到 /host');
-        router.push('/host');
-        return;
-      }
-
-      console.log('跳转到 /user (默认)');
-      router.push('/user');
+      redirectByRole(roleData.role, router);
     } catch (err) {
-      console.error('登录异常:', err);
       const errorMessage = err instanceof Error ? err.message : '登录失败，请检查网络连接';
-      setError(`错误: ${errorMessage}`);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   const handleSubmit = useMagicLink ? handleMagicLinkSignIn : handlePasswordSignIn;
+
+  // Show nothing while checking auth status
+  if (authLoading) return null;
+  // Already logged in, redirect in progress
+  if (user) return null;
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background relative">

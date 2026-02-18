@@ -19,3 +19,10 @@ export async function getCurrentUserId(): Promise<string | null> {
   const { data: { session } } = await supabase.auth.getSession();
   return session?.user?.id ?? null;
 }
+
+/**
+ * Sign out the current user and redirect to login.
+ */
+export async function signOut(): Promise<void> {
+  await supabase.auth.signOut();
+}

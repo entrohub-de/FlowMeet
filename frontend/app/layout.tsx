@@ -2,6 +2,7 @@
 import { Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 import { LocaleProvider } from '@/lib/i18n/context';
+import { AuthProvider } from '@/lib/auth/context';
 import { Toaster } from '@/components/ui/toaster';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -38,10 +39,12 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
       <body>
-        <LocaleProvider>
-          <main>{children}</main>
-          <Toaster />
-        </LocaleProvider>
+        <AuthProvider>
+          <LocaleProvider>
+            <main>{children}</main>
+            <Toaster />
+          </LocaleProvider>
+        </AuthProvider>
       </body>
     </html>
   );
