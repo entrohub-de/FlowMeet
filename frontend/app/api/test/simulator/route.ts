@@ -41,9 +41,11 @@ function guardRequest(req: NextRequest): NextResponse | null {
   return null; // all checks passed
 }
 
-const adminClient = createClient(SUPABASE_URL, SERVICE_KEY, {
-  auth: { autoRefreshToken: false, persistSession: false },
-});
+function getAdminClient() {
+  return createClient(SUPABASE_URL, SERVICE_KEY, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+}
 
 const NICKNAMES = [
   '张晓', 'Alex', '李明', 'Sophie', '王芳', 'Tom', '赵静', 'Emily',
@@ -61,6 +63,8 @@ const MAX_BATCH_SIZE = 100;
 export async function POST(req: NextRequest) {
   const blocked = guardRequest(req);
   if (blocked) return blocked;
+
+  const adminClient = getAdminClient();
 
   const body = await req.json();
   const { action } = body;
