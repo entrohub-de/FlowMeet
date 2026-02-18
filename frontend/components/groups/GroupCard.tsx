@@ -1,3 +1,5 @@
+'use client';
+
 import { Users } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 

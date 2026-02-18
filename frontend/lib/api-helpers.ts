@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from './api-auth';
+import { createServerClient } from '@/lib/supabase/server';
+
+export type { ApiKeyInfo } from './api-auth';
 
 // ── Response helpers ──
 
@@ -28,16 +31,48 @@ class ValidationError extends Error {
   }
 }
 
+// ── Error classes for authorization ──
+
+export class NotFoundError extends Error {
+  constructor(message = 'Not found') {
+    super(message);
+    this.name = 'NotFoundError';
+  }
+}
+
+export class ForbiddenError extends Error {
+  constructor(message = 'Forbidden') {
+    super(message);
+    this.name = 'ForbiddenError';
+  }
+}
+
+// ── Ownership check ──
+
+export async function requireEventOwnership(eventId: string, agentName: string) {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from('evt_events')
+    .select('created_by')
+    .eq('event_id', eventId)
+    .single();
+  if (error || !data) throw new NotFoundError('Event not found');
+  if (data.created_by !== agentName) throw new ForbiddenError('No permission');
+}
+
 // ── Handler wrapper with API key auth + error handling ──
 
 type RouteParams = { params: Promise<Record<string, string>> };
 
+type ApiKeyInfo = import('./api-auth').ApiKeyInfo;
+
 type ApiHandler = (
   request: NextRequest,
   context: RouteParams,
+  keyInfo: ApiKeyInfo,
 ) => Promise<NextResponse>;
 
-export function withApiHandler(handler: ApiHandler): ApiHandler {
+export function withApiHandler(handler: ApiHandler): (request: NextRequest, context: RouteParams) => Promise<NextResponse> {
   return async (request: NextRequest, context: RouteParams) => {
     // Validate API key
     const apiKey = request.headers.get('x-api-key') || '';
@@ -47,10 +82,16 @@ export function withApiHandler(handler: ApiHandler): ApiHandler {
     }
 
     try {
-      return await handler(request, context);
+      return await handler(request, context, keyInfo);
     } catch (err) {
       if (err instanceof ValidationError) {
         return apiError(err.message, 'VALIDATION_ERROR');
+      }
+      if (err instanceof NotFoundError) {
+        return apiError(err.message, 'NOT_FOUND', 404);
+      }
+      if (err instanceof ForbiddenError) {
+        return apiError(err.message, 'FORBIDDEN', 403);
       }
 
       const message = err instanceof Error ? err.message : 'Internal server error';

@@ -19,7 +19,7 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 /** POST /api/v1/events/:eventId/matching/pairs — generate and persist 1v1 pairs */
-export const POST = withApiHandler(async (request, { params }) => {
+export const POST = withApiHandler(async (request, { params }, _keyInfo) => {
   const { eventId } = await params;
   const body = await request.json();
   const readyUserIds: string[] = body.readyUserIds;

@@ -1,3 +1,5 @@
+'use client';
+
 import { UserPlus } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 import { getMatchLevel } from '@/lib/api/matching-algorithm';

@@ -1,11 +1,12 @@
 import { createServerClient } from '@/lib/supabase/server';
-import { withApiHandler, apiSuccess, apiError, requireParam } from '@/lib/api-helpers';
+import { withApiHandler, apiSuccess, apiError, requireParam, requireEventOwnership } from '@/lib/api-helpers';
 
 const EVENT_SELECT = '*, venue:evt_venues(venue_id, name, capacity, created_at)' as const;
 
 /** PATCH /api/v1/events/:eventId/status — update event status */
-export const PATCH = withApiHandler(async (request, { params }) => {
+export const PATCH = withApiHandler(async (request, { params }, keyInfo) => {
   const { eventId } = await params;
+  await requireEventOwnership(eventId, keyInfo.agentName!);
   const body = await request.json();
   const status = requireParam(body, 'status');
 

@@ -1,3 +1,5 @@
+'use client';
+
 import { useTranslation } from '@/lib/i18n/context';
 import { StarRating } from './StarRating';
 import type { Match, MatchRating } from '@/types/domain';

@@ -2,7 +2,7 @@ import { createServerClient } from '@/lib/supabase/server';
 import { withApiHandler, apiSuccess, requireParam } from '@/lib/api-helpers';
 
 /** POST /api/v1/events/:eventId/matching/manual — manually pair two users */
-export const POST = withApiHandler(async (request, { params }) => {
+export const POST = withApiHandler(async (request, { params }, _keyInfo) => {
   const { eventId } = await params;
   const body = await request.json();
   const user1Id = requireParam(body, 'user1Id');

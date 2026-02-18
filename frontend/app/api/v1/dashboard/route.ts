@@ -4,7 +4,7 @@ import { withApiHandler, apiSuccess } from '@/lib/api-helpers';
 const EVENT_SELECT = '*, venue:evt_venues(venue_id, name, capacity, created_at)' as const;
 
 /** GET /api/v1/dashboard — host dashboard data */
-export const GET = withApiHandler(async () => {
+export const GET = withApiHandler(async (_request, _context, _keyInfo) => {
   const supabase = createServerClient();
 
   const { data: events, error } = await supabase

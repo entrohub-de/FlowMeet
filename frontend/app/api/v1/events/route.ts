@@ -4,7 +4,7 @@ import { withApiHandler, apiSuccess, apiError } from '@/lib/api-helpers';
 const EVENT_SELECT = '*, venue:evt_venues(venue_id, name, capacity, created_at)' as const;
 
 /** GET /api/v1/events — list all events */
-export const GET = withApiHandler(async () => {
+export const GET = withApiHandler(async (_request, _context, _keyInfo) => {
   const supabase = createServerClient();
   const { data, error } = await supabase
     .from('evt_events')
@@ -16,9 +16,10 @@ export const GET = withApiHandler(async () => {
 });
 
 /** POST /api/v1/events — create an event */
-export const POST = withApiHandler(async (request) => {
+export const POST = withApiHandler(async (request, _context, keyInfo) => {
   const body = await request.json();
-  const { name, description, start_time, end_time, venue_id, cover_image, created_by } = body;
+  const { name, description, start_time, end_time, venue_id, cover_image } = body;
+  const created_by = keyInfo.agentName!;
 
   if (!name || !start_time || !end_time) {
     return apiError('Missing required fields: name, start_time, end_time', 'VALIDATION_ERROR');

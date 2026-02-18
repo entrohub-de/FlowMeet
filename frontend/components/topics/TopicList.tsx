@@ -1,3 +1,5 @@
+'use client';
+
 import { Copy, Check } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from '@/lib/i18n/context';

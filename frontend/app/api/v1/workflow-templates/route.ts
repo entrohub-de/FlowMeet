@@ -2,7 +2,7 @@ import { createServerClient } from '@/lib/supabase/server';
 import { withApiHandler, apiSuccess } from '@/lib/api-helpers';
 
 /** GET /api/v1/workflow-templates — list all workflow templates */
-export const GET = withApiHandler(async () => {
+export const GET = withApiHandler(async (_request, _context, _keyInfo) => {
   const supabase = createServerClient();
 
   const { data, error } = await supabase

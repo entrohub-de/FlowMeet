@@ -1,3 +1,5 @@
+'use client';
+
 import { Sparkles, RefreshCw } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 

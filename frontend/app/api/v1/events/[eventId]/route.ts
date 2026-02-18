@@ -1,10 +1,10 @@
 import { createServerClient } from '@/lib/supabase/server';
-import { withApiHandler, apiSuccess, apiError } from '@/lib/api-helpers';
+import { withApiHandler, apiSuccess, apiError, requireEventOwnership } from '@/lib/api-helpers';
 
 const EVENT_SELECT = '*, venue:evt_venues(venue_id, name, capacity, created_at)' as const;
 
 /** GET /api/v1/events/:eventId — get event details */
-export const GET = withApiHandler(async (_request, { params }) => {
+export const GET = withApiHandler(async (_request, { params }, _keyInfo) => {
   const { eventId } = await params;
   const supabase = createServerClient();
 
@@ -22,8 +22,10 @@ export const GET = withApiHandler(async (_request, { params }) => {
 });
 
 /** PATCH /api/v1/events/:eventId — update event */
-export const PATCH = withApiHandler(async (request, { params }) => {
+export const PATCH = withApiHandler(async (request, { params }, keyInfo) => {
   const { eventId } = await params;
+  await requireEventOwnership(eventId, keyInfo.agentName!);
+
   const body = await request.json();
 
   const allowedFields = ['name', 'description', 'start_time', 'end_time', 'venue_id', 'cover_image', 'status'];
@@ -49,8 +51,10 @@ export const PATCH = withApiHandler(async (request, { params }) => {
 });
 
 /** DELETE /api/v1/events/:eventId — delete event */
-export const DELETE = withApiHandler(async (_request, { params }) => {
+export const DELETE = withApiHandler(async (_request, { params }, keyInfo) => {
   const { eventId } = await params;
+  await requireEventOwnership(eventId, keyInfo.agentName!);
+
   const supabase = createServerClient();
 
   const { error } = await supabase

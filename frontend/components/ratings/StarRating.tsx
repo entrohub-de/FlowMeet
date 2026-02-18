@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import { Star } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';

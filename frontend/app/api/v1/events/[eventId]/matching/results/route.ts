@@ -2,7 +2,7 @@ import { createServerClient } from '@/lib/supabase/server';
 import { withApiHandler, apiSuccess } from '@/lib/api-helpers';
 
 /** GET /api/v1/events/:eventId/matching/results — get all match results for an event */
-export const GET = withApiHandler(async (request, { params }) => {
+export const GET = withApiHandler(async (request, { params }, _keyInfo) => {
   const { eventId } = await params;
   const url = new URL(request.url);
   const userId = url.searchParams.get('userId');

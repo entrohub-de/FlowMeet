@@ -1,8 +1,8 @@
 import { createServerClient } from '@/lib/supabase/server';
-import { withApiHandler, apiSuccess } from '@/lib/api-helpers';
+import { withApiHandler, apiSuccess, requireEventOwnership } from '@/lib/api-helpers';
 
 /** GET /api/v1/events/:eventId/flow — get current flow state */
-export const GET = withApiHandler(async (_request, { params }) => {
+export const GET = withApiHandler(async (_request, { params }, _keyInfo) => {
   const { eventId } = await params;
   const supabase = createServerClient();
 
@@ -17,8 +17,10 @@ export const GET = withApiHandler(async (_request, { params }) => {
 });
 
 /** PUT /api/v1/events/:eventId/flow — upsert flow state */
-export const PUT = withApiHandler(async (request, { params }) => {
+export const PUT = withApiHandler(async (request, { params }, keyInfo) => {
   const { eventId } = await params;
+  await requireEventOwnership(eventId, keyInfo.agentName!);
+
   const body = await request.json();
 
   const supabase = createServerClient();
@@ -34,8 +36,10 @@ export const PUT = withApiHandler(async (request, { params }) => {
 });
 
 /** DELETE /api/v1/events/:eventId/flow — reset flow */
-export const DELETE = withApiHandler(async (_request, { params }) => {
+export const DELETE = withApiHandler(async (_request, { params }, keyInfo) => {
   const { eventId } = await params;
+  await requireEventOwnership(eventId, keyInfo.agentName!);
+
   const supabase = createServerClient();
 
   const { error } = await supabase

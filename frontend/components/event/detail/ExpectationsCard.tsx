@@ -1,3 +1,5 @@
+'use client';
+
 import { MessageSquare } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 import type { Signup } from '@/types/domain';

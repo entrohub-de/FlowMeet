@@ -2,7 +2,7 @@ import { createServerClient } from '@/lib/supabase/server';
 import { withApiHandler, apiSuccess, apiError, requireParam } from '@/lib/api-helpers';
 
 /** POST /api/v1/events/:eventId/checkin — check in a participant */
-export const POST = withApiHandler(async (request, { params }) => {
+export const POST = withApiHandler(async (request, { params }, _keyInfo) => {
   const { eventId } = await params;
   const body = await request.json();
   const userId = requireParam(body, 'userId');
