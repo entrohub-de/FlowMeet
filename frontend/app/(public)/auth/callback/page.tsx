@@ -5,6 +5,43 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useTranslation } from '@/lib/i18n/context';
 
+async function ensureRoleAndRedirect(
+  userId: string,
+  router: ReturnType<typeof useRouter>
+) {
+  const { data: roleData, error: roleError } = await supabase
+    .from('usr_role')
+    .select('role')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (roleError) {
+    console.error('Role error:', roleError);
+  }
+
+  if (!roleData) {
+    await supabase
+      .from('usr_role')
+      .upsert(
+        { user_id: userId, role: 'user' },
+        { onConflict: 'user_id', ignoreDuplicates: true }
+      );
+    router.push('/user');
+    return;
+  }
+
+  const normalizedRole =
+    typeof roleData.role === 'string' ? roleData.role.trim().toLowerCase() : '';
+
+  if (normalizedRole === 'admin') {
+    router.push('/admin/test/simulator');
+  } else if (normalizedRole === 'host') {
+    router.push('/host');
+  } else {
+    router.push('/user');
+  }
+}
+
 function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -14,12 +51,34 @@ function AuthCallbackContent() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
+        // OAuth providers (Google etc.) use query param `code`
+        const code = searchParams.get('code');
+        if (code) {
+          const { data: sessionData, error: sessionError } =
+            await supabase.auth.exchangeCodeForSession(code);
+
+          if (sessionError) {
+            setError(sessionError.message || t('auth.callbackError'));
+            return;
+          }
+
+          if (!sessionData?.user) {
+            setError(t('auth.callbackNoUser'));
+            return;
+          }
+
+          await ensureRoleAndRedirect(sessionData.user.id, router);
+          return;
+        }
+
+        // Magic link / email verification use hash fragment tokens
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         const accessToken = hashParams.get('access_token');
         const refreshToken = hashParams.get('refresh_token');
         const type = hashParams.get('type');
 
-        if (type === 'magiclink' && accessToken && refreshToken) {
+        const validTypes = ['magiclink', 'signup', 'email', 'recovery'];
+        if (validTypes.includes(type ?? '') && accessToken && refreshToken) {
           const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
@@ -35,37 +94,7 @@ function AuthCallbackContent() {
             return;
           }
 
-          const { data: roleData, error: roleError } = await supabase
-            .from('usr_role')
-            .select('role')
-            .eq('user_id', sessionData.user.id)
-            .maybeSingle();
-
-          if (roleError) {
-            console.error('Role error:', roleError);
-          }
-
-          if (!roleData) {
-            await supabase
-              .from('usr_role')
-              .upsert(
-                { user_id: sessionData.user.id, role: 'user' },
-                { onConflict: 'user_id', ignoreDuplicates: true }
-              );
-            router.push('/user');
-            return;
-          }
-
-          const normalizedRole =
-            typeof roleData.role === 'string' ? roleData.role.trim().toLowerCase() : '';
-
-          if (normalizedRole === 'admin') {
-            router.push('/admin/test/simulator');
-          } else if (normalizedRole === 'host') {
-            router.push('/host');
-          } else {
-            router.push('/user');
-          }
+          await ensureRoleAndRedirect(sessionData.user.id, router);
         } else {
           setError(t('auth.callbackInvalidLink'));
         }

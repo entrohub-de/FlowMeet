@@ -643,7 +643,8 @@
     "callbackInvalidLink": "无效的认证链接。",
     "callbackErrorTitle": "认证错误",
     "backToLogin": "返回登录",
-    "signOut": "退出登录"
+    "signOut": "退出登录",
+    "orContinueWith": "或通过以下方式继续"
   },
   "topicsPage": {
     "title": "对话话题生成",
