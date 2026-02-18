@@ -863,6 +863,11 @@
     "noVenueForEvent": "当前活动暂无关联场地",
     "deleteConfirm": "确定要删除这个场地吗？"
   },
+  "familiarFaces": {
+    "title": "老朋友也来了",
+    "hint": "这些人你在之前的活动中配对过，这次 TA 们也报名了",
+    "metAt": "上次在「{event}」见过"
+  },
   "eventPreferences": {
     "title": "配对偏好设置",
     "subtitle": "帮助我们为你找到更好的配对",
@@ -880,7 +885,9 @@
     "saved": "偏好已保存",
     "saveFailed": "保存失败，请重试",
     "modalTitle": "完善你的配对偏好",
-    "modalHint": "填写以下信息，帮助我们为你匹配更合适的伙伴"
+    "modalHint": "填写以下信息，帮助我们为你匹配更合适的伙伴",
+    "networkingIntent": "今天的目标",
+    "networkingIntentHint": "选择你参加活动的主要目的，帮助我们匹配志同道合的人"
   },
   "expectations": {
     "sectionTitle": "活动期待",
@@ -1177,6 +1184,12 @@
       "growth": "成长期",
       "mature": "成熟期",
       "not_entrepreneur": "非创业者"
+    },
+    "networkingIntent": {
+      "find_cofounder": "找合伙人",
+      "learn_exchange": "学习交流",
+      "expand_network": "拓展人脉",
+      "get_inspiration": "找灵感"
     }
   },
   "share": {

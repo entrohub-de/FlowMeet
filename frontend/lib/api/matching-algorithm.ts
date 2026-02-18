@@ -1,8 +1,9 @@
-import type { Profile, Preferences } from '@/types/domain';
+import type { Profile, Preferences, NetworkingIntent } from '@/types/domain';
 
 export interface UserWithPreferences {
   profile: Profile;
   preferences: Preferences | null;
+  networkingIntent?: NetworkingIntent | null;
 }
 
 export interface MatchScore {
@@ -36,8 +37,9 @@ const COMPLEMENTARY_PAIRS: Record<string, string[]> = {
  * - 职业背景（互补）：30分
  * - 兴趣话题（重叠）：25分
  * - 创业阶段（相似）：15分
+ * - 社交意图（对齐）：10分
  * - 语言（重叠）：10分
- * - 基础分：20分（保底）
+ * - 基础分：10分（保底）
  */
 export function calculateMatchScore(
   user1: UserWithPreferences,
@@ -107,7 +109,15 @@ export function calculateMatchScore(
     }
   }
 
-  // 4. 语言 — 重叠匹配 (权重: 10分)
+  // 4. 社交意图 — 对齐匹配 (权重: 10分)
+  if (user1.networkingIntent && user2.networkingIntent) {
+    if (user1.networkingIntent === user2.networkingIntent) {
+      score += 10;
+      reasons.push('相同社交目标');
+    }
+  }
+
+  // 5. 语言 — 重叠匹配 (权重: 10分)
   if (prefs1?.languages && prefs2?.languages) {
     const langs1 = prefs1.languages.split(',').map(s => s.trim()).filter(Boolean);
     const langs2 = prefs2.languages.split(',').map(s => s.trim()).filter(Boolean);
@@ -119,9 +129,9 @@ export function calculateMatchScore(
     }
   }
 
-  // 基础分：保底 20 分
+  // 基础分：保底 10 分
   if (reasons.length === 0) {
-    score = 20;
+    score = 10;
     reasons.push('探索新朋友');
   }
 

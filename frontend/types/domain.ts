@@ -162,6 +162,8 @@ export interface MatchWithScore extends Match {
   match_reasons: string[] | null;
 }
 
+export type NetworkingIntent = 'find_cofounder' | 'learn_exchange' | 'expand_network' | 'get_inspiration';
+
 export interface MatchPreference {
   preference_id: string;
   event_id: string;
@@ -169,6 +171,7 @@ export interface MatchPreference {
   preferred_topics: string | null;
   availability: string | null;
   notes: string | null;
+  networking_intent: NetworkingIntent | null;
   created_at: string;
   updated_at: string;
 }

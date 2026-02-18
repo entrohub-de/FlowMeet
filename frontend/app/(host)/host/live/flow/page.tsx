@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ListChecks, PauseCircle, PlayCircle, StopCircle } from 'lucide-react';
+import { ListChecks, PauseCircle, PlayCircle, StopCircle, ChevronDown } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 import { getEvents } from '@/lib/api/events';
 import type { Event, ActiveFlowStep } from '@/types/domain';
@@ -73,10 +73,11 @@ export default function FlowControlPage() {
           getEvents(),
           getAllWorkflowModules(),
         ]);
-        setEvents(eventsData);
+        const activeEvents = eventsData.filter((e) => e.status === 'active');
+        setEvents(activeEvents);
         setModules(modulesData);
-        if (eventsData.length > 0) {
-          setSelectedEventId(eventsData[0].event_id);
+        if (activeEvents.length > 0) {
+          setSelectedEventId(activeEvents[0].event_id);
         }
       } catch (error) {
         console.error('Failed to load data:', error);
@@ -132,15 +133,23 @@ export default function FlowControlPage() {
   }, []);
 
   // Restore active flow from DB on event change
-  const restoredRef = useRef(false);
+  const restoredRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!selectedEventId || restoredRef.current) return;
+    if (!selectedEventId || restoredRef.current === selectedEventId) return;
     let cancelled = false;
 
     const restore = async () => {
       try {
         const activeFlow = await getActiveFlow(selectedEventId);
-        if (cancelled || !activeFlow || activeFlow.flow_status === 'idle') return;
+        if (cancelled) return;
+
+        if (!activeFlow || activeFlow.flow_status === 'idle') {
+          // No active flow – reset steps so auto-apply can kick in
+          setFlowSteps([]);
+          setIsGloballyPaused(false);
+          autoApplied.current = false;
+          return;
+        }
 
         // Restore flow steps from DB
         const dbSteps = activeFlow.steps as ActiveFlowStep[];
@@ -167,11 +176,9 @@ export default function FlowControlPage() {
             setSelectedTemplateId(activeFlow.template_id);
           }
           // Restore global pause state
-          if (activeFlow.is_globally_paused) {
-            setIsGloballyPaused(true);
-          }
-          restoredRef.current = true;
+          setIsGloballyPaused(!!activeFlow.is_globally_paused);
         }
+        restoredRef.current = selectedEventId;
       } catch (error) {
         console.error('Failed to restore active flow:', error);
       }
@@ -437,6 +444,31 @@ export default function FlowControlPage() {
     }
   }, [selectedEventId, flowSteps]);
 
+  // Handle event switch: reset flow state so restore effect re-runs
+  const handleEventChange = useCallback((eventId: string) => {
+    if (eventId === selectedEventId) return;
+    setSelectedEventId(eventId);
+    setFlowSteps([]);
+    setIsGloballyPaused(false);
+    restoredRef.current = null;
+    autoApplied.current = false;
+  }, [selectedEventId]);
+
+  // Event dropdown state
+  const [showEventDropdown, setShowEventDropdown] = useState(false);
+  const eventDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (eventDropdownRef.current && !eventDropdownRef.current.contains(e.target as Node)) {
+        setShowEventDropdown(false);
+      }
+    };
+    if (showEventDropdown) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showEventDropdown]);
+
+  const selectedEvent = events.find((e) => e.event_id === selectedEventId);
   const selectedTemplate = templates.find((tpl) => tpl.template_id === selectedTemplateId);
 
   // Auto-scroll to active step
@@ -498,6 +530,43 @@ export default function FlowControlPage() {
               {t('hostActions.historyToggle')}
             </button>
           </div>
+
+          {/* ── Event Selector Dropdown ── */}
+          {events.length > 1 && (
+            <div ref={eventDropdownRef} className="relative inline-block mb-1">
+              <button
+                type="button"
+                onClick={() => setShowEventDropdown((v) => !v)}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border bg-background text-sm font-medium text-foreground hover:bg-muted transition-colors"
+              >
+                <span className="truncate max-w-[240px]">
+                  {selectedEvent?.name ?? t('host.flowControl.selectEvent')}
+                </span>
+                <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${showEventDropdown ? 'rotate-180' : ''}`} />
+              </button>
+              {showEventDropdown && (
+                <div className="absolute left-0 z-50 mt-1 min-w-[260px] bg-background border border-border rounded-lg shadow-lg max-h-[300px] overflow-y-auto">
+                  {events.map((event) => {
+                    const isSelected = event.event_id === selectedEventId;
+                    return (
+                      <button
+                        key={event.event_id}
+                        type="button"
+                        onClick={() => { handleEventChange(event.event_id); setShowEventDropdown(false); }}
+                        className={`w-full px-4 py-2.5 text-left text-sm transition-colors ${
+                          isSelected
+                            ? 'bg-primary/10 text-primary font-medium'
+                            : 'text-foreground hover:bg-muted'
+                        }`}
+                      >
+                        {event.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* ── Global Pause & End Event Buttons ── */}
@@ -578,9 +647,6 @@ export default function FlowControlPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
             <div className="w-full max-w-lg mx-4">
               <TemplateSelectionPanel
-                events={events}
-                selectedEventId={selectedEventId}
-                onEventChange={setSelectedEventId}
                 templates={templates}
                 selectedTemplateId={selectedTemplateId}
                 onTemplateChange={setSelectedTemplateId}

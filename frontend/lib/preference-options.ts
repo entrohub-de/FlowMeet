@@ -40,6 +40,13 @@ export const PROFESSIONAL_BACKGROUND_OPTIONS = [
 /** @deprecated Use PROFESSIONAL_BACKGROUND_OPTIONS */
 export const INDUSTRY_OPTIONS = PROFESSIONAL_BACKGROUND_OPTIONS;
 
+export const NETWORKING_INTENT_OPTIONS = [
+  'find_cofounder',
+  'learn_exchange',
+  'expand_network',
+  'get_inspiration',
+] as const;
+
 export const STARTUP_STAGE_OPTIONS = [
   'not_started',
   'idea',

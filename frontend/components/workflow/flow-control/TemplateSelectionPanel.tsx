@@ -8,13 +8,9 @@ import {
   resolveWorkflow,
   type WorkflowModule,
 } from '@/features/host-console/workflowModules';
-import type { Event } from '@/types/domain';
 import type { WorkflowTemplateRecord } from '@/lib/api/workflow-templates';
 
 interface TemplateSelectionPanelProps {
-  events: Event[];
-  selectedEventId: string;
-  onEventChange: (eventId: string) => void;
   templates: WorkflowTemplateRecord[];
   selectedTemplateId: string;
   onTemplateChange: (templateId: string) => void;
@@ -25,9 +21,6 @@ interface TemplateSelectionPanelProps {
 }
 
 export default function TemplateSelectionPanel({
-  events,
-  selectedEventId,
-  onEventChange,
   templates,
   selectedTemplateId,
   onTemplateChange,
@@ -46,54 +39,33 @@ export default function TemplateSelectionPanel({
       </h2>
 
       <div className="space-y-5">
-        {/* Event selector */}
-        {events.length > 0 && (
-          <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-2">
-              {t('host.flowControl.selectEvent')}
-            </label>
+        {/* Template selector */}
+        <div>
+          <label className="block text-sm font-medium text-muted-foreground mb-2">
+            {t('host.flowControl.selectTemplateLabel')}
+          </label>
+          {loadingTemplates ? (
+            <div className="text-sm text-muted-foreground">{t('common.loading')}</div>
+          ) : templates.length > 0 ? (
             <CustomSelect
-              options={events.map((event) => ({
-                value: event.event_id,
-                label: event.name,
+              options={templates.map((tpl) => ({
+                value: tpl.template_id,
+                label: tpl.name,
               }))}
-              value={selectedEventId}
-              onChange={onEventChange}
-              placeholder={t('host.flowControl.selectEventPlaceholder')}
+              value={selectedTemplateId}
+              onChange={onTemplateChange}
+              placeholder={t('host.flowControl.selectTemplatePlaceholder')}
               className="w-full md:w-auto md:min-w-[300px]"
             />
-          </div>
-        )}
-
-        {/* Template selector */}
-        {selectedEventId && (
-          <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-2">
-              {t('host.flowControl.selectTemplateLabel')}
-            </label>
-            {loadingTemplates ? (
-              <div className="text-sm text-muted-foreground">{t('common.loading')}</div>
-            ) : templates.length > 0 ? (
-              <CustomSelect
-                options={templates.map((tpl) => ({
-                  value: tpl.template_id,
-                  label: tpl.name,
-                }))}
-                value={selectedTemplateId}
-                onChange={onTemplateChange}
-                placeholder={t('host.flowControl.selectTemplatePlaceholder')}
-                className="w-full md:w-auto md:min-w-[300px]"
-              />
-            ) : (
-              <div className="text-sm text-muted-foreground">
-                {t('host.flowControl.noTemplates')}
-                <Link href="/host/workflows" className="ml-1 text-primary hover:underline">
-                  {t('host.flowControl.goToCreateTemplate')}
-                </Link>
-              </div>
-            )}
-          </div>
-        )}
+          ) : (
+            <div className="text-sm text-muted-foreground">
+              {t('host.flowControl.noTemplates')}
+              <Link href="/host/workflows" className="ml-1 text-primary hover:underline">
+                {t('host.flowControl.goToCreateTemplate')}
+              </Link>
+            </div>
+          )}
+        </div>
 
         {/* Template preview */}
         {selectedTemplate && (
@@ -143,14 +115,12 @@ export default function TemplateSelectionPanel({
               {t('common.cancel')}
             </button>
           )}
-          {selectedEventId && (
-            <Link
-              href="/host/workflows"
-              className="px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {t('host.flowControl.goToWorkflows')}
-            </Link>
-          )}
+          <Link
+            href="/host/workflows"
+            className="px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {t('host.flowControl.goToWorkflows')}
+          </Link>
         </div>
       </div>
     </div>

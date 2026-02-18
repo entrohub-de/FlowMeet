@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Save, SkipForward, Sparkles, BookmarkCheck, Globe, Heart, Briefcase, Rocket } from 'lucide-react';
+import { X, Save, SkipForward, Sparkles, BookmarkCheck, Globe, Heart, Briefcase, Rocket, Target } from 'lucide-react';
 import { toast } from 'sonner';
 import { getMatchPreference, saveMatchPreference } from '@/lib/api/matching';
 import { getPreferences, upsertPreferences } from '@/lib/api/profile';
@@ -21,6 +21,7 @@ import {
   INTEREST_OPTIONS,
   PROFESSIONAL_BACKGROUND_OPTIONS,
   STARTUP_STAGE_OPTIONS,
+  NETWORKING_INTENT_OPTIONS,
   parsePreferenceString,
   serializePreferenceArray,
 } from '@/lib/preference-options';
@@ -40,6 +41,7 @@ export default function PreferencesModal({ eventId, userId, t, onClose }: Prefer
   const [preferredTopics, setPreferredTopics] = useState('');
   const [availability, setAvailability] = useState('');
   const [notes, setNotes] = useState('');
+  const [networkingIntent, setNetworkingIntent] = useState('');
 
   // Expectations (tag-based)
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -70,6 +72,7 @@ export default function PreferencesModal({ eventId, userId, t, onClose }: Prefer
           setPreferredTopics(matchPref.preferred_topics ?? '');
           setAvailability(matchPref.availability ?? '');
           setNotes(matchPref.notes ?? '');
+          setNetworkingIntent(matchPref.networking_intent ?? '');
         }
 
         if (globalPrefs) {
@@ -119,6 +122,7 @@ export default function PreferencesModal({ eventId, userId, t, onClose }: Prefer
         preferred_topics: preferredTopics || undefined,
         availability: availability || undefined,
         notes: notes || undefined,
+        networking_intent: networkingIntent || undefined,
       });
 
       if (selectedTags.length > 0 || expectationText.trim()) {
@@ -278,6 +282,20 @@ export default function PreferencesModal({ eventId, userId, t, onClose }: Prefer
                 onChange={(e) => setExpectationText(e.target.value)}
                 placeholder={t('user.expectationPlaceholder')}
               />
+            </div>
+
+            {/* Networking Intent */}
+            <div className="space-y-3 pt-2 border-t border-border">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-foreground flex items-center gap-1">
+                  <Target className="w-3.5 h-3.5" />
+                  {t('eventPreferences.networkingIntent')}
+                </label>
+                <p className="text-xs text-muted-foreground">
+                  {t('eventPreferences.networkingIntentHint')}
+                </p>
+                {renderSingleChipGroup(NETWORKING_INTENT_OPTIONS, networkingIntent, 'networkingIntent', setNetworkingIntent)}
+              </div>
             </div>
 
             {/* Event-specific preferences */}

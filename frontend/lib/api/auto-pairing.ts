@@ -3,7 +3,7 @@ import {
   calculateMatchScore,
   type UserWithPreferences,
 } from './matching-algorithm';
-import type { Profile, Preferences } from '@/types/domain';
+import type { Profile, Preferences, NetworkingIntent } from '@/types/domain';
 
 export interface PairResult {
   user1Id: string;
@@ -60,7 +60,7 @@ export async function generatePairs(
   // 0. Fetch history pairs for this event
   const historySet = await fetchHistoryPairs(eventId);
 
-  // 1. Fetch profiles + preferences
+  // 1. Fetch profiles + preferences + match preferences (networking intent)
   const { data: profiles } = await supabase
     .from('usr_profiles')
     .select('*')
@@ -70,6 +70,20 @@ export async function generatePairs(
     .from('usr_preferences')
     .select('*')
     .in('user_id', readyUserIds);
+
+  const { data: matchPreferences } = await supabase
+    .from('match_preferences')
+    .select('user_id, networking_intent')
+    .eq('event_id', eventId)
+    .in('user_id', readyUserIds);
+
+  // Build a map of user_id -> networking_intent
+  const intentMap = new Map<string, NetworkingIntent | null>();
+  if (matchPreferences) {
+    for (const mp of matchPreferences) {
+      intentMap.set(mp.user_id, (mp.networking_intent as NetworkingIntent) ?? null);
+    }
+  }
 
   // Split users: those with profiles vs those without
   const usersWithProfile = new Map<string, UserWithPreferences>();
@@ -81,6 +95,7 @@ export async function generatePairs(
       usersWithProfile.set(uid, {
         profile: profile as Profile,
         preferences: (preferences?.find((p) => p.user_id === uid) as Preferences) ?? null,
+        networkingIntent: intentMap.get(uid) ?? null,
       });
     } else {
       usersWithoutProfile.push(uid);

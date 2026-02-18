@@ -2,17 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Save, SkipForward, Globe, Heart, Briefcase, Rocket } from 'lucide-react';
+import { ArrowLeft, Save, SkipForward, Globe, Heart, Briefcase, Rocket, Target } from 'lucide-react';
 import { useAuth } from '@/features/auth/useAuth';
 import { useTranslation } from '@/lib/i18n/context';
 import { getMatchPreference, saveMatchPreference } from '@/lib/api/matching';
 import { getPreferences, upsertPreferences } from '@/lib/api/profile';
+import FamiliarFaces from '@/components/matching/FamiliarFaces';
 import { cn } from '@/lib/utils';
 import {
   LANGUAGE_OPTIONS,
   INTEREST_OPTIONS,
   PROFESSIONAL_BACKGROUND_OPTIONS,
   STARTUP_STAGE_OPTIONS,
+  NETWORKING_INTENT_OPTIONS,
   parsePreferenceString,
   serializePreferenceArray,
 } from '@/lib/preference-options';
@@ -30,6 +32,7 @@ export default function EventPreferencesPage() {
   const [preferredTopics, setPreferredTopics] = useState('');
   const [availability, setAvailability] = useState('');
   const [notes, setNotes] = useState('');
+  const [networkingIntent, setNetworkingIntent] = useState('');
 
   // Global preferences (show only if not filled)
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
@@ -51,6 +54,7 @@ export default function EventPreferencesPage() {
           setPreferredTopics(matchPref.preferred_topics ?? '');
           setAvailability(matchPref.availability ?? '');
           setNotes(matchPref.notes ?? '');
+          setNetworkingIntent(matchPref.networking_intent ?? '');
         }
 
         if (globalPrefs) {
@@ -81,6 +85,7 @@ export default function EventPreferencesPage() {
         preferred_topics: preferredTopics || undefined,
         availability: availability || undefined,
         notes: notes || undefined,
+        networking_intent: networkingIntent || undefined,
       });
 
       if (!hasGlobalPrefs) {
@@ -183,11 +188,25 @@ export default function EventPreferencesPage() {
         </div>
 
         <div className="space-y-6">
+          {/* Familiar faces from previous events */}
+          {user?.id && <FamiliarFaces eventId={eventId} userId={user.id} />}
+
           {/* Event-specific preferences */}
           <div className="bg-card border border-border rounded-xl p-6 space-y-4">
             <h2 className="text-lg font-semibold text-foreground">
               {t('eventPreferences.eventSpecific')}
             </h2>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground flex items-center gap-1">
+                <Target className="w-3.5 h-3.5" />
+                {t('eventPreferences.networkingIntent')}
+              </label>
+              <p className="text-xs text-muted-foreground">
+                {t('eventPreferences.networkingIntentHint')}
+              </p>
+              {renderSingleChipGroup(NETWORKING_INTENT_OPTIONS, networkingIntent, 'networkingIntent', setNetworkingIntent)}
+            </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground" htmlFor="topics">

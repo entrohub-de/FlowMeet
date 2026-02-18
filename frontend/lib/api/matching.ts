@@ -42,6 +42,7 @@ export async function saveMatchPreference(
     preferred_topics?: string;
     availability?: string;
     notes?: string;
+    networking_intent?: string;
   }
 ): Promise<boolean> {
   const { error } = await supabase.from('match_preferences').upsert(
@@ -546,4 +547,82 @@ export function subscribeToMatchLocation(
     .subscribe();
 
   return channel;
+}
+
+export interface FamiliarFace {
+  profile: Profile;
+  previousEventName: string;
+  previousMatchDate: string;
+}
+
+/**
+ * 弱关系激活：查找当前活动中曾在其他活动中配对过的用户
+ */
+export async function getFamiliarFaces(
+  eventId: string,
+  userId: string
+): Promise<FamiliarFace[]> {
+  // 1. Get all users signed up for this event
+  const { data: signups } = await supabase
+    .from('evt_signups')
+    .select('user_id')
+    .eq('event_id', eventId)
+    .eq('status', 'active');
+
+  if (!signups || signups.length === 0) return [];
+
+  const eventUserIds = signups.map((s) => s.user_id).filter((id) => id !== userId);
+  if (eventUserIds.length === 0) return [];
+
+  // 2. Get all previous matches of the current user from OTHER events
+  const { data: previousMatches } = await supabase
+    .from('match_records')
+    .select('user1_id, user2_id, event_id, created_at')
+    .neq('event_id', eventId)
+    .or(`user1_id.eq.${userId},user2_id.eq.${userId}`)
+    .in('status', ['accepted', 'completed']);
+
+  if (!previousMatches || previousMatches.length === 0) return [];
+
+  // 3. Find intersection: users who are both in this event AND were previously matched
+  const familiarUserMap = new Map<string, { eventId: string; matchDate: string }>();
+  for (const match of previousMatches) {
+    const partnerId = match.user1_id === userId ? match.user2_id : match.user1_id;
+    if (eventUserIds.includes(partnerId) && !familiarUserMap.has(partnerId)) {
+      familiarUserMap.set(partnerId, {
+        eventId: match.event_id,
+        matchDate: match.created_at,
+      });
+    }
+  }
+
+  if (familiarUserMap.size === 0) return [];
+
+  // 4. Fetch profiles and event names
+  const familiarIds = Array.from(familiarUserMap.keys());
+
+  const [{ data: profiles }, { data: events }] = await Promise.all([
+    supabase.from('usr_profiles').select('*').in('user_id', familiarIds),
+    supabase
+      .from('evt_events')
+      .select('event_id, name')
+      .in('event_id', Array.from(new Set([...familiarUserMap.values()].map((v) => v.eventId)))),
+  ]);
+
+  const eventNameMap = new Map<string, string>();
+  events?.forEach((e) => eventNameMap.set(e.event_id, e.name));
+
+  const results: FamiliarFace[] = [];
+  for (const [uid, info] of familiarUserMap) {
+    const profile = profiles?.find((p) => p.user_id === uid);
+    if (profile) {
+      results.push({
+        profile: profile as Profile,
+        previousEventName: eventNameMap.get(info.eventId) ?? '',
+        previousMatchDate: info.matchDate,
+      });
+    }
+  }
+
+  return results;
 }
