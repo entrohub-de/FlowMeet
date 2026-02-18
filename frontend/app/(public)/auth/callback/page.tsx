@@ -34,7 +34,7 @@ async function ensureRoleAndRedirect(
     typeof roleData.role === 'string' ? roleData.role.trim().toLowerCase() : '';
 
   if (normalizedRole === 'admin') {
-    router.push('/admin/test/simulator');
+    router.push('/admin');
   } else if (normalizedRole === 'host') {
     router.push('/host');
   } else {

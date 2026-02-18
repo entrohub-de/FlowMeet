@@ -15,7 +15,7 @@ export async function isProfileComplete(userId: string): Promise<boolean> {
 export async function getProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase
     .from('usr_profiles')
-    .select('*')
+    .select('id, created_at, user_id, nickname, gender, age_group, avatar_url')
     .eq('user_id', userId)
     .maybeSingle();
 
@@ -40,7 +40,7 @@ export async function upsertProfile(
 export async function getPreferences(userId: string): Promise<Preferences | null> {
   const { data, error } = await supabase
     .from('usr_preferences')
-    .select('*')
+    .select('id, created_at, user_id, languages, interests, industry_background, startup_stage')
     .eq('user_id', userId)
     .maybeSingle();
 

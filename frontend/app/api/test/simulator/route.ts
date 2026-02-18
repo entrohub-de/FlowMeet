@@ -1,9 +1,45 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 
-// Direct connection to local Supabase (not through proxy)
+// ============================================================
+// Three-layer protection for test simulator:
+// 1. NODE_ENV must be 'development'
+// 2. TEST_SIMULATOR_SECRET env var must be set
+// 3. Request must include matching X-Test-Secret header
+// ============================================================
+
 const SUPABASE_URL = process.env.SUPABASE_URL || 'http://127.0.0.1:54321';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const TEST_SECRET = process.env.TEST_SIMULATOR_SECRET || '';
+
+function guardRequest(req: NextRequest): NextResponse | null {
+  // Layer 1: environment check
+  if (process.env.NODE_ENV !== 'development') {
+    return NextResponse.json(
+      { error: 'Test simulator is only available in development mode' },
+      { status: 403 },
+    );
+  }
+
+  // Layer 2: server-side secret must be configured
+  if (!TEST_SECRET) {
+    return NextResponse.json(
+      { error: 'TEST_SIMULATOR_SECRET is not configured' },
+      { status: 503 },
+    );
+  }
+
+  // Layer 3: request must carry the matching secret
+  const clientSecret = req.headers.get('x-test-secret');
+  if (clientSecret !== TEST_SECRET) {
+    return NextResponse.json(
+      { error: 'Invalid or missing X-Test-Secret header' },
+      { status: 401 },
+    );
+  }
+
+  return null; // all checks passed
+}
 
 const adminClient = createClient(SUPABASE_URL, SERVICE_KEY, {
   auth: { autoRefreshToken: false, persistSession: false },
@@ -20,13 +56,11 @@ const AGE_GROUPS = ['18-24', '25-34', '35-44', '45-54'];
 const PROFESSIONAL_BACKGROUNDS = ['engineer', 'marketing_sales', 'student_research', 'founder', 'product_manager', 'designer', 'finance_legal'];
 const pick = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
+const MAX_BATCH_SIZE = 100;
+
 export async function POST(req: NextRequest) {
-  if (process.env.NODE_ENV !== 'development') {
-    return NextResponse.json(
-      { error: 'Test simulator is only available in development mode' },
-      { status: 403 }
-    );
-  }
+  const blocked = guardRequest(req);
+  if (blocked) return blocked;
 
   const body = await req.json();
   const { action } = body;
@@ -34,8 +68,7 @@ export async function POST(req: NextRequest) {
   try {
     switch (action) {
       case 'setup': {
-        // Create test users and return their info
-        const count: number = body.count || 20;
+        const count = Math.min(Math.max(body.count || 20, 1), MAX_BATCH_SIZE);
         const users: Array<{ email: string; userId: string; nickname: string }> = [];
 
         for (let i = 1; i <= count; i++) {
@@ -55,7 +88,6 @@ export async function POST(req: NextRequest) {
               const existing = listData?.users?.find((u) => u.email === email);
               if (existing) {
                 userId = existing.id;
-                // Ensure profile exists
                 const { data: profile } = await adminClient
                   .from('usr_profiles')
                   .select('nickname')
@@ -71,7 +103,6 @@ export async function POST(req: NextRequest) {
 
           userId = authData.user.id;
 
-          // Create profile
           await adminClient.from('usr_profiles').upsert({
             user_id: userId,
             nickname,
@@ -80,7 +111,6 @@ export async function POST(req: NextRequest) {
             profile_completed_at: new Date().toISOString(),
           }, { onConflict: 'user_id' });
 
-          // Create preferences
           const INTEREST_POOL = ['startup', 'tech_ai', 'career', 'cross_cultural', 'investment', 'product', 'design', 'marketing'];
           const interests = [pick(INTEREST_POOL), pick(INTEREST_POOL)].filter((v, i, a) => a.indexOf(v) === i).join(',');
           await adminClient.from('usr_preferences').upsert({
@@ -100,7 +130,7 @@ export async function POST(req: NextRequest) {
       case 'signup': {
         const { eventId, userIds } = body as { eventId: string; userIds: string[] };
         let ok = 0;
-        for (const uid of userIds) {
+        for (const uid of userIds.slice(0, MAX_BATCH_SIZE)) {
           const { error } = await adminClient.from('evt_signups').upsert({
             event_id: eventId,
             user_id: uid,
@@ -114,7 +144,7 @@ export async function POST(req: NextRequest) {
       case 'checkin': {
         const { eventId, userIds } = body as { eventId: string; userIds: string[] };
         let ok = 0;
-        for (const uid of userIds) {
+        for (const uid of userIds.slice(0, MAX_BATCH_SIZE)) {
           const { error } = await adminClient.from('evt_signups').update({
             checked_in: true,
             checked_in_at: new Date().toISOString(),
@@ -149,7 +179,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

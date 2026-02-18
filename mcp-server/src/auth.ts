@@ -62,8 +62,16 @@ export function resolveUserId(explicitId?: string): string {
   throw new Error('Not logged in and no userId provided. Use the login tool first or pass userId explicitly.');
 }
 
+export function requireAuth(): void {
+  if (!currentSession) {
+    throw new Error('Not logged in. Use the login tool first.');
+  }
+}
+
 export function requireHostAccess(): void {
-  if (!currentSession) return; // backward compat: no login = no restriction
+  if (!currentSession) {
+    throw new Error('Not logged in. Use the login tool first.');
+  }
   if (currentSession.activeView !== 'host') {
     throw new Error('Access denied: host tools require host view. Use switch_view to switch to host mode.');
   }

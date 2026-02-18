@@ -19,7 +19,7 @@ export async function getMatchPreference(
 ): Promise<MatchPreference | null> {
   const { data, error } = await supabase
     .from('match_preferences')
-    .select('*')
+    .select('preference_id, event_id, user_id, preferred_topics, availability, notes, networking_intent, created_at, updated_at')
     .eq('event_id', eventId)
     .eq('user_id', userId)
     .single();
@@ -98,7 +98,7 @@ export async function getUserMatches(
 
   const { data: profiles } = await supabase
     .from('usr_profiles')
-    .select('*')
+    .select('id, created_at, user_id, nickname, gender, age_group, avatar_url')
     .in('user_id', Array.from(userIds));
 
   // 合并数据
@@ -265,7 +265,7 @@ export async function getAvailableUsers(
   // 获取这些用户的资料
   const { data: profiles, error: profileError } = await supabase
     .from('usr_profiles')
-    .select('*')
+    .select('id, created_at, user_id, nickname, gender, age_group, avatar_url')
     .in('user_id', availableUserIds);
 
   if (profileError) {
@@ -379,7 +379,7 @@ export async function getAvailableUsersWithPreferences(
   // 获取这些用户的资料和偏好
   const { data: profiles, error: profileError } = await supabase
     .from('usr_profiles')
-    .select('*')
+    .select('id, created_at, user_id, nickname, gender, age_group, avatar_url')
     .in('user_id', availableUserIds);
 
   if (profileError) {
@@ -389,7 +389,7 @@ export async function getAvailableUsersWithPreferences(
 
   const { data: preferences, error: prefError } = await supabase
     .from('usr_preferences')
-    .select('*')
+    .select('id, created_at, user_id, languages, interests, industry_background, startup_stage')
     .in('user_id', availableUserIds);
 
   if (prefError) {
@@ -412,7 +412,7 @@ export async function getCurrentUserWithPreferences(userId: string): Promise<Use
   // 获取profile，如果有多个则取第一个
   const { data: profiles, error: profileError } = await supabase
     .from('usr_profiles')
-    .select('*')
+    .select('id, created_at, user_id, nickname, gender, age_group, avatar_url')
     .eq('user_id', userId)
     .limit(1);
 
@@ -426,7 +426,7 @@ export async function getCurrentUserWithPreferences(userId: string): Promise<Use
   // 获取preferences
   const { data: preferences, error: prefError } = await supabase
     .from('usr_preferences')
-    .select('*')
+    .select('id, created_at, user_id, languages, interests, industry_background, startup_stage')
     .eq('user_id', userId)
     .limit(1);
 
@@ -602,7 +602,7 @@ export async function getFamiliarFaces(
   const familiarIds = Array.from(familiarUserMap.keys());
 
   const [{ data: profiles }, { data: events }] = await Promise.all([
-    supabase.from('usr_profiles').select('*').in('user_id', familiarIds),
+    supabase.from('usr_profiles').select('id, created_at, user_id, nickname, gender, age_group, avatar_url').in('user_id', familiarIds),
     supabase
       .from('evt_events')
       .select('event_id, name')

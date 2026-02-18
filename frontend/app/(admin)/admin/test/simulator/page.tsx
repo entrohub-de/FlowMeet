@@ -39,10 +39,15 @@ interface LogEntry {
 
 // ─── API helper ───────────────────────────────────────────────────────────────
 
+const TEST_SECRET = process.env.NEXT_PUBLIC_TEST_SIMULATOR_SECRET || '';
+
 async function simApi(body: Record<string, unknown>) {
   const res = await fetch('/api/test/simulator', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Test-Secret': TEST_SECRET,
+    },
     body: JSON.stringify(body),
   });
   return res.json();

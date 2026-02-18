@@ -12,7 +12,7 @@ import { Eye, EyeOff } from 'lucide-react';
 function redirectByRole(role: string, router: ReturnType<typeof useRouter>) {
   const normalized = typeof role === 'string' ? role.trim().toLowerCase() : '';
   if (normalized === 'admin') {
-    router.push('/admin/test/simulator');
+    router.push('/admin');
   } else if (normalized === 'host') {
     router.push('/host');
   } else {
@@ -55,13 +55,13 @@ export default function LoginPage() {
       });
 
       if (signInError) {
-        setError(signInError.message || 'Unable to send magic link.');
+        setError(t('auth.magicLinkError') || '发送链接失败，请稍后再试');
         return;
       }
 
       setMagicLinkSent(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to send magic link.');
+      setError(t('auth.magicLinkError') || '发送链接失败，请稍后再试');
     } finally {
       setLoading(false);
     }
@@ -80,12 +80,12 @@ export default function LoginPage() {
         });
 
       if (signInError) {
-        setError(`${t('auth.signIn')}${t('auth.failed') || '失败'}: ${signInError.message}`);
+        setError(t('auth.invalidCredentials') || '邮箱或密码错误');
         return;
       }
 
       if (!authData?.user) {
-        setError('Unable to load user role.');
+        setError(t('auth.invalidCredentials') || '邮箱或密码错误');
         return;
       }
 
@@ -97,7 +97,7 @@ export default function LoginPage() {
         .maybeSingle();
 
       if (roleError) {
-        setError(roleError.message || 'Unable to load user role.');
+        setError(t('auth.loginError') || '登录失败，请稍后再试');
         return;
       }
 
@@ -114,8 +114,7 @@ export default function LoginPage() {
 
       redirectByRole(roleData.role, router);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '登录失败，请检查网络连接';
-      setError(errorMessage);
+      setError(t('auth.loginError') || '登录失败，请稍后再试');
     } finally {
       setLoading(false);
     }
@@ -278,7 +277,7 @@ export default function LoginPage() {
                   },
                 });
                 if (oauthError) {
-                  setError(oauthError.message);
+                  setError(t('auth.loginError') || '登录失败，请稍后再试');
                 }
               }}
               className="w-full px-button h-button bg-background border border-border rounded-button font-medium text-foreground hover:bg-secondary transition-colors flex items-center justify-center gap-2 text-sm"

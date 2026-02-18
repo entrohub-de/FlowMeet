@@ -72,7 +72,7 @@ export async function applyForHost(userId: string): Promise<{ success: boolean; 
 export async function getHostApplication(userId: string): Promise<HostApplication | null> {
   const { data, error } = await supabase
     .from('usr_host_applications')
-    .select('*')
+    .select('id, user_id, status, created_at, reviewed_at, reviewed_by')
     .eq('user_id', userId)
     .maybeSingle();
 

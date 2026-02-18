@@ -20,7 +20,7 @@ export default function Home() {
 
     getUserRole(user.id).then((role) => {
       if (role === 'admin') {
-        router.push('/admin/test/simulator');
+        router.push('/admin');
       } else if (role === 'host') {
         router.push('/host');
       } else {
