@@ -21,6 +21,13 @@ const PROFESSIONAL_BACKGROUNDS = ['engineer', 'marketing_sales', 'student_resear
 const pick = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
 export async function POST(req: NextRequest) {
+  if (process.env.NODE_ENV !== 'development') {
+    return NextResponse.json(
+      { error: 'Test simulator is only available in development mode' },
+      { status: 403 }
+    );
+  }
+
   const body = await req.json();
   const { action } = body;
 

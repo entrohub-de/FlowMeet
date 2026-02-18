@@ -4,9 +4,9 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/features/auth/useAuth';
 import { useTranslation } from '@/lib/i18n/context';
 import { getProfile, upsertProfile, getPreferences, upsertPreferences } from '@/lib/api/profile';
-import { getUserRole, upgradeToHost, type UserRole } from '@/lib/api/role';
+import { getUserRole, applyForHost, getHostApplication, type UserRole, type HostApplication } from '@/lib/api/role';
 import { uploadUserAvatar } from '@/lib/api/storage';
-import { Crown, User, Pencil, Check, Mail, Globe, Heart, Briefcase, Rocket, ChevronDown, Camera, Loader2 } from 'lucide-react';
+import { Crown, User, Pencil, Check, Mail, Globe, Heart, Briefcase, Rocket, ChevronDown, Camera, Loader2, Clock, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import {
@@ -45,16 +45,18 @@ export default function ProfilePage() {
   const [isPrefsEditing, setIsPrefsEditing] = useState(false);
   const [prefsSaving, setPrefsSaving] = useState(false);
 
-  // Role upgrade states
+  // Role & application states
   const [userRole, setUserRole] = useState<UserRole>('user');
-  const [upgrading, setUpgrading] = useState(false);
+  const [hostApplication, setHostApplication] = useState<HostApplication | null>(null);
+  const [applying, setApplying] = useState(false);
 
   const loadData = useCallback(async (userId: string) => {
     try {
-      const [profile, prefs, role] = await Promise.all([
+      const [profile, prefs, role, application] = await Promise.all([
         getProfile(userId),
         getPreferences(userId),
         getUserRole(userId),
+        getHostApplication(userId),
       ]);
       if (profile) {
         setNickname(profile.nickname ?? '');
@@ -75,6 +77,7 @@ export default function ProfilePage() {
         );
       }
       setUserRole(role);
+      setHostApplication(application);
     } finally {
       setLoading(false);
     }
@@ -126,25 +129,35 @@ export default function ProfilePage() {
     }
   };
 
-  const handleUpgradeToHost = async () => {
+  const handleApplyForHost = async () => {
     if (!user?.id) return;
-    setUpgrading(true);
+    setApplying(true);
     try {
-      const result = await upgradeToHost(user.id);
+      const result = await applyForHost(user.id);
       if (result.success) {
-        toast.success(t('profile.roleUpgrade.upgraded'));
-        setUserRole('host');
-        setTimeout(() => { window.location.href = '/host'; }, 1500);
-      } else if (result.error?.includes('already')) {
-        toast.info(t('profile.roleUpgrade.alreadyHost'));
+        toast.success(t('profile.roleUpgrade.applied'));
+        setHostApplication({ id: '', user_id: user.id, status: 'pending', created_at: new Date().toISOString(), reviewed_at: null, reviewed_by: null });
+      } else if (result.error === 'already_applied') {
+        toast.info(t('profile.roleUpgrade.alreadyApplied'));
       } else {
         toast.error(result.error || t('profile.roleUpgrade.error'));
       }
     } catch {
       toast.error(t('profile.roleUpgrade.error'));
     } finally {
-      setUpgrading(false);
+      setApplying(false);
     }
+  };
+
+  const handleReapply = async () => {
+    if (!user?.id) return;
+    // Delete old application first, then re-apply
+    // Since we have a UNIQUE constraint, we need to delete first
+    // But RLS doesn't allow user DELETE — so we handle this by upserting via the insert with ON CONFLICT
+    // Actually the table has UNIQUE(user_id) so re-insert won't work.
+    // For reapply, we'll just show a message — admin needs to handle this,
+    // or we can use the existing record. Let's just toast for now.
+    toast.info(t('profile.roleUpgrade.reapplyHint'));
   };
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -235,6 +248,9 @@ export default function ProfilePage() {
       ))}
     </div>
   );
+
+  // Determine application state for the role upgrade section
+  const applicationStatus = hostApplication?.status ?? null;
 
   return (
     <div className="min-h-[calc(100vh-60px)] p-4 bg-muted/30">
@@ -489,8 +505,8 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {/* Role Upgrade Section */}
-        {userRole === 'user' && (
+        {/* Role Upgrade Section — Application-based */}
+        {userRole === 'user' && !applicationStatus && (
           <div className="bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-2xl p-5 space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
@@ -522,12 +538,48 @@ export default function ProfilePage() {
             </div>
 
             <button
-              onClick={handleUpgradeToHost}
-              disabled={upgrading}
+              onClick={handleApplyForHost}
+              disabled={applying}
               className="w-full px-4 py-2.5 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 touch-feedback"
             >
               <Crown className="w-4 h-4" />
-              {upgrading ? t('profile.roleUpgrade.upgrading') : t('profile.roleUpgrade.upgradeToHost')}
+              {applying ? t('profile.roleUpgrade.applying') : t('profile.roleUpgrade.applyToHost')}
+            </button>
+          </div>
+        )}
+
+        {/* Pending Application */}
+        {userRole === 'user' && applicationStatus === 'pending' && (
+          <div className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-950/20 dark:to-amber-950/20 border border-yellow-200 dark:border-yellow-800 rounded-2xl p-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center">
+                <Clock className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground">{t('profile.roleUpgrade.pendingTitle')}</h3>
+                <p className="text-xs text-muted-foreground">{t('profile.roleUpgrade.pendingDescription')}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Rejected Application */}
+        {userRole === 'user' && applicationStatus === 'rejected' && (
+          <div className="bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950/20 dark:to-rose-950/20 border border-red-200 dark:border-red-800 rounded-2xl p-5 space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                <XCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground">{t('profile.roleUpgrade.rejectedTitle')}</h3>
+                <p className="text-xs text-muted-foreground">{t('profile.roleUpgrade.rejectedDescription')}</p>
+              </div>
+            </div>
+            <button
+              onClick={handleReapply}
+              className="w-full px-4 py-2.5 bg-muted text-foreground rounded-xl font-medium hover:bg-muted/80 transition-colors flex items-center justify-center gap-2 touch-feedback text-sm"
+            >
+              {t('profile.roleUpgrade.reapply')}
             </button>
           </div>
         )}

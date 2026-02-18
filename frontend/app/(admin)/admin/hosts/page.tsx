@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Users, Shield, ShieldOff, ShieldCheck, Search, Loader2 } from 'lucide-react';
+import { Users, Shield, ShieldOff, ShieldCheck, Search, Loader2, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
-import { getAllUsersWithRoles, updateUserRole, type UserWithRole } from '@/lib/api/admin';
+import { getAllUsersWithRoles, updateUserRole, getHostApplications, approveHostApplication, rejectHostApplication, type UserWithRole, type HostApplicationWithProfile } from '@/lib/api/admin';
 import type { UserRole } from '@/lib/api/role';
 
 type Filter = 'all' | 'host' | 'admin';
@@ -11,26 +11,32 @@ type Filter = 'all' | 'host' | 'admin';
 export default function AdminHostsPage() {
   const { t } = useTranslation();
   const [users, setUsers] = useState<UserWithRole[]>([]);
+  const [applications, setApplications] = useState<HostApplicationWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>('all');
   const [search, setSearch] = useState('');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [processingAppId, setProcessingAppId] = useState<string | null>(null);
 
-  const loadUsers = useCallback(async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await getAllUsersWithRoles();
-      setUsers(data);
+      const [usersData, appsData] = await Promise.all([
+        getAllUsersWithRoles(),
+        getHostApplications(),
+      ]);
+      setUsers(usersData);
+      setApplications(appsData);
     } catch (err) {
-      console.error('Failed to load users:', err);
+      console.error('Failed to load data:', err);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadUsers();
-  }, [loadUsers]);
+    loadData();
+  }, [loadData]);
 
   const handleRoleChange = async (userId: string, newRole: UserRole) => {
     const confirmMsg =
@@ -53,6 +59,45 @@ export default function AdminHostsPage() {
       setUpdatingId(null);
     }
   };
+
+  const handleApprove = async (app: HostApplicationWithProfile) => {
+    if (!window.confirm(t('admin.hosts.confirmApprove'))) return;
+
+    setProcessingAppId(app.id);
+    try {
+      await approveHostApplication(app.id, app.user_id);
+      setApplications((prev) =>
+        prev.map((a) => (a.id === app.id ? { ...a, status: 'approved' } : a))
+      );
+      setUsers((prev) =>
+        prev.map((u) => (u.user_id === app.user_id ? { ...u, role: 'host' as UserRole } : u))
+      );
+    } catch (err) {
+      console.error('Failed to approve application:', err);
+      alert(t('admin.hosts.updateFailed'));
+    } finally {
+      setProcessingAppId(null);
+    }
+  };
+
+  const handleReject = async (app: HostApplicationWithProfile) => {
+    if (!window.confirm(t('admin.hosts.confirmReject'))) return;
+
+    setProcessingAppId(app.id);
+    try {
+      await rejectHostApplication(app.id);
+      setApplications((prev) =>
+        prev.map((a) => (a.id === app.id ? { ...a, status: 'rejected' } : a))
+      );
+    } catch (err) {
+      console.error('Failed to reject application:', err);
+      alert(t('admin.hosts.updateFailed'));
+    } finally {
+      setProcessingAppId(null);
+    }
+  };
+
+  const pendingApplications = applications.filter((a) => a.status === 'pending');
 
   const filteredUsers = users.filter((u) => {
     if (filter === 'host' && u.role !== 'host') return false;
@@ -82,6 +127,62 @@ export default function AdminHostsPage() {
             </p>
           </div>
         </div>
+
+        {/* Pending Applications */}
+        {pendingApplications.length > 0 && (
+          <div className="bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+              <h2 className="font-semibold text-foreground">
+                {t('admin.hosts.applications.title')}
+              </h2>
+              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-200 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200">
+                {pendingApplications.length}
+              </span>
+            </div>
+            <div className="space-y-2">
+              {pendingApplications.map((app) => (
+                <div
+                  key={app.id}
+                  className="flex items-center justify-between bg-white dark:bg-card rounded-lg p-3 border border-border"
+                >
+                  <div>
+                    <div className="font-medium text-foreground text-sm">
+                      {app.nickname || app.user_id.slice(0, 8)}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {t('admin.hosts.applications.appliedAt', {
+                        time: new Date(app.created_at).toLocaleDateString(),
+                      })}
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    {processingAppId === app.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => handleApprove(app)}
+                          className="px-3 py-1.5 text-xs font-medium rounded-lg bg-green-50 text-green-600 border border-green-200 hover:bg-green-100 transition-colors flex items-center gap-1"
+                        >
+                          <CheckCircle className="w-3.5 h-3.5" />
+                          {t('admin.hosts.applications.approve')}
+                        </button>
+                        <button
+                          onClick={() => handleReject(app)}
+                          className="px-3 py-1.5 text-xs font-medium rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition-colors flex items-center gap-1"
+                        >
+                          <XCircle className="w-3.5 h-3.5" />
+                          {t('admin.hosts.applications.reject')}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Filters */}
         <div className="bg-card border border-border rounded-xl p-4 flex flex-col sm:flex-row gap-3">

@@ -6,6 +6,7 @@ import { useAuth } from '@/features/auth/useAuth';
 import { supabase } from '@/lib/supabase/client';
 import { useTranslation } from '@/lib/i18n/context';
 import { getProfile } from '@/lib/api/profile';
+import { getUserRole, type UserRole } from '@/lib/api/role';
 
 export default function ProfileAvatar() {
   const { user } = useAuth();
@@ -14,6 +15,7 @@ export default function ProfileAvatar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -29,6 +31,7 @@ export default function ProfileAvatar() {
   useEffect(() => {
     if (!user?.id) return;
     getProfile(user.id).then((p) => setAvatarUrl(p?.avatar_url ?? null)).catch(() => {});
+    getUserRole(user.id).then(setUserRole).catch(() => {});
   }, [user?.id]);
 
   if (!user) return null;
@@ -40,9 +43,11 @@ export default function ProfileAvatar() {
     router.push('/');
   };
 
-  const isAdmin = pathname?.startsWith('/admin');
-  const isHost = pathname?.startsWith('/host');
-  const profileHref = isHost ? '/host/profile' : '/user/profile';
+  const isAdminArea = pathname?.startsWith('/admin');
+  const isHostArea = pathname?.startsWith('/host');
+  const isUserArea = pathname?.startsWith('/user');
+  const profileHref = isHostArea ? '/host/profile' : '/user/profile';
+  const canSwitchView = userRole === 'host' || userRole === 'admin';
 
   return (
     <div ref={menuRef} className="relative ml-auto">
@@ -65,12 +70,28 @@ export default function ProfileAvatar() {
           >
             {t('profile.title')}
           </button>
-          {!isHost && !isAdmin && (
+          {!isHostArea && !isAdminArea && (
             <button
               onClick={() => { setOpen(false); router.push('/user/expectations'); }}
               className="w-full px-button h-button text-sm text-muted-foreground hover:bg-secondary transition-colors cursor-pointer rounded-button text-left"
             >
               {t('nav.user.expectations')}
+            </button>
+          )}
+          {canSwitchView && (isHostArea || isAdminArea) && (
+            <button
+              onClick={() => { setOpen(false); router.push('/user'); }}
+              className="w-full px-button h-button text-sm text-primary hover:bg-secondary transition-colors cursor-pointer rounded-button text-left"
+            >
+              {t('profile.switchToUser')}
+            </button>
+          )}
+          {canSwitchView && isUserArea && (
+            <button
+              onClick={() => { setOpen(false); router.push('/host'); }}
+              className="w-full px-button h-button text-sm text-primary hover:bg-secondary transition-colors cursor-pointer rounded-button text-left"
+            >
+              {t('profile.switchToHost')}
             </button>
           )}
           <button

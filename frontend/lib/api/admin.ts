@@ -91,6 +91,64 @@ export async function updateUserRole(userId: string, newRole: UserRole): Promise
   if (error) throw error;
 }
 
+// ── Host Applications ──
+
+export interface HostApplicationWithProfile {
+  id: string;
+  user_id: string;
+  status: string;
+  created_at: string;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
+  nickname: string | null;
+}
+
+export async function getHostApplications(): Promise<HostApplicationWithProfile[]> {
+  const { data, error } = await supabase
+    .from('usr_host_applications')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  if (!data || data.length === 0) return [];
+
+  const nickMap = await fetchNicknameMap(data.map((a) => a.user_id));
+
+  return data.map((a) => ({
+    id: a.id,
+    user_id: a.user_id,
+    status: a.status,
+    created_at: a.created_at,
+    reviewed_at: a.reviewed_at,
+    reviewed_by: a.reviewed_by,
+    nickname: nickMap.get(a.user_id) || null,
+  }));
+}
+
+export async function approveHostApplication(applicationId: string, userId: string): Promise<void> {
+  // Update application status
+  const { error: appError } = await supabase
+    .from('usr_host_applications')
+    .update({ status: 'approved', reviewed_at: new Date().toISOString() })
+    .eq('id', applicationId);
+  if (appError) throw appError;
+
+  // Update user role to host
+  const { error: roleError } = await supabase
+    .from('usr_role')
+    .update({ role: 'host' })
+    .eq('user_id', userId);
+  if (roleError) throw roleError;
+}
+
+export async function rejectHostApplication(applicationId: string): Promise<void> {
+  const { error } = await supabase
+    .from('usr_host_applications')
+    .update({ status: 'rejected', reviewed_at: new Date().toISOString() })
+    .eq('id', applicationId);
+  if (error) throw error;
+}
+
 // ── Event overview ──
 
 export interface AdminEventSummary {

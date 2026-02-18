@@ -530,6 +530,8 @@
     "title": "Profile",
     "language": "Language",
     "logout": "Log out",
+    "switchToUser": "Switch to User View",
+    "switchToHost": "Switch to Host View",
     "email": "Email",
     "nickname": "Nickname",
     "nicknamePlaceholder": "Enter nickname",
@@ -571,7 +573,7 @@
         "host": "Host",
         "admin": "Admin"
       },
-      "upgradeToHost": "Become a Host",
+      "applyToHost": "Apply to Become a Host",
       "upgradeDescription": "As a host, you'll be able to create and manage events, view registration data, manage check-ins, and more.",
       "benefits": {
         "title": "Host permissions include:",
@@ -580,10 +582,16 @@
         "checkin": "On-site check-in management",
         "viewStats": "View event statistics"
       },
-      "upgrading": "Upgrading...",
-      "upgraded": "Successfully upgraded to host!",
-      "alreadyHost": "You are already a host",
-      "error": "Upgrade failed, please try again"
+      "applying": "Submitting...",
+      "applied": "Application submitted! Please wait for admin review.",
+      "alreadyApplied": "You have already submitted an application",
+      "pendingTitle": "Application Under Review",
+      "pendingDescription": "Your host application is being reviewed by an admin. You will be notified once it's approved.",
+      "rejectedTitle": "Application Rejected",
+      "rejectedDescription": "Your host application was not approved. You may contact an admin for more details.",
+      "reapply": "Contact Admin",
+      "reapplyHint": "Please contact an admin to resubmit your application.",
+      "error": "Application failed, please try again"
     }
   },
   "home": {
@@ -714,8 +722,16 @@
       "promoteToHost": "Promote to Host",
       "confirmDemote": "Are you sure you want to demote this user?",
       "confirmPromote": "Are you sure you want to promote this user to Host?",
+      "confirmApprove": "Are you sure you want to approve this host application?",
+      "confirmReject": "Are you sure you want to reject this host application?",
       "updateSuccess": "Role updated successfully",
       "updateFailed": "Failed to update role",
+      "applications": {
+        "title": "Pending Host Applications",
+        "approve": "Approve",
+        "reject": "Reject",
+        "appliedAt": "Applied on {time}"
+      },
       "allUsers": "All Users",
       "hostsOnly": "Hosts Only",
       "adminsOnly": "Admins Only",

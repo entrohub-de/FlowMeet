@@ -63,7 +63,7 @@ export default function RoleRouteGuard({ area, children }: RoleRouteGuardProps) 
       const allowed =
         (area === 'admin' && role === 'admin') ||
         (area === 'host' && (role === 'host' || role === 'admin')) ||
-        (area === 'user' && role === 'user');
+        (area === 'user' && (role === 'user' || role === 'host' || role === 'admin'));
 
       if (!allowed) {
         if (!cancelled) {
