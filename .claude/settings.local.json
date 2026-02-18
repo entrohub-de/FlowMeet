@@ -3,7 +3,16 @@
     "allow": [
       "Bash(*)",
       "Edit",
-      "Write"
+      "Write",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "mcp__flowmeet__list_events",
+      "mcp__flowmeet__get_dashboard",
+      "mcp__flowmeet__host_get_dashboard"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "flowmeet"
+  ]
 }

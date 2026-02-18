@@ -6,3 +6,9 @@ nul
 
 #superbase connection
 supabase link --project-ref bmaccwxsrhanffljyslg
+
+# MCP server
+mcp-server/.env
+mcp-server/node_modules/
+mcp-server/dist/
+.mcp.json
