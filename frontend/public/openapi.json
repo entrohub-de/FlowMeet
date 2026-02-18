@@ -1,0 +1,635 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "FlowMeet API",
+    "description": "REST API for external AI Agents to interact with FlowMeet — manage events, signups, check-ins, matching, flow control, and analytics.\n\nAll endpoints require an `x-api-key` header for authentication.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    { "url": "http://localhost:3000", "description": "Local development" }
+  ],
+  "security": [{ "ApiKeyAuth": [] }],
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-key"
+      }
+    },
+    "schemas": {
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "data": { "description": "Response payload" }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string" },
+          "code": { "type": "string" }
+        }
+      },
+      "Event": {
+        "type": "object",
+        "properties": {
+          "event_id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "description": { "type": "string", "nullable": true },
+          "start_time": { "type": "string", "format": "date-time" },
+          "end_time": { "type": "string", "format": "date-time" },
+          "status": { "type": "string", "enum": ["active", "cancelled", "passed"] },
+          "venue_id": { "type": "string", "format": "uuid", "nullable": true },
+          "cover_image": { "type": "string", "nullable": true },
+          "created_by": { "type": "string", "format": "uuid", "nullable": true },
+          "venue": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "venue_id": { "type": "string", "format": "uuid" },
+              "name": { "type": "string" },
+              "capacity": { "type": "integer", "nullable": true },
+              "created_at": { "type": "string", "format": "date-time" }
+            }
+          }
+        }
+      },
+      "Signup": {
+        "type": "object",
+        "properties": {
+          "signup_id": { "type": "string", "format": "uuid" },
+          "event_id": { "type": "string", "format": "uuid" },
+          "user_id": { "type": "string", "format": "uuid" },
+          "status": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "checked_in": { "type": "boolean" },
+          "checked_in_at": { "type": "string", "format": "date-time", "nullable": true },
+          "profile": { "type": "object", "nullable": true }
+        }
+      },
+      "PairResult": {
+        "type": "object",
+        "properties": {
+          "user1Id": { "type": "string", "format": "uuid" },
+          "user2Id": { "type": "string", "format": "uuid" },
+          "score": { "type": "number" },
+          "reasons": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "GroupResult": {
+        "type": "object",
+        "properties": {
+          "memberIds": { "type": "array", "items": { "type": "string", "format": "uuid" } },
+          "avgScore": { "type": "number" }
+        }
+      },
+      "MatchRecord": {
+        "type": "object",
+        "properties": {
+          "match_id": { "type": "string", "format": "uuid" },
+          "event_id": { "type": "string", "format": "uuid" },
+          "user1_id": { "type": "string", "format": "uuid" },
+          "user2_id": { "type": "string", "format": "uuid" },
+          "status": { "type": "string" },
+          "match_score": { "type": "number", "nullable": true },
+          "match_reasons": { "type": "array", "items": { "type": "string" }, "nullable": true },
+          "created_at": { "type": "string", "format": "date-time" },
+          "user1_profile": { "type": "object", "nullable": true },
+          "user2_profile": { "type": "object", "nullable": true }
+        }
+      },
+      "Rating": {
+        "type": "object",
+        "properties": {
+          "rating_id": { "type": "string", "format": "uuid" },
+          "user_id": { "type": "string", "format": "uuid" },
+          "nickname": { "type": "string", "nullable": true },
+          "overall_score": { "type": "number" },
+          "organization_score": { "type": "number", "nullable": true },
+          "venue_score": { "type": "number", "nullable": true },
+          "comment": { "type": "string", "nullable": true },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "WorkflowTemplate": {
+        "type": "object",
+        "properties": {
+          "template_id": { "type": "string", "format": "uuid" },
+          "event_id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "steps": { "type": "object" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "parameters": {
+      "eventId": {
+        "name": "eventId",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string", "format": "uuid" },
+        "description": "Event ID"
+      }
+    }
+  },
+  "tags": [
+    { "name": "Events", "description": "Event CRUD operations" },
+    { "name": "Signups", "description": "Event signup and check-in" },
+    { "name": "Matching", "description": "Auto-pairing, grouping, and manual matching" },
+    { "name": "Flow", "description": "Active flow state management" },
+    { "name": "Templates", "description": "Workflow templates" },
+    { "name": "Analytics", "description": "Ratings, analytics, and dashboard" }
+  ],
+  "paths": {
+    "/api/v1/events": {
+      "get": {
+        "tags": ["Events"],
+        "summary": "List all events",
+        "operationId": "listEvents",
+        "responses": {
+          "200": {
+            "description": "Array of events with venue info",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/Event" } } } } } }
+          },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      },
+      "post": {
+        "tags": ["Events"],
+        "summary": "Create an event",
+        "operationId": "createEvent",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "start_time", "end_time"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "description": { "type": "string" },
+                  "start_time": { "type": "string", "format": "date-time" },
+                  "end_time": { "type": "string", "format": "date-time" },
+                  "venue_id": { "type": "string", "format": "uuid" },
+                  "cover_image": { "type": "string" },
+                  "created_by": { "type": "string", "format": "uuid" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created event",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/Event" } } } } }
+          },
+          "400": { "description": "Validation error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      }
+    },
+    "/api/v1/events/{eventId}": {
+      "parameters": [{ "$ref": "#/components/parameters/eventId" }],
+      "get": {
+        "tags": ["Events"],
+        "summary": "Get event details",
+        "operationId": "getEvent",
+        "responses": {
+          "200": { "description": "Event details with venue", "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/Event" } } } } } },
+          "404": { "description": "Event not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      },
+      "patch": {
+        "tags": ["Events"],
+        "summary": "Update event",
+        "operationId": "updateEvent",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "description": { "type": "string" },
+                  "start_time": { "type": "string", "format": "date-time" },
+                  "end_time": { "type": "string", "format": "date-time" },
+                  "venue_id": { "type": "string", "format": "uuid" },
+                  "cover_image": { "type": "string" },
+                  "status": { "type": "string", "enum": ["active", "cancelled", "passed"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Updated event", "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/Event" } } } } } }
+        }
+      },
+      "delete": {
+        "tags": ["Events"],
+        "summary": "Delete event",
+        "operationId": "deleteEvent",
+        "responses": {
+          "200": { "description": "Deletion confirmed", "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "type": "object", "properties": { "deleted": { "type": "boolean" } } } } } } } }
+        }
+      }
+    },
+    "/api/v1/events/{eventId}/status": {
+      "parameters": [{ "$ref": "#/components/parameters/eventId" }],
+      "patch": {
+        "tags": ["Events"],
+        "summary": "Update event status",
+        "operationId": "updateEventStatus",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["status"],
+                "properties": {
+                  "status": { "type": "string", "enum": ["active", "cancelled", "passed"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Updated event", "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/Event" } } } } } }
+        }
+      }
+    },
+    "/api/v1/events/{eventId}/signups": {
+      "parameters": [{ "$ref": "#/components/parameters/eventId" }],
+      "get": {
+        "tags": ["Signups"],
+        "summary": "List signups for an event",
+        "operationId": "listSignups",
+        "responses": {
+          "200": { "description": "Array of signups with profiles", "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/Signup" } } } } } } }
+        }
+      },
+      "post": {
+        "tags": ["Signups"],
+        "summary": "Sign up a user for an event",
+        "operationId": "createSignup",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["userId"],
+                "properties": {
+                  "userId": { "type": "string", "format": "uuid" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Signup confirmed", "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "type": "object", "properties": { "signedUp": { "type": "boolean" } } } } } } } }
+        }
+      }
+    },
+    "/api/v1/events/{eventId}/signups/stats": {
+      "parameters": [{ "$ref": "#/components/parameters/eventId" }],
+      "get": {
+        "tags": ["Signups"],
+        "summary": "Get check-in statistics",
+        "operationId": "getSignupStats",
+        "responses": {
+          "200": {
+            "description": "Check-in stats",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "checkedIn": { "type": "integer" },
+                        "total": { "type": "integer" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{eventId}/checkin": {
+      "parameters": [{ "$ref": "#/components/parameters/eventId" }],
+      "post": {
+        "tags": ["Signups"],
+        "summary": "Check in a participant",
+        "operationId": "checkinParticipant",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["userId"],
+                "properties": {
+                  "userId": { "type": "string", "format": "uuid" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Check-in confirmed", "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "type": "object", "properties": { "checkedIn": { "type": "boolean" } } } } } } } },
+          "404": { "description": "User not signed up", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "409": { "description": "Already checked in", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      }
+    },
+    "/api/v1/events/{eventId}/matching/pairs": {
+      "parameters": [{ "$ref": "#/components/parameters/eventId" }],
+      "post": {
+        "tags": ["Matching"],
+        "summary": "Generate and persist 1v1 pairs",
+        "description": "Uses profile-based scoring algorithm to generate optimal 1v1 pairs. Users without profiles are randomly paired. Pairs are persisted via the `host_upsert_match` RPC.",
+        "operationId": "generatePairs",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["readyUserIds"],
+                "properties": {
+                  "readyUserIds": { "type": "array", "items": { "type": "string", "format": "uuid" }, "minItems": 2, "description": "User IDs of participants ready for matching" },
+                  "activeModuleId": { "type": "string", "format": "uuid", "description": "Optional active workflow module ID" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Generated pairs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "pairs": { "type": "array", "items": { "$ref": "#/components/schemas/PairResult" } },
+                        "persisted": { "type": "array", "items": { "type": "object", "properties": { "user1Id": { "type": "string" }, "user2Id": { "type": "string" }, "matchId": { "type": "string" } } } },
+                        "unpairedUserId": { "type": "string", "nullable": true, "description": "User ID left unpaired (odd number of participants)" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{eventId}/matching/groups": {
+      "parameters": [{ "$ref": "#/components/parameters/eventId" }],
+      "post": {
+        "tags": ["Matching"],
+        "summary": "Generate and persist groups",
+        "description": "Uses greedy algorithm with profile-based scoring to form optimal groups. Groups are persisted via `host_upsert_group` and `host_add_group_members` RPCs.",
+        "operationId": "generateGroups",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["readyUserIds", "stepId"],
+                "properties": {
+                  "readyUserIds": { "type": "array", "items": { "type": "string", "format": "uuid" }, "minItems": 2 },
+                  "groupSize": { "type": "integer", "default": 4, "minimum": 2, "description": "Target group size" },
+                  "stepId": { "type": "string", "format": "uuid", "description": "Workflow step ID for group persistence" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Generated groups",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "groups": { "type": "array", "items": { "$ref": "#/components/schemas/GroupResult" } },
+                        "persisted": { "type": "array", "items": { "type": "object", "properties": { "groupId": { "type": "string" }, "memberIds": { "type": "array", "items": { "type": "string" } } } } },
+                        "ungroupedUserIds": { "type": "array", "items": { "type": "string" } }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{eventId}/matching/manual": {
+      "parameters": [{ "$ref": "#/components/parameters/eventId" }],
+      "post": {
+        "tags": ["Matching"],
+        "summary": "Manually pair two users",
+        "operationId": "manualPair",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["user1Id", "user2Id"],
+                "properties": {
+                  "user1Id": { "type": "string", "format": "uuid" },
+                  "user2Id": { "type": "string", "format": "uuid" },
+                  "activeModuleId": { "type": "string", "format": "uuid" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Manual pair created",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "type": "object", "properties": { "matchId": { "type": "string" }, "user1Id": { "type": "string" }, "user2Id": { "type": "string" } } } } } } }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{eventId}/matching/results": {
+      "parameters": [{ "$ref": "#/components/parameters/eventId" }],
+      "get": {
+        "tags": ["Matching"],
+        "summary": "Get match results",
+        "operationId": "getMatchResults",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" },
+            "description": "Filter by user ID (matches where this user is user1 or user2)"
+          }
+        ],
+        "responses": {
+          "200": { "description": "Match records with profiles", "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/MatchRecord" } } } } } } }
+        }
+      }
+    },
+    "/api/v1/events/{eventId}/flow": {
+      "parameters": [{ "$ref": "#/components/parameters/eventId" }],
+      "get": {
+        "tags": ["Flow"],
+        "summary": "Get current flow state",
+        "operationId": "getFlow",
+        "responses": {
+          "200": { "description": "Current active flow state (null if none)", "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "type": "object", "nullable": true } } } } } }
+        }
+      },
+      "put": {
+        "tags": ["Flow"],
+        "summary": "Upsert flow state",
+        "operationId": "upsertFlow",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Flow state fields (merged with event_id)",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Flow updated", "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "type": "object", "properties": { "updated": { "type": "boolean" } } } } } } } }
+        }
+      },
+      "delete": {
+        "tags": ["Flow"],
+        "summary": "Reset flow",
+        "operationId": "deleteFlow",
+        "responses": {
+          "200": { "description": "Flow deleted", "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "type": "object", "properties": { "deleted": { "type": "boolean" } } } } } } } }
+        }
+      }
+    },
+    "/api/v1/events/{eventId}/participants/state": {
+      "parameters": [{ "$ref": "#/components/parameters/eventId" }],
+      "get": {
+        "tags": ["Flow"],
+        "summary": "Get participant state overview",
+        "operationId": "getParticipantState",
+        "responses": {
+          "200": { "description": "Array of participant states", "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "type": "array", "items": { "type": "object" } } } } } } }
+        }
+      }
+    },
+    "/api/v1/workflow-templates": {
+      "get": {
+        "tags": ["Templates"],
+        "summary": "List all workflow templates",
+        "operationId": "listWorkflowTemplates",
+        "responses": {
+          "200": { "description": "Array of templates", "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/WorkflowTemplate" } } } } } } }
+        }
+      }
+    },
+    "/api/v1/events/{eventId}/ratings": {
+      "parameters": [{ "$ref": "#/components/parameters/eventId" }],
+      "get": {
+        "tags": ["Analytics"],
+        "summary": "Get event ratings",
+        "operationId": "getEventRatings",
+        "responses": {
+          "200": { "description": "Array of ratings with nicknames", "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/Rating" } } } } } } }
+        }
+      }
+    },
+    "/api/v1/events/{eventId}/analytics": {
+      "parameters": [{ "$ref": "#/components/parameters/eventId" }],
+      "get": {
+        "tags": ["Analytics"],
+        "summary": "Get aggregated event analytics",
+        "operationId": "getEventAnalytics",
+        "responses": {
+          "200": {
+            "description": "Aggregated analytics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "event": { "$ref": "#/components/schemas/Event" },
+                        "signups": { "type": "object", "properties": { "total": { "type": "integer" }, "checkedIn": { "type": "integer" } } },
+                        "ratings": { "type": "object", "properties": { "count": { "type": "integer" }, "avgOverall": { "type": "number", "nullable": true }, "avgOrganization": { "type": "number", "nullable": true }, "avgVenue": { "type": "number", "nullable": true } } },
+                        "matchQuality": { "type": "object", "properties": { "count": { "type": "integer" }, "avgScore": { "type": "number", "nullable": true } } },
+                        "matches": { "type": "object", "properties": { "total": { "type": "integer" }, "accepted": { "type": "integer" }, "completed": { "type": "integer" } } }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/dashboard": {
+      "get": {
+        "tags": ["Analytics"],
+        "summary": "Get host dashboard data",
+        "operationId": "getDashboard",
+        "responses": {
+          "200": {
+            "description": "Dashboard with events and totals",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "events": { "type": "array", "items": { "type": "object" } },
+                        "totals": {
+                          "type": "object",
+                          "properties": {
+                            "totalEvents": { "type": "integer" },
+                            "totalParticipants": { "type": "integer" },
+                            "avgRating": { "type": "number", "nullable": true },
+                            "thisMonthEvents": { "type": "integer" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
