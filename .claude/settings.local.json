@@ -8,7 +8,20 @@
       "WebFetch(domain:github.com)",
       "mcp__flowmeet__list_events",
       "mcp__flowmeet__get_dashboard",
-      "mcp__flowmeet__host_get_dashboard"
+      "mcp__flowmeet__host_get_dashboard",
+      "mcp__flowmeet__whoami",
+      "mcp__flowmeet__login",
+      "mcp__flowmeet__switch_view",
+      "mcp__flowmeet__host_list_signups",
+      "mcp__flowmeet__host_get_checkin_stats",
+      "mcp__flowmeet__host_get_signup_count",
+      "mcp__flowmeet__get_event",
+      "mcp__flowmeet__user_get_my_signup",
+      "mcp__flowmeet__user_get_my_matches",
+      "mcp__flowmeet__get_active_flow",
+      "mcp__flowmeet__logout",
+      "mcp__flowmeet__host_list_matches",
+      "mcp__flowmeet__host_get_match_recommendations"
     ]
   },
   "enableAllProjectMcpServers": true,

@@ -16,7 +16,7 @@ export interface MatchScore {
 
 /**
  * 职业背景互补对照表
- * 基于 Entrohub 问卷数据：Engineer↔Marketing 是最有价值的互补组合
+ * 基于 FlowMeet 问卷数据：Engineer↔Marketing 是最有价值的互补组合
  */
 const COMPLEMENTARY_PAIRS: Record<string, string[]> = {
   engineer: ['marketing_sales', 'product_manager', 'designer', 'founder'],

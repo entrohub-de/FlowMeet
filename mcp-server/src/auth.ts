@@ -82,7 +82,7 @@ export function requireHostAccess(): void {
 
 async function fetchUserRole(userId: string): Promise<AuthSession['role']> {
   const { data, error } = await supabase
-    .from('usr_roles')
+    .from('usr_role')
     .select('role')
     .eq('user_id', userId)
     .maybeSingle();

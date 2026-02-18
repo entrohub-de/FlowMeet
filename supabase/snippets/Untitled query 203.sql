@@ -1,13 +1,1 @@
-ALTER TABLE evt_host_actions
-  DROP CONSTRAINT evt_host_actions_action_type_check;
-
-ALTER TABLE evt_host_actions
-  ADD CONSTRAINT evt_host_actions_action_type_check
-  CHECK (action_type IN (
-    'flow_applied', 'step_started', 'step_paused', 'step_resumed', 'step_completed',
-    'flow_paused', 'flow_resumed', 'flow_completed', 'flow_reset',
-    'matching_triggered', 'grouping_triggered',
-    'manual_pair', 'manual_unpair', 'manual_regroup',
-    'global_pause', 'global_resume',
-    'time_adjusted'
-  ));
+28679686-ab62-42d8-9f3d-6ee25b72d695

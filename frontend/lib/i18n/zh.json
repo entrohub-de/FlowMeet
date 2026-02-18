@@ -186,7 +186,7 @@
   "user": {
     "center": "用户中心",
     "centerHint": "请从上方菜单选择要访问的页面。",
-    "welcomeHome": "欢迎来到Entrohub",
+    "welcomeHome": "欢迎来到FlowMeet",
     "welcomeHomeDesc": "从这里开启你的探索之旅",
     "signupPage": "活动报名页面",
     "noEvents": "暂无可报名的活动",
@@ -1233,6 +1233,13 @@
       "retentionTitle": "8. 数据保留",
       "contactTitle": "9. 联系方式"
     }
+  },
+  "errors": {
+    "notFound": "页面未找到",
+    "backHome": "返回首页",
+    "title": "出错了",
+    "description": "页面加载时发生了错误，请重试。",
+    "retry": "重试"
   },
   "share": {
     "shareEvent": "分享活动",

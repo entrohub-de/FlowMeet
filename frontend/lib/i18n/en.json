@@ -21,6 +21,8 @@
     "host": {
       "eventManagement": "Event Management",
       "eventLive": "Event Live",
+      "eventLiveCheckin": "Check-in",
+      "eventLiveFlow": "Flow Control",
       "venueManagement": "Venue Management",
       "workflowSettings": "Workflow Settings"
     },
@@ -62,7 +64,7 @@
     "duration": "Duration",
     "maxParticipants": "Max Participants",
     "maxParticipantsHint": "Individual users can create events for up to 5 people",
-    "people": "",
+    "people": "people",
     "create": "Create",
     "createSuccess": "Event created successfully",
     "createFailed": "Failed to create event",
@@ -184,7 +186,7 @@
   "user": {
     "center": "User Center",
     "centerHint": "Please select a page from the menu above.",
-    "welcomeHome": "Welcome to Entrohub",
+    "welcomeHome": "Welcome to FlowMeet",
     "welcomeHomeDesc": "Start your exploration journey here",
     "signupPage": "Event signup page",
     "noEvents": "No events available",
@@ -1231,6 +1233,13 @@
       "retentionTitle": "8. Data Retention",
       "contactTitle": "9. Contact"
     }
+  },
+  "errors": {
+    "notFound": "Page Not Found",
+    "backHome": "Back to Home",
+    "title": "Something Went Wrong",
+    "description": "An error occurred while loading the page. Please try again.",
+    "retry": "Try Again"
   },
   "share": {
     "shareEvent": "Share Event",

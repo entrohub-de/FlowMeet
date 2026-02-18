@@ -17,7 +17,18 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: 'FlowMeet',
-  description: 'FlowMeet - Organize & join events easily.',
+  description: 'FlowMeet - Real-time social event platform for meaningful connections. Organize, match, and engage with 50-200 participants.',
+  openGraph: {
+    title: 'FlowMeet',
+    description: 'Real-time social event platform for meaningful connections.',
+    siteName: 'FlowMeet',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'FlowMeet',
+    description: 'Real-time social event platform for meaningful connections.',
+  },
 };
 
 export const viewport = {
