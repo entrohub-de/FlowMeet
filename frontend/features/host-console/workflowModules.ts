@@ -3,7 +3,23 @@ export type WorkflowModuleCategory =
   | 'networking'
   | 'group'
   | 'industry'
-  | 'closing';
+  | 'closing'
+  | 'workshop'
+  | 'presentation'
+  | 'break'
+  | 'custom';
+
+export const WORKFLOW_MODULE_CATEGORIES: WorkflowModuleCategory[] = [
+  'opening',
+  'networking',
+  'group',
+  'industry',
+  'closing',
+  'workshop',
+  'presentation',
+  'break',
+  'custom',
+];
 
 export interface ModuleDefinition {
   pairingMode?: 'group' | '1v1';
@@ -111,11 +127,7 @@ export function loadEventWorkflow(eventId: string): WorkflowStepConfig[] | null 
           (typeof step?.descriptionSnapshot === 'undefined' ||
             typeof step?.descriptionSnapshot === 'string') &&
           (typeof step?.categorySnapshot === 'undefined' ||
-            step?.categorySnapshot === 'opening' ||
-            step?.categorySnapshot === 'networking' ||
-            step?.categorySnapshot === 'group' ||
-            step?.categorySnapshot === 'industry' ||
-            step?.categorySnapshot === 'closing')
+            WORKFLOW_MODULE_CATEGORIES.includes(step?.categorySnapshot as WorkflowModuleCategory))
       )
       .map((step) => ({
         stepId: step.stepId,

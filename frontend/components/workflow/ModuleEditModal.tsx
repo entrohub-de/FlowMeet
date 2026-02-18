@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { X, Plus } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
-import type { WorkflowModuleCategory, ModuleDefinition } from '@/features/host-console/workflowModules';
+import { WORKFLOW_MODULE_CATEGORIES, type WorkflowModuleCategory, type ModuleDefinition } from '@/features/host-console/workflowModules';
 
 interface ModuleFormData {
   title: string;
@@ -73,7 +73,7 @@ export default function ModuleEditModal({ initial, onClose, onSave, error }: Mod
           <div className="space-y-1">
             <span className="text-xs text-muted-foreground">{t('host.workflows.custom.category')}</span>
             <div className="flex flex-wrap gap-1.5">
-              {(['opening', 'networking', 'group', 'industry', 'closing'] as const).map((cat) => (
+              {WORKFLOW_MODULE_CATEGORIES.map((cat) => (
                 <button
                   key={cat}
                   type="button"

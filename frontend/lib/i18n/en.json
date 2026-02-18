@@ -472,7 +472,11 @@
           "networking": "Networking",
           "group": "Group",
           "industry": "Industry",
-          "closing": "Closing"
+          "closing": "Closing",
+          "workshop": "Workshop",
+          "presentation": "Presentation",
+          "break": "Break",
+          "custom": "Custom"
         },
         "save": "Save to Module Library",
         "libraryTitle": "Module Library",

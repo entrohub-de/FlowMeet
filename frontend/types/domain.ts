@@ -299,7 +299,6 @@ export type HostActionType =
   | 'matching_triggered' | 'grouping_triggered'
   | 'manual_pair' | 'manual_unpair' | 'manual_regroup'
   | 'global_pause' | 'global_resume'
-  | 'time_adjusted'
   | 'time_adjusted';
 
 export interface HostAction {

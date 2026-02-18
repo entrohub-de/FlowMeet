@@ -474,7 +474,11 @@
           "networking": "交流",
           "group": "小组",
           "industry": "行业",
-          "closing": "结束"
+          "closing": "结束",
+          "workshop": "工作坊",
+          "presentation": "演讲",
+          "break": "休息",
+          "custom": "自定义"
         },
         "save": "保存到模块库",
         "libraryTitle": "模块库",
