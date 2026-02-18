@@ -122,13 +122,23 @@ export default function PrivacyPage() {
               {t('privacy.policy.cookiesTitle')}
             </h2>
             {locale === 'zh' ? (
-              <p>
-                我们使用必要的 Cookie 来维持您的登录状态和网站功能。这些 Cookie 对网站正常运行至关重要，无法关闭。我们不使用任何跟踪或广告 Cookie。
-              </p>
+              <>
+                <p>
+                  我们使用必要的 Cookie 来维持您的登录状态和网站功能。这些 Cookie 对网站正常运行至关重要，无法关闭。
+                </p>
+                <p>
+                  此外，在您同意后，我们使用 PostHog 分析 Cookie 来了解用户如何使用我们的网站，以改善服务体验。您可以在首次访问时的 Cookie 设置弹窗中选择是否接受分析 Cookie。
+                </p>
+              </>
             ) : (
-              <p>
-                We use essential cookies to maintain your login session and website functionality. These cookies are strictly necessary for the website to function and cannot be disabled. We do not use any tracking or advertising cookies.
-              </p>
+              <>
+                <p>
+                  We use essential cookies to maintain your login session and website functionality. These cookies are strictly necessary for the website to function and cannot be disabled.
+                </p>
+                <p>
+                  Additionally, with your consent, we use PostHog analytics cookies to understand how users interact with our website to improve the service experience. You can choose whether to accept analytics cookies in the cookie settings dialog shown on your first visit.
+                </p>
+              </>
             )}
           </section>
 
@@ -142,12 +152,14 @@ export default function PrivacyPage() {
                 <li><strong>Supabase</strong>：数据库和身份验证服务提供商（服务器位于欧盟）</li>
                 <li><strong>Google OAuth</strong>：可选的第三方登录服务。使用 Google 登录时，我们仅接收您的邮箱地址和基本资料</li>
                 <li><strong>Vercel</strong>：网站托管服务提供商</li>
+                <li><strong>PostHog</strong>：网站分析服务（欧盟数据中心）。仅在您同意后启用，用于了解网站使用情况以改善服务</li>
               </ul>
             ) : (
               <ul className="list-disc pl-5 space-y-1">
                 <li><strong>Supabase</strong>: Database and authentication service provider (servers located in the EU)</li>
                 <li><strong>Google OAuth</strong>: Optional third-party login service. When using Google Sign-In, we only receive your email address and basic profile</li>
                 <li><strong>Vercel</strong>: Website hosting service provider</li>
+                <li><strong>PostHog</strong>: Website analytics service (EU data center). Only enabled with your consent, used to understand website usage and improve our services</li>
               </ul>
             )}
           </section>

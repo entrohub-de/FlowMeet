@@ -1214,7 +1214,8 @@
     "consent": "我已阅读并同意",
     "consentRequired": "请先同意隐私政策",
     "cookieBanner": {
-      "message": "本网站使用必要的 Cookie 来保障网站功能正常运行。",
+      "title": "Cookie 设置",
+      "message": "本网站使用必要的 Cookie 来保障网站功能正常运行。我们还使用分析 Cookie 来改善用户体验。",
       "learnMore": "了解更多",
       "acceptAll": "接受",
       "essentialOnly": "仅必要"

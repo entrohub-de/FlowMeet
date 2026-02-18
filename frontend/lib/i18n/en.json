@@ -1212,7 +1212,8 @@
     "consent": "I have read and agree to the",
     "consentRequired": "Please agree to the privacy policy first",
     "cookieBanner": {
-      "message": "This website uses essential cookies to ensure proper functionality.",
+      "title": "Cookie Settings",
+      "message": "This website uses essential cookies to ensure proper functionality. We also use analytics cookies to improve the user experience.",
       "learnMore": "Learn more",
       "acceptAll": "Accept",
       "essentialOnly": "Essential only"

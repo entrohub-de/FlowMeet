@@ -5,6 +5,8 @@ import { LocaleProvider } from '@/lib/i18n/context';
 import { AuthProvider } from '@/lib/auth/context';
 import { Toaster } from '@/components/ui/toaster';
 import CookieBanner from '@/components/CookieBanner';
+import PostHogProvider from '@/lib/posthog/provider';
+import PostHogPageView from '@/lib/posthog/pageview';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -40,13 +42,16 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
       <body>
-        <AuthProvider>
-          <LocaleProvider>
-            <main>{children}</main>
-            <Toaster />
-            <CookieBanner />
-          </LocaleProvider>
-        </AuthProvider>
+        <PostHogProvider>
+          <AuthProvider>
+            <LocaleProvider>
+              <PostHogPageView />
+              <main>{children}</main>
+              <Toaster />
+              <CookieBanner />
+            </LocaleProvider>
+          </AuthProvider>
+        </PostHogProvider>
       </body>
     </html>
   );
