@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Clock, Play, Pause, CheckCircle, Users, Zap, ChevronDown, ChevronUp, BarChart3, AlertTriangle, X } from 'lucide-react';
+import { Clock, Play, Pause, CheckCircle, Users, Zap, ChevronDown, ChevronUp, BarChart3, AlertTriangle, X, Plus, Minus } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 import type { MatchQualityInfo } from '@/hooks/useHostFlowMatching';
 
@@ -31,6 +31,8 @@ interface FlowStepCardProps {
   isGrouping?: boolean;
   // Match quality
   matchQuality?: MatchQualityInfo | null;
+  // Time adjustment
+  onAdjustTime?: (stepId: string, deltaSeconds: number) => void;
 }
 
 const cardStyles: Record<FlowStatus, string> = {
@@ -85,6 +87,7 @@ export default function FlowStepCard({
   onTriggerGrouping,
   isGrouping,
   matchQuality,
+  onAdjustTime,
 }: FlowStepCardProps) {
   const { t } = useTranslation();
   const [qualityExpanded, setQualityExpanded] = useState(false);
@@ -137,17 +140,48 @@ export default function FlowStepCard({
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Clock className="w-3.5 h-3.5" />
               {status === 'active' || status === 'paused' ? (
-                <span
-                  className={`font-mono font-semibold ${
-                    remainingSeconds <= 0
-                      ? 'text-red-500'
-                      : status === 'paused'
-                      ? 'text-amber-600'
-                      : 'text-primary'
-                  }`}
-                >
-                  {formatTime(remainingSeconds)}
-                </span>
+                <>
+                  <span
+                    className={`font-mono font-semibold ${
+                      remainingSeconds <= 0
+                        ? 'text-red-500'
+                        : status === 'paused'
+                        ? 'text-amber-600'
+                        : 'text-primary'
+                    }`}
+                  >
+                    {formatTime(remainingSeconds)}
+                  </span>
+                  {onAdjustTime && (
+                    <div className="flex items-center gap-1 ml-2">
+                      <button
+                        type="button"
+                        onClick={() => onAdjustTime(id, -60)}
+                        disabled={remainingSeconds <= 60}
+                        className="w-6 h-6 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                        title={t('host.flowControl.removeMinute')}
+                      >
+                        <Minus className="w-3 h-3" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onAdjustTime(id, 60)}
+                        className="w-6 h-6 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-colors"
+                        title={t('host.flowControl.addMinute')}
+                      >
+                        <Plus className="w-3 h-3" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onAdjustTime(id, 300)}
+                        className="px-1.5 h-6 rounded-full border border-border text-[10px] font-medium flex items-center justify-center hover:bg-muted transition-colors"
+                        title={t('host.flowControl.addFiveMinutes')}
+                      >
+                        +5m
+                      </button>
+                    </div>
+                  )}
+                </>
               ) : (
                 <span>
                   {t('host.flowControl.minutesSuffix', { minutes: duration })}

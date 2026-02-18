@@ -444,6 +444,45 @@ export default function FlowControlPage() {
     }
   }, [selectedEventId, flowSteps]);
 
+  // Adjust time for an active/paused step (deltaSeconds can be positive or negative)
+  const handleAdjustTime = useCallback(async (stepId: string, deltaSeconds: number) => {
+    const updatedSteps = flowSteps.map((step) => {
+      if (step.id !== stepId) return step;
+      const newRemaining = Math.max(0, step.remainingSeconds + deltaSeconds);
+      const newDuration = Math.max(1, step.duration + deltaSeconds / 60);
+      return { ...step, remainingSeconds: newRemaining, duration: newDuration };
+    });
+
+    setFlowSteps(updatedSteps);
+
+    if (selectedEventId) {
+      const now = new Date().toISOString();
+      const adjustedStep = updatedSteps.find((s) => s.id === stepId);
+
+      try {
+        await upsertActiveFlow(selectedEventId, {
+          steps: updatedSteps,
+          active_step_remaining_seconds: adjustedStep?.remainingSeconds ?? null,
+        });
+        broadcastFlowUpdate(selectedEventId, 'step_changed', {
+          flowStatus: 'running',
+          steps: updatedSteps,
+          activeStepId: adjustedStep?.id ?? null,
+          activeStepStartedAt: now,
+          activeStepRemainingSeconds: adjustedStep?.remainingSeconds ?? null,
+          timestamp: now,
+        });
+        logHostAction(selectedEventId, 'time_adjusted', {
+          stepTitle: adjustedStep?.title,
+          deltaSeconds,
+          newRemainingSeconds: adjustedStep?.remainingSeconds,
+        }, stepId);
+      } catch (error) {
+        console.error('Failed to persist time adjustment:', error);
+      }
+    }
+  }, [flowSteps, selectedEventId]);
+
   // Handle event switch: reset flow state so restore effect re-runs
   const handleEventChange = useCallback((eventId: string) => {
     if (eventId === selectedEventId) return;
@@ -708,6 +747,7 @@ export default function FlowControlPage() {
                     onTriggerGrouping={triggerGrouping}
                     isGrouping={isGrouping}
                     matchQuality={step.id === activeStepForMatching?.id ? matchQuality : undefined}
+                    onAdjustTime={handleAdjustTime}
                   />
                   </div>
                 ))}

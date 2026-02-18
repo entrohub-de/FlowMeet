@@ -525,6 +525,9 @@
       "complete": "完成",
       "resume": "继续",
       "completed": "已完成",
+      "addMinute": "+1 分钟",
+      "removeMinute": "-1 分钟",
+      "addFiveMinutes": "+5 分钟",
       "checkinStats": "签到 {checked}/{total}"
     }
   },
@@ -1070,7 +1073,8 @@
       "manual_unpair": "拆散配对",
       "manual_regroup": "手动重组",
       "global_pause": "全局暂停",
-      "global_resume": "全局恢复"
+      "global_resume": "全局恢复",
+      "time_adjusted": "调整时长"
     },
     "history": {
       "title": "操作历史",

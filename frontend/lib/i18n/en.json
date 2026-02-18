@@ -523,6 +523,9 @@
       "complete": "Complete",
       "resume": "Resume",
       "completed": "Completed",
+      "addMinute": "+1 min",
+      "removeMinute": "-1 min",
+      "addFiveMinutes": "+5 min",
       "checkinStats": "Check-in {checked}/{total}"
     }
   },
@@ -1068,7 +1071,8 @@
       "manual_unpair": "Pair Broken",
       "manual_regroup": "Manual Regroup",
       "global_pause": "Global Pause",
-      "global_resume": "Global Resume"
+      "global_resume": "Global Resume",
+      "time_adjusted": "Time Adjusted"
     },
     "history": {
       "title": "Action History",
