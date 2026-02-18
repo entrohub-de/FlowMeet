@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3000",
     "dev:mobile": "next dev -H 0.0.0.0",
     "prebuild": "node scripts/clean-build.js",
     "build": "next build",
