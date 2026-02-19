@@ -19,7 +19,7 @@ export async function getMatchPreference(
 ): Promise<MatchPreference | null> {
   const { data, error } = await supabase
     .from('match_preferences')
-    .select('preference_id, event_id, user_id, preferred_topics, availability, notes, networking_intent, created_at, updated_at')
+    .select('preference_id, event_id, user_id, preferred_topics, availability, notes, networking_intent, preferred_topics_tags, created_at, updated_at')
     .eq('event_id', eventId)
     .eq('user_id', userId)
     .single();

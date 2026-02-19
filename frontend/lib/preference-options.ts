@@ -56,6 +56,17 @@ export const STARTUP_STAGE_OPTIONS = [
   'not_entrepreneur',
 ] as const;
 
+export const TOPIC_TAG_OPTIONS = [
+  'fundraising',
+  'product_dev',
+  'growth_hacking',
+  'team_building',
+  'market_entry',
+  'tech_trends',
+  'work_life',
+  'industry_insights',
+] as const;
+
 /** Parse a comma-separated preference string into an array of values */
 export function parsePreferenceString(value: string | null): string[] {
   if (!value) return [];

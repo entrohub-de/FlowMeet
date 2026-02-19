@@ -1056,7 +1056,8 @@
     "languages": "Languages",
     "interests": "Interests",
     "professionalBackground": "Professional Background",
-    "startupStage": "Startup Stage"
+    "startupStage": "Startup Stage",
+    "conversationTopics": "Conversation Topics"
   },
   "groupDetail": {
     "groupName": "Group Name",
@@ -1208,6 +1209,16 @@
       "learn_exchange": "Learn & Exchange",
       "expand_network": "Expand Network",
       "get_inspiration": "Get Inspiration"
+    },
+    "topicTags": {
+      "fundraising": "Fundraising",
+      "product_dev": "Product Development",
+      "growth_hacking": "Growth Hacking",
+      "team_building": "Team Building",
+      "market_entry": "Market Entry",
+      "tech_trends": "Tech Trends",
+      "work_life": "Work & Life",
+      "industry_insights": "Industry Insights"
     }
   },
   "privacy": {
@@ -1250,5 +1261,25 @@
     "whatsapp": "WhatsApp",
     "nativeShare": "More",
     "scanToShare": "Scan to Share"
+  },
+  "swipePreference": {
+    "selectMultiple": "Select multiple",
+    "selectOne": "Select one",
+    "skip": "Skip this",
+    "skipAll": "Skip all",
+    "next": "Next",
+    "done": "Done",
+    "q": {
+      "industry": "What do you do?",
+      "intent": "What do you want to achieve?",
+      "stage": "What stage are you at?",
+      "interests": "What areas interest you?",
+      "languages": "What languages do you speak?",
+      "topics": "What topics do you want to discuss?"
+    }
+  },
+  "matchReveal": {
+    "success": "Match Found!",
+    "candidatesNearby": "Participants nearby"
   }
 }

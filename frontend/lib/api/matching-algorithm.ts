@@ -1,9 +1,16 @@
 import type { Profile, Preferences, NetworkingIntent } from '@/types/domain';
 
+export interface EventPreferences {
+  preferred_topics_tags?: string[];
+}
+
 export interface UserWithPreferences {
   profile: Profile;
   preferences: Preferences | null;
   networkingIntent?: NetworkingIntent | null;
+  eventPreferences?: EventPreferences | null;
+  /** Average rating score received from past matches (0-5) */
+  avgRating?: number | null;
 }
 
 export interface MatchScore {
@@ -31,15 +38,17 @@ const COMPLEMENTARY_PAIRS: Record<string, string[]> = {
 
 /**
  * 计算两个用户之间的匹配分数
- * 分数范围：0-100
+ * 分数范围：0-100（+ 最多 5 分历史反馈 bonus，独立叠加）
  *
- * 权重分配（基于问卷分析）：
+ * 权重分配：
  * - 职业背景（互补）：30分
- * - 兴趣话题（重叠）：25分
+ * - 兴趣话题（重叠）：20分
  * - 创业阶段（相似）：15分
+ * - 期望话题标签（重叠）：10分
  * - 社交意图（对齐）：10分
  * - 语言（重叠）：10分
- * - 基础分：10分（保底）
+ * - 基础分：5分（保底）
+ * - 历史反馈 bonus：+5 max（独立叠加）
  */
 export function calculateMatchScore(
   user1: UserWithPreferences,
@@ -81,14 +90,14 @@ export function calculateMatchScore(
     }
   }
 
-  // 2. 兴趣话题 — 重叠匹配 (权重: 25分)
+  // 2. 兴趣话题 — 重叠匹配 (权重: 20分)
   if (prefs1?.interests && prefs2?.interests) {
     const int1 = prefs1.interests.split(',').map(s => s.trim()).filter(Boolean);
     const int2 = prefs2.interests.split(',').map(s => s.trim()).filter(Boolean);
     const common = int1.filter(i => int2.includes(i));
 
     if (common.length > 0) {
-      score += Math.min(25, common.length * 10);
+      score += Math.min(20, common.length * 8);
       reasons.push(`共同兴趣: ${common.slice(0, 2).join(', ')}`);
     }
   }
@@ -109,7 +118,18 @@ export function calculateMatchScore(
     }
   }
 
-  // 4. 社交意图 — 对齐匹配 (权重: 10分)
+  // 4. 期望话题标签 — 重叠匹配 (权重: 10分)
+  const tags1 = user1.eventPreferences?.preferred_topics_tags ?? [];
+  const tags2 = user2.eventPreferences?.preferred_topics_tags ?? [];
+  if (tags1.length > 0 && tags2.length > 0) {
+    const commonTags = tags1.filter(t => tags2.includes(t));
+    if (commonTags.length > 0) {
+      score += Math.min(10, commonTags.length * 5);
+      reasons.push('共同话题兴趣');
+    }
+  }
+
+  // 5. 社交意图 — 对齐匹配 (权重: 10分)
   if (user1.networkingIntent && user2.networkingIntent) {
     if (user1.networkingIntent === user2.networkingIntent) {
       score += 10;
@@ -117,7 +137,7 @@ export function calculateMatchScore(
     }
   }
 
-  // 5. 语言 — 重叠匹配 (权重: 10分)
+  // 6. 语言 — 重叠匹配 (权重: 10分)
   if (prefs1?.languages && prefs2?.languages) {
     const langs1 = prefs1.languages.split(',').map(s => s.trim()).filter(Boolean);
     const langs2 = prefs2.languages.split(',').map(s => s.trim()).filter(Boolean);
@@ -129,10 +149,23 @@ export function calculateMatchScore(
     }
   }
 
-  // 基础分：保底 10 分
+  // 基础分：保底 5 分
   if (reasons.length === 0) {
-    score = 10;
+    score = 5;
     reasons.push('探索新朋友');
+  }
+
+  // 历史反馈 bonus（独立叠加，最多 +5）
+  const avg1 = user1.avgRating ?? 0;
+  const avg2 = user2.avgRating ?? 0;
+  if (avg1 > 0 || avg2 > 0) {
+    const avgBoth = (avg1 + avg2) / (avg1 > 0 && avg2 > 0 ? 2 : 1);
+    // Scale 1-5 rating to 0-5 bonus
+    const bonus = Math.min(5, Math.round(avgBoth));
+    if (bonus > 0) {
+      score += bonus;
+      reasons.push('口碑良好');
+    }
   }
 
   return {

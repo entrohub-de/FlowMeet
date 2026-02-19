@@ -28,6 +28,10 @@ export interface FlowMatchingState {
   isReady: boolean;
   partner: MatchPartner | null;
   isUnpaired: boolean;
+  revealShown: boolean;
+  matchScore: number | null;
+  matchReasons: string[] | null;
+  otherUserIds: string[];
 }
 
 export function useFlowMatching(
@@ -45,10 +49,15 @@ export function useFlowMatching(
   const [userId, setUserId] = useState<string | null>(null);
 
   const [isCheckedIn, setIsCheckedIn] = useState<boolean | null>(null);
+  const [revealShown, setRevealShown] = useState(false);
+  const [matchScore, setMatchScore] = useState<number | null>(null);
+  const [matchReasons, setMatchReasons] = useState<string[] | null>(null);
+  const [otherUserIds, setOtherUserIds] = useState<string[]>([]);
 
   const channelRef = useRef<RealtimeChannel | null>(null);
   const matchedRef = useRef(false);
   const recoveryAttemptedRef = useRef(false);
+  const topicGeneratedRef = useRef(false);
 
   // Get current user ID
   useEffect(() => {
@@ -102,6 +111,7 @@ export function useFlowMatching(
             setIsUnpaired(false);
             setPhase('matched');
             matchedRef.current = true;
+            setRevealShown(true); // Don't replay reveal on recovery
           }
         }
         // For 'ready' status, the queue join effect below will handle it naturally
@@ -143,6 +153,7 @@ export function useFlowMatching(
     ) => {
       setReadyCount(readyUsers.length);
       setTotalPresent(allUsers.length);
+      setOtherUserIds(allUsers.filter((u) => u.userId !== userId).map((u) => u.userId));
     };
 
     const handleMatchAssigned = async (payload: MatchAssignmentPayload) => {
@@ -167,6 +178,30 @@ export function useFlowMatching(
         setIsUnpaired(false);
         setPhase('matched');
         matchedRef.current = true;
+
+        // Fetch match score and reasons for reveal animation
+        Promise.resolve(
+          supabase
+            .from('match_records')
+            .select('match_score, match_reasons')
+            .eq('match_id', myPair.matchId)
+            .single()
+        )
+          .then(({ data }) => {
+            if (data) {
+              setMatchScore(data.match_score);
+              setMatchReasons(data.match_reasons);
+            }
+          })
+          .catch(() => {});
+
+        // Auto-generate conversation topics (silent degradation)
+        if (!topicGeneratedRef.current) {
+          topicGeneratedRef.current = true;
+          import('@/lib/api/conversation-topics')
+            .then(({ generateTopics }) => generateTopics(myPair.matchId))
+            .catch(() => {});
+        }
 
         // Persist matched state for recovery
         upsertParticipantState(eventId, userId, {
@@ -207,6 +242,10 @@ export function useFlowMatching(
     }).catch((err) => console.error('Failed to persist ready state:', err));
   }, [isReady, userId, eventId, stepId]);
 
+  const markRevealShown = useCallback(() => {
+    setRevealShown(true);
+  }, []);
+
   const state: FlowMatchingState = {
     phase,
     readyCount,
@@ -214,7 +253,11 @@ export function useFlowMatching(
     isReady,
     partner,
     isUnpaired,
+    revealShown,
+    matchScore,
+    matchReasons,
+    otherUserIds,
   };
 
-  return { state, toggleReady };
+  return { state, toggleReady, markRevealShown };
 }

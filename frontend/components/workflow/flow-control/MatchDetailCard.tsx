@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Globe, Sparkles, Briefcase, TrendingUp, Rocket } from 'lucide-react';
+import { Globe, Sparkles, Briefcase, TrendingUp, Rocket, MessageCircle } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 import { supabase } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { Preferences } from '@/types/domain';
+import type { Preferences, ConversationTopic } from '@/types/domain';
 
 interface MatchDetailCardProps {
   matchId: string;
@@ -26,6 +26,7 @@ export default function MatchDetailCard({ matchId, partnerId }: MatchDetailCardP
   const [matchScore, setMatchScore] = useState<number | null>(null);
   const [matchReasons, setMatchReasons] = useState<string[] | null>(null);
   const [preferences, setPreferences] = useState<Preferences | null>(null);
+  const [topics, setTopics] = useState<ConversationTopic | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -66,6 +67,35 @@ export default function MatchDetailCard({ matchId, partnerId }: MatchDetailCardP
     fetchData();
     return () => { cancelled = true; };
   }, [matchId, partnerId]);
+
+  // Poll for conversation topics (auto-generated after match)
+  useEffect(() => {
+    let cancelled = false;
+    let retryCount = 0;
+    const maxRetries = 5;
+
+    const pollTopics = async () => {
+      const { data } = await supabase
+        .from('evt_conversation_topics')
+        .select('*')
+        .eq('match_id', matchId)
+        .order('generated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (cancelled) return;
+
+      if (data) {
+        setTopics(data as ConversationTopic);
+      } else if (retryCount < maxRetries) {
+        retryCount++;
+        setTimeout(pollTopics, 3000);
+      }
+    };
+
+    pollTopics();
+    return () => { cancelled = true; };
+  }, [matchId]);
 
   if (loading) {
     return (
@@ -181,6 +211,31 @@ export default function MatchDetailCard({ matchId, partnerId }: MatchDetailCardP
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Conversation topics section */}
+      {topics && topics.topics.length > 0 && (
+        <div className="space-y-2">
+          <div className="flex items-center gap-1.5">
+            <MessageCircle className="w-4 h-4 text-muted-foreground" />
+            <span className="text-xs font-medium text-muted-foreground">
+              {t('matchDetail.conversationTopics')}
+            </span>
+          </div>
+          <div className="space-y-2">
+            {topics.topics.slice(0, 3).map((topic, idx) => (
+              <div
+                key={idx}
+                className="bg-primary/5 rounded-lg p-3 space-y-1"
+              >
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+                  {topic.category}
+                </span>
+                <p className="text-sm text-foreground">{topic.question}</p>
+              </div>
+            ))}
           </div>
         </div>
       )}

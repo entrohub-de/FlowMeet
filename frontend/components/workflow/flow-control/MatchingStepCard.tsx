@@ -9,6 +9,8 @@ import { getEventVenueAreas } from '@/lib/api/venues';
 import { supabase } from '@/lib/supabase/client';
 import LocationSharing from '@/components/matching/LocationSharing';
 import PartnerLocationCard from '@/components/matching/PartnerLocationCard';
+import MatchRevealOverlay from '@/components/matching/MatchRevealOverlay';
+import AnonymousCandidateHints from '@/components/matching/AnonymousCandidateHints';
 import MatchingTransition from '@/components/workflow/flow-control/MatchingTransition';
 import MatchDetailCard from '@/components/workflow/flow-control/MatchDetailCard';
 import PostMatchFeedback from '@/components/workflow/flow-control/PostMatchFeedback';
@@ -36,7 +38,9 @@ export default function MatchingStepCard({
   eventId,
 }: MatchingStepCardProps) {
   const { t } = useTranslation();
-  const { state, toggleReady } = useFlowMatching(eventId, stepId, status, '1v1');
+  const { state, toggleReady, markRevealShown } = useFlowMatching(eventId, stepId, status, '1v1');
+
+  const [myNickname, setMyNickname] = useState('');
 
   const [areas, setAreas] = useState<Area[]>([]);
   const [isUpdatingLocation, setIsUpdatingLocation] = useState(false);
@@ -44,10 +48,21 @@ export default function MatchingStepCard({
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [feedbackDismissed, setFeedbackDismissed] = useState(false);
 
-  // Get current user ID for feedback
+  // Get current user ID and nickname
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setCurrentUserId(session?.user?.id ?? null);
+      const uid = session?.user?.id ?? null;
+      setCurrentUserId(uid);
+      if (uid) {
+        supabase
+          .from('usr_profiles')
+          .select('nickname')
+          .eq('user_id', uid)
+          .limit(1)
+          .then(({ data }) => {
+            if (data?.[0]) setMyNickname((data[0] as { nickname: string | null }).nickname ?? '');
+          });
+      }
     });
   }, []);
 
@@ -85,7 +100,22 @@ export default function MatchingStepCard({
     }
   }, [state.partner?.matchId]);
 
+  const showReveal = state.phase === 'matched' && state.partner && !state.revealShown;
+
   return (
+    <>
+    {showReveal && (
+      <MatchRevealOverlay
+        myNickname={myNickname}
+        partner={{
+          profile: state.partner!.profile,
+          matchId: state.partner!.matchId,
+        }}
+        score={state.matchScore}
+        reasons={state.matchReasons}
+        onComplete={markRevealShown}
+      />
+    )}
     <div className="rounded-xl border-2 border-primary bg-primary/5 overflow-hidden">
       {/* Step header */}
       <div className="p-4 flex items-center gap-4">
@@ -178,6 +208,7 @@ export default function MatchingStepCard({
                   <p>{t('ux.matching.unpaired')}</p>
                 </div>
               )}
+              <AnonymousCandidateHints otherUserIds={state.otherUserIds} />
             </div>
           )}
 
@@ -247,5 +278,6 @@ export default function MatchingStepCard({
         )}
       </div>
     </div>
+    </>
   );
 }

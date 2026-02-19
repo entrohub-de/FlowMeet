@@ -13,6 +13,8 @@ function makeUser(overrides: {
   languages?: string | null;
   networkingIntent?: NetworkingIntent | null;
   preferences?: null;
+  preferred_topics_tags?: string[];
+  avgRating?: number | null;
 } = {}): UserWithPreferences {
   const userId = overrides.userId ?? 'user-1';
   const profile: Profile = {
@@ -41,6 +43,10 @@ function makeUser(overrides: {
     profile,
     preferences,
     networkingIntent: overrides.networkingIntent ?? null,
+    eventPreferences: overrides.preferred_topics_tags
+      ? { preferred_topics_tags: overrides.preferred_topics_tags }
+      : null,
+    avgRating: overrides.avgRating ?? null,
   };
 }
 
@@ -81,8 +87,6 @@ describe('calculateMatchScore', () => {
   });
 
   it('complementary takes priority over same (no same reason)', () => {
-    // engineer↔marketing_sales is complementary; engineer=engineer would be same
-    // but complementaryCount > 0, so same branch is skipped
     const u1 = makeUser({ userId: 'u1', industry_background: 'engineer' });
     const u2 = makeUser({ userId: 'u2', industry_background: 'engineer,marketing_sales' });
     const result = calculateMatchScore(u1, u2);
@@ -91,20 +95,20 @@ describe('calculateMatchScore', () => {
   });
 
   // --- Interest overlap ---
-  it('scores 1 common interest → 10pts', () => {
+  it('scores 1 common interest → 8pts', () => {
     const u1 = makeUser({ userId: 'u1', interests: 'startup,tech_ai' });
     const u2 = makeUser({ userId: 'u2', interests: 'startup,career' });
     const result = calculateMatchScore(u1, u2);
-    expect(result.score).toBe(10);
+    expect(result.score).toBe(8);
     expect(result.reasons.some(r => r.startsWith('共同兴趣'))).toBe(true);
   });
 
-  it('caps interest overlap at 25pts (3+ common)', () => {
+  it('caps interest overlap at 20pts (3+ common)', () => {
     const u1 = makeUser({ userId: 'u1', interests: 'a,b,c,d' });
     const u2 = makeUser({ userId: 'u2', interests: 'a,b,c,d' });
     const result = calculateMatchScore(u1, u2);
-    // 4 common × 10 = 40 → capped at 25
-    expect(result.score).toBe(25);
+    // 4 common × 8 = 32 → capped at 20
+    expect(result.score).toBe(20);
   });
 
   // --- Startup stage ---
@@ -128,8 +132,8 @@ describe('calculateMatchScore', () => {
     const u1 = makeUser({ userId: 'u1', startup_stage: 'not_started' });
     const u2 = makeUser({ userId: 'u2', startup_stage: 'growth' });
     const result = calculateMatchScore(u1, u2);
-    // No other dimensions match either → baseline
-    expect(result.score).toBe(10);
+    // No other dimensions match → baseline 5
+    expect(result.score).toBe(5);
     expect(result.reasons).not.toContain('相同创业阶段');
     expect(result.reasons).not.toContain('相近创业阶段');
   });
@@ -147,8 +151,8 @@ describe('calculateMatchScore', () => {
     const u1 = makeUser({ userId: 'u1', networkingIntent: 'find_cofounder' });
     const u2 = makeUser({ userId: 'u2', networkingIntent: 'learn_exchange' });
     const result = calculateMatchScore(u1, u2);
-    // No other dimensions → baseline
-    expect(result.score).toBe(10);
+    // No other dimensions → baseline 5
+    expect(result.score).toBe(5);
     expect(result.reasons).not.toContain('相同社交目标');
   });
 
@@ -169,20 +173,55 @@ describe('calculateMatchScore', () => {
     expect(result.score).toBe(10);
   });
 
-  // --- Baseline / no preferences ---
-  it('returns baseline 10pts when no preferences match', () => {
+  // --- Topic tag overlap ---
+  it('scores 1 common topic tag → 5pts', () => {
+    const u1 = makeUser({ userId: 'u1', preferred_topics_tags: ['fundraising', 'product_dev'] });
+    const u2 = makeUser({ userId: 'u2', preferred_topics_tags: ['fundraising', 'tech_trends'] });
+    const result = calculateMatchScore(u1, u2);
+    expect(result.score).toBe(5);
+    expect(result.reasons).toContain('共同话题兴趣');
+  });
+
+  it('caps topic tag overlap at 10pts', () => {
+    const u1 = makeUser({ userId: 'u1', preferred_topics_tags: ['a', 'b', 'c'] });
+    const u2 = makeUser({ userId: 'u2', preferred_topics_tags: ['a', 'b', 'c'] });
+    const result = calculateMatchScore(u1, u2);
+    // 3 common × 5 = 15 → capped at 10
+    expect(result.score).toBe(10);
+  });
+
+  // --- History feedback bonus ---
+  it('adds rating bonus for well-rated users', () => {
+    const u1 = makeUser({ userId: 'u1', avgRating: 4.5 });
+    const u2 = makeUser({ userId: 'u2', avgRating: 4.0 });
+    const result = calculateMatchScore(u1, u2);
+    // baseline 5 + bonus (avg 4.25 → round = 4)
+    expect(result.score).toBe(9);
+    expect(result.reasons).toContain('口碑良好');
+  });
+
+  it('does not add bonus when no ratings', () => {
     const u1 = makeUser({ userId: 'u1' });
     const u2 = makeUser({ userId: 'u2' });
     const result = calculateMatchScore(u1, u2);
-    expect(result.score).toBe(10);
+    expect(result.score).toBe(5);
+    expect(result.reasons).not.toContain('口碑良好');
+  });
+
+  // --- Baseline / no preferences ---
+  it('returns baseline 5pts when no preferences match', () => {
+    const u1 = makeUser({ userId: 'u1' });
+    const u2 = makeUser({ userId: 'u2' });
+    const result = calculateMatchScore(u1, u2);
+    expect(result.score).toBe(5);
     expect(result.reasons).toEqual(['探索新朋友']);
   });
 
-  it('returns baseline 10pts when preferences are null', () => {
+  it('returns baseline 5pts when preferences are null', () => {
     const u1 = makeUser({ userId: 'u1', preferences: null });
     const u2 = makeUser({ userId: 'u2', preferences: null });
     const result = calculateMatchScore(u1, u2);
-    expect(result.score).toBe(10);
+    expect(result.score).toBe(5);
     expect(result.reasons).toEqual(['探索新朋友']);
   });
 
@@ -205,9 +244,9 @@ describe('calculateMatchScore', () => {
       languages: 'chinese,english,german',
     });
     const result = calculateMatchScore(u1, u2);
-    // complementary: 30 + interests: 25 + stage: 15 + intent: 10 + languages: 10 = 90
+    // complementary: 30 + interests: 20 + stage: 15 + intent: 10 + languages: 10 = 85
     expect(result.score).toBeLessThanOrEqual(100);
-    expect(result.score).toBe(90);
+    expect(result.score).toBe(85);
   });
 
   // --- Score rounding ---

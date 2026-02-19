@@ -60,7 +60,7 @@ export async function generatePairs(
   // 0. Fetch history pairs for this event
   const historySet = await fetchHistoryPairs(eventId);
 
-  // 1. Fetch profiles + preferences + match preferences (networking intent)
+  // 1. Fetch profiles + preferences + match preferences (networking intent + topic tags) + ratings
   const { data: profiles } = await supabase
     .from('usr_profiles')
     .select('*')
@@ -73,16 +73,53 @@ export async function generatePairs(
 
   const { data: matchPreferences } = await supabase
     .from('match_preferences')
-    .select('user_id, networking_intent')
+    .select('user_id, networking_intent, preferred_topics_tags')
     .eq('event_id', eventId)
     .in('user_id', readyUserIds);
 
-  // Build a map of user_id -> networking_intent
+  // Fetch historical match ratings for feedback bonus
+  const { data: ratingData } = await supabase
+    .from('rating_matches')
+    .select('match_id, rater_user_id, score')
+    .in('rater_user_id', readyUserIds);
+
+  // Build a map of user_id -> networking_intent & topic tags
   const intentMap = new Map<string, NetworkingIntent | null>();
+  const topicTagsMap = new Map<string, string[]>();
   if (matchPreferences) {
     for (const mp of matchPreferences) {
       intentMap.set(mp.user_id, (mp.networking_intent as NetworkingIntent) ?? null);
+      topicTagsMap.set(mp.user_id, (mp.preferred_topics_tags as string[]) ?? []);
     }
+  }
+
+  // Build rating averages: for each user, compute average score they received
+  // We need to find who was rated (the non-rater in each match)
+  const ratingScores = new Map<string, number[]>();
+  if (ratingData && ratingData.length > 0) {
+    // Get all unique match IDs
+    const matchIds = [...new Set(ratingData.map((r) => r.match_id))];
+    const { data: matchRecords } = await supabase
+      .from('match_records')
+      .select('match_id, user1_id, user2_id')
+      .in('match_id', matchIds);
+
+    if (matchRecords) {
+      const matchMap = new Map(matchRecords.map((m) => [m.match_id, m]));
+      for (const r of ratingData) {
+        const match = matchMap.get(r.match_id);
+        if (!match) continue;
+        // The rated user is the one who is NOT the rater
+        const ratedUserId = match.user1_id === r.rater_user_id ? match.user2_id : match.user1_id;
+        if (!ratingScores.has(ratedUserId)) ratingScores.set(ratedUserId, []);
+        ratingScores.get(ratedUserId)!.push(r.score);
+      }
+    }
+  }
+
+  const avgRatingMap = new Map<string, number>();
+  for (const [uid, scores] of ratingScores) {
+    avgRatingMap.set(uid, scores.reduce((a, b) => a + b, 0) / scores.length);
   }
 
   // Split users: those with profiles vs those without
@@ -96,6 +133,10 @@ export async function generatePairs(
         profile: profile as Profile,
         preferences: (preferences?.find((p) => p.user_id === uid) as Preferences) ?? null,
         networkingIntent: intentMap.get(uid) ?? null,
+        eventPreferences: {
+          preferred_topics_tags: topicTagsMap.get(uid) ?? [],
+        },
+        avgRating: avgRatingMap.get(uid) ?? null,
       });
     } else {
       usersWithoutProfile.push(uid);

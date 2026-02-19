@@ -172,6 +172,7 @@ export interface MatchPreference {
   availability: string | null;
   notes: string | null;
   networking_intent: NetworkingIntent | null;
+  preferred_topics_tags: string[];
   created_at: string;
   updated_at: string;
 }
