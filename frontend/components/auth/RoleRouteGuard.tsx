@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/context';
 import { getUserRole } from '@/lib/api/role';
 
-type AppRole = 'user' | 'host' | 'admin';
+type AppRole = 'user' | 'organizer' | 'host' | 'admin';
 type AccessArea = 'user' | 'host' | 'admin';
 
 interface RoleRouteGuardProps {
@@ -42,7 +42,7 @@ export default function RoleRouteGuard({ area, children }: RoleRouteGuardProps) 
       const allowed =
         (area === 'admin' && role === 'admin') ||
         (area === 'host' && (role === 'host' || role === 'admin')) ||
-        (area === 'user' && (role === 'user' || role === 'host' || role === 'admin'));
+        (area === 'user' && (role === 'user' || role === 'organizer' || role === 'host' || role === 'admin'));
 
       if (!allowed) {
         routerRef.current.replace(getHomeByRole(role));

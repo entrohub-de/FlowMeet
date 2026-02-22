@@ -574,14 +574,36 @@
     "avatarUploading": "上传中...",
     "avatarUploadFailed": "头像上传失败",
     "avatarRemove": "移除头像",
+    "completenessHint": "完善资料，提升配对精准度",
+    "prefsEmptyHint": "完善偏好信息，获得更精准的配对推荐",
+    "prefsGoSet": "去设置",
+    "greeting": {
+      "morning": "早上好，{name}",
+      "afternoon": "下午好，{name}",
+      "evening": "晚上好，{name}",
+      "lateNight": "{name}，还在忙啊"
+    },
+    "stats": {
+      "eventsJoined": "已参加 {count} 次活动",
+      "matchesMade": "{count} 次配对"
+    },
     "roleUpgrade": {
-      "title": "账户角色",
+      "title": "升级为主办方",
       "currentRole": "当前角色",
       "roles": {
         "user": "普通用户",
+        "organizer": "活跃组织者",
         "host": "主办方",
         "admin": "管理员"
       },
+      "organizerTitle": "成为活跃组织者",
+      "organizerDescription": "发起小型聚会，邀请好友参加活动",
+      "organizerBenefits": {
+        "smallEvents": "发起小型活动（20人以内）",
+        "inviteLink": "生成专属邀请链接",
+        "badge": "获得社区活跃标识"
+      },
+      "applyOrganizer": "申请成为活跃组织者",
       "applyToHost": "申请成为主办方",
       "upgradeDescription": "成为主办方后，你将可以创建和管理活动、查看报名数据、管理签到等功能。",
       "benefits": {
@@ -595,9 +617,9 @@
       "applied": "申请已提交！请等待管理员审核。",
       "alreadyApplied": "你已经提交过申请了",
       "pendingTitle": "申请审核中",
-      "pendingDescription": "你的主办方申请正在等待管理员审核，审核通过后会通知你。",
+      "pendingDescription": "你的申请正在等待审核，通过后会通知你。",
       "rejectedTitle": "申请被拒绝",
-      "rejectedDescription": "你的主办方申请未通过审核，如有疑问请联系管理员。",
+      "rejectedDescription": "你的申请未通过审核，如有疑问请联系管理员。",
       "reapply": "联系管理员",
       "reapplyHint": "请联系管理员重新提交申请。",
       "error": "申请失败，请重试"

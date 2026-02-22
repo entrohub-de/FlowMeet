@@ -15,6 +15,9 @@ supabase link --project-ref bmaccwxsrhanffljyslg
 .env.test.local
 .env.production.local
 
+# Build artifacts
+*.tsbuildinfo
+
 # MCP server
 mcp-server/.env
 mcp-server/node_modules/
