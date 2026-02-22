@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase/client';
+import { useAuth } from '@/lib/auth/context';
+import { getUserRole } from '@/lib/api/role';
 
 type AppRole = 'user' | 'host' | 'admin';
 type AccessArea = 'user' | 'host' | 'admin';
@@ -10,13 +11,6 @@ type AccessArea = 'user' | 'host' | 'admin';
 interface RoleRouteGuardProps {
   area: AccessArea;
   children: React.ReactNode;
-}
-
-function normalizeRole(rawRole: string | null | undefined): AppRole {
-  const role = typeof rawRole === 'string' ? rawRole.trim().toLowerCase() : '';
-  if (role === 'host') return 'host';
-  if (role === 'admin') return 'admin';
-  return 'user';
 }
 
 function getHomeByRole(role: AppRole): string {
@@ -29,59 +23,38 @@ export default function RoleRouteGuard({ area, children }: RoleRouteGuardProps) 
   const router = useRouter();
   const routerRef = useRef(router);
   routerRef.current = router;
+  const { user, loading } = useAuth();
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
+    if (loading) return;
+
+    if (!user) {
+      routerRef.current.replace('/login');
+      return;
+    }
+
     let cancelled = false;
 
-    const verify = async () => {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const sessionUser = sessionData.session?.user;
+    getUserRole(user.id).then((role) => {
+      if (cancelled) return;
 
-      if (!sessionUser) {
-        if (!cancelled) {
-          routerRef.current.replace('/login');
-        }
-        return;
-      }
-
-      const { data: roleData, error: roleError } = await supabase
-        .from('usr_role')
-        .select('role')
-        .eq('user_id', sessionUser.id)
-        .maybeSingle();
-
-      if (roleError || !roleData) {
-        // 无角色数据时重定向到登录页，不默认当 user 处理
-        if (!cancelled) {
-          routerRef.current.replace('/login');
-        }
-        return;
-      }
-
-      const role = normalizeRole(roleData.role);
       const allowed =
         (area === 'admin' && role === 'admin') ||
         (area === 'host' && (role === 'host' || role === 'admin')) ||
         (area === 'user' && (role === 'user' || role === 'host' || role === 'admin'));
 
       if (!allowed) {
-        if (!cancelled) {
-          routerRef.current.replace(getHomeByRole(role));
-        }
-        return;
-      }
-
-      if (!cancelled) {
+        routerRef.current.replace(getHomeByRole(role));
+      } else {
         setIsAuthorized(true);
       }
-    };
+    });
 
-    verify();
     return () => {
       cancelled = true;
     };
-  }, [area]);
+  }, [area, user, loading]);
 
   if (!isAuthorized) {
     return null;

@@ -615,9 +615,14 @@
     "signIn": "Sign in",
     "signUp": "Sign up",
     "welcomeBack": "Welcome back to FlowMeet.",
+    "welcomeBackTitle": "Welcome back",
     "createAccount": "Create your account",
-    "createAccountDesc": "Start hosting and joining FlowMeet events.",
+    "createAccountTitle": "Create your free account",
+    "createAccountDesc": "Start joining FlowMeet events.",
     "password": "Password",
+    "confirmPassword": "Confirm password",
+    "confirmPasswordPlaceholder": "Re-enter your password",
+    "passwordMismatch": "Passwords do not match",
     "magicLink": "Magic Link",
     "email": "Email",
     "emailPlaceholder": "you@example.com",
@@ -627,6 +632,8 @@
     "sendingMagicLink": "Sending magic link...",
     "sendMagicLink": "Send magic link",
     "creatingAccount": "Creating account...",
+    "continueWithGoogle": "Continue with Google",
+    "or": "or",
     "checkEmailMagicLink": "Check your email for the magic link!",
     "clickLinkToSignIn": "Click the link in the email to sign in.",
     "sendAnotherLink": "Send another link",
@@ -644,7 +651,12 @@
     "callbackErrorTitle": "Authentication Error",
     "backToLogin": "Back to login",
     "signOut": "Sign out",
-    "orContinueWith": "or continue with"
+    "orContinueWith": "or continue with",
+    "passwordStrength": "Password strength",
+    "passwordTooShort": "Too short",
+    "passwordWeak": "Weak",
+    "passwordMedium": "Medium",
+    "passwordStrong": "Strong"
   },
   "topicsPage": {
     "title": "Conversation Starters",
@@ -956,7 +968,8 @@
     "step2Subtitle": "Preferences help improve matching accuracy (optional)",
     "next": "Next",
     "complete": "Complete",
-    "skipPreferences": "Skip for now"
+    "skipPreferences": "Skip for now",
+    "stepOf": "{current}/{total}"
   },
   "checkin": {
     "selectEvent": "Select Event",

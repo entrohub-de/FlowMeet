@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, ChevronRight, ChevronLeft, Check, Globe, Heart, Briefcase, Rocket } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Check, Globe, Heart, Briefcase, Rocket } from 'lucide-react';
 import { useAuth } from '@/features/auth/useAuth';
 import { useTranslation } from '@/lib/i18n/context';
 import { upsertProfile, upsertPreferences, getProfile, getPreferences } from '@/lib/api/profile';
@@ -108,7 +108,7 @@ export default function ProfileCompletePage() {
 
   const chipClass = (selected: boolean) =>
     cn(
-      'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer hover:bg-primary/5',
+      'px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors cursor-pointer hover:bg-primary/5',
       selected
         ? 'bg-primary/10 text-primary border-primary/30'
         : 'bg-muted/50 text-muted-foreground border-transparent'
@@ -155,38 +155,35 @@ export default function ProfileCompletePage() {
   );
 
   return (
-    <div className="min-h-[calc(100vh-60px)] flex items-center justify-center p-4 bg-muted/30">
-      <div className="w-full max-w-lg">
+    <div className="relative min-h-[calc(100vh-60px)] flex items-center justify-center p-4 bg-muted/30 overflow-hidden">
+      {/* Brand glow background */}
+      <div className="pointer-events-none absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full bg-primary/[0.12] blur-[120px]" />
+      <div className="pointer-events-none absolute -bottom-32 -left-32 w-[400px] h-[400px] rounded-full bg-accent/[0.08] blur-[100px]" />
+
+      <div className="relative w-full max-w-lg">
+        {/* Progress bar */}
+        <div className="w-full h-1 bg-border rounded-full mb-6 overflow-hidden">
+          <div
+            className="h-full bg-primary rounded-full transition-all duration-300"
+            style={{ width: step === 1 ? '50%' : '100%' }}
+          />
+        </div>
+
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <User className="w-8 h-8 text-primary" />
-          </div>
-          <h1 className="text-2xl font-bold text-foreground">
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-xl font-bold text-foreground">
             {t('profileCompletion.title')}
           </h1>
-          <p className="text-muted-foreground mt-2">
-            {t('profileCompletion.subtitle')}
-          </p>
+          <span className="text-sm text-muted-foreground">
+            {t('profileCompletion.stepOf', { current: step, total: 2 })}
+          </span>
         </div>
-
-        {/* Step indicator */}
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-            step >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-          }`}>
-            {step > 1 ? <Check className="w-4 h-4" /> : '1'}
-          </div>
-          <div className={`w-12 h-0.5 ${step > 1 ? 'bg-primary' : 'bg-border'}`} />
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-            step >= 2 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-          }`}>
-            2
-          </div>
-        </div>
+        <p className="text-sm text-muted-foreground mb-6">
+          {t('profileCompletion.subtitle')}
+        </p>
 
         {/* Card */}
-        <div className="bg-card border border-border rounded-xl shadow-sm p-6">
+        <div className="bg-card/80 border border-border rounded-2xl shadow-lg backdrop-blur-sm p-6">
           {step === 1 && (
             <div className="space-y-5">
               <h2 className="text-lg font-semibold text-foreground">
@@ -199,7 +196,7 @@ export default function ProfileCompletePage() {
                 </label>
                 <input
                   id="nickname"
-                  className="w-full px-3 py-2 bg-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full h-12 px-4 bg-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                   value={nickname}
                   onChange={(e) => setNickname(e.target.value)}
                   placeholder={t('profile.nicknamePlaceholder')}
@@ -207,44 +204,46 @@ export default function ProfileCompletePage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">
-                    {t('profile.gender')}
-                  </label>
-                  <select
-                    className="w-full px-3 py-2 bg-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                    value={gender}
-                    onChange={(e) => setGender(e.target.value)}
-                  >
-                    <option value="">{t('profile.genderOptions.unset')}</option>
-                    {GENDER_OPTIONS.map((g) => (
-                      <option key={g} value={g}>{t(`profile.genderOptions.${g}`)}</option>
-                    ))}
-                  </select>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">
+                  {t('profile.gender')}
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {GENDER_OPTIONS.map((g) => (
+                    <button
+                      key={g}
+                      type="button"
+                      onClick={() => setGender(gender === g ? '' : g)}
+                      className={chipClass(gender === g)}
+                    >
+                      {t(`profile.genderOptions.${g}`)}
+                    </button>
+                  ))}
                 </div>
+              </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">
-                    {t('profile.ageGroup')}
-                  </label>
-                  <select
-                    className="w-full px-3 py-2 bg-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                    value={ageGroup}
-                    onChange={(e) => setAgeGroup(e.target.value)}
-                  >
-                    <option value="">{t('profile.ageGroupOptions.unset')}</option>
-                    {AGE_GROUP_OPTIONS.map((a) => (
-                      <option key={a} value={a}>{t(`profile.ageGroupOptions.${a}`)}</option>
-                    ))}
-                  </select>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">
+                  {t('profile.ageGroup')}
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {AGE_GROUP_OPTIONS.map((a) => (
+                    <button
+                      key={a}
+                      type="button"
+                      onClick={() => setAgeGroup(ageGroup === a ? '' : a)}
+                      className={chipClass(ageGroup === a)}
+                    >
+                      {t(`profile.ageGroupOptions.${a}`)}
+                    </button>
+                  ))}
                 </div>
               </div>
 
               <button
                 onClick={() => setStep(2)}
                 disabled={!canProceedStep1}
-                className="w-full px-4 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full h-12 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {t('profileCompletion.next')}
                 <ChevronRight className="w-4 h-4" />
@@ -264,31 +263,37 @@ export default function ProfileCompletePage() {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground flex items-center gap-1">
-                    <Globe className="w-3.5 h-3.5" />
+                    <Globe className="w-4 h-4" />
                     {t('profile.languages')}
                   </label>
                   {renderChipGroup(LANGUAGE_OPTIONS, selectedLanguages, 'languages', setSelectedLanguages)}
                 </div>
 
+                <div className="border-t border-border pt-4" />
+
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground flex items-center gap-1">
-                    <Heart className="w-3.5 h-3.5" />
+                    <Heart className="w-4 h-4" />
                     {t('profile.interests')}
                   </label>
                   {renderChipGroup(INTEREST_OPTIONS, selectedInterests, 'interests', setSelectedInterests)}
                 </div>
 
+                <div className="border-t border-border pt-4" />
+
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground flex items-center gap-1">
-                    <Briefcase className="w-3.5 h-3.5" />
+                    <Briefcase className="w-4 h-4" />
                     {t('profile.professionalBackground')}
                   </label>
                   {renderChipGroup(PROFESSIONAL_BACKGROUND_OPTIONS, selectedIndustries, 'professionalBackground', setSelectedIndustries)}
                 </div>
 
+                <div className="border-t border-border pt-4" />
+
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground flex items-center gap-1">
-                    <Rocket className="w-3.5 h-3.5" />
+                    <Rocket className="w-4 h-4" />
                     {t('profile.startupStage')}
                   </label>
                   {renderSingleChipGroup(STARTUP_STAGE_OPTIONS, selectedStartupStage, 'startupStages', setSelectedStartupStage)}
@@ -298,7 +303,7 @@ export default function ProfileCompletePage() {
               <div className="flex gap-3">
                 <button
                   onClick={() => setStep(1)}
-                  className="px-4 py-3 border border-border text-foreground rounded-lg font-medium hover:bg-muted transition-colors flex items-center gap-2"
+                  className="h-12 px-4 border border-border text-foreground rounded-xl font-medium hover:bg-muted transition-colors flex items-center gap-2"
                 >
                   <ChevronLeft className="w-4 h-4" />
                   {t('common.back')}
@@ -306,7 +311,7 @@ export default function ProfileCompletePage() {
                 <button
                   onClick={handleComplete}
                   disabled={saving || !canProceedStep1}
-                  className="flex-1 px-4 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 h-12 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {saving ? t('profile.saving') : t('profileCompletion.complete')}
                   <Check className="w-4 h-4" />
@@ -316,7 +321,7 @@ export default function ProfileCompletePage() {
               <button
                 onClick={handleComplete}
                 disabled={saving}
-                className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="w-full h-12 border border-border text-muted-foreground rounded-xl font-medium hover:bg-muted transition-colors text-sm"
               >
                 {t('profileCompletion.skipPreferences')}
               </button>
