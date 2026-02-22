@@ -10,7 +10,7 @@ interface SwipeToSignupProps {
   disabled?: boolean;
 }
 
-const THUMB_SIZE = 44;
+const THUMB_SIZE = 48;
 const COMPLETE_THRESHOLD = 0.85;
 
 export default function SwipeToSignup({ label, onSwipeComplete, disabled }: SwipeToSignupProps) {
@@ -155,11 +155,11 @@ export default function SwipeToSignup({ label, onSwipeComplete, disabled }: Swip
       {/* Draggable thumb */}
       {!completed && (
         <div
-          className={`absolute top-0.5 bottom-0.5 left-0.5 flex items-center justify-center rounded-[calc(var(--radius-button,0.75rem)-2px)] bg-primary text-primary-foreground shadow-md ${
+          className={`absolute top-0 bottom-0 left-0 flex items-center justify-center rounded-button bg-primary text-primary-foreground shadow-md ${
             dragging ? 'scale-105' : 'transition-transform'
           } ${disabled ? '' : 'cursor-grab active:cursor-grabbing'}`}
           style={{
-            width: THUMB_SIZE - 4,
+            width: THUMB_SIZE,
             transform: `translateX(${offsetX}px)${dragging ? ' scale(1.05)' : ''}`,
             transition: dragging ? 'none' : 'transform 0.3s ease',
           }}

@@ -1,31 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { Event } from '@/types/domain';
-import { Calendar, MapPin, QrCode, CheckCircle2, X } from 'lucide-react';
+import type { Event, Profile } from '@/types/domain';
+import { Calendar, MapPin, ChevronDown, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDateRange } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { signupForEvent, cancelSignup, getUserSignupStatus } from '@/lib/api/signup';
 import { getUserCheckinStatus } from '@/lib/api/checkin';
 import { supabase } from '@/lib/supabase/client';
-import { QRCodeSVG } from 'qrcode.react';
 import PreferencesModal from './PreferencesModal';
-import SwipeToSignup from './SwipeToSignup';
-
-function generateNumericCode(eventId: string, userId: string, checkinCode: string): string {
-  const raw = `${eventId}/${userId}/${checkinCode}`;
-  let hash = 0;
-  for (let i = 0; i < raw.length; i++) {
-    const char = raw.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
-  }
-  return (Math.abs(hash) % 900000 + 100000).toString();
-}
-
-function generateQRValue(eventId: string, userId: string, checkinCode: string): string {
-  return btoa(`${eventId}/${userId}/${checkinCode}`);
-}
+import EventCardActions from './EventCardActions';
+import EventCardCheckin from './EventCardCheckin';
 
 interface EventCardProps {
   event: Event;
@@ -33,16 +19,19 @@ interface EventCardProps {
   t: (key: string, params?: Record<string, string | number>) => string;
   initialSignedUp?: boolean;
   onSignupChange?: (eventId: string, signedUp: boolean) => void;
+  hostProfile?: Pick<Profile, 'nickname' | 'avatar_url'> | null;
+  variant?: 'default' | 'signed-up';
+  fadingOut?: boolean;
 }
 
-export default function EventCard({ event, locale, t, initialSignedUp, onSignupChange }: EventCardProps) {
+export default function EventCard({ event, locale, t, initialSignedUp, onSignupChange, hostProfile, variant = 'default', fadingOut }: EventCardProps) {
   const [signingUp, setSigningUp] = useState(false);
   const [signedUp, setSignedUp] = useState(initialSignedUp ?? false);
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(initialSignedUp === undefined);
   const [showPreferencesModal, setShowPreferencesModal] = useState(false);
   const [isCheckedIn, setIsCheckedIn] = useState(false);
-  const [showQR, setShowQR] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -51,12 +40,10 @@ export default function EventCard({ event, locale, t, initialSignedUp, onSignupC
 
       if (currentUserId) {
         if (initialSignedUp !== undefined) {
-          // Signup status already known from parent, only fetch checkin
           getUserCheckinStatus(currentUserId, event.event_id).then((checkinStatuses) => {
             setIsCheckedIn(checkinStatuses.some((s) => s.checked_in));
           });
         } else {
-          // Fetch both signup and checkin status
           Promise.all([
             getUserSignupStatus(currentUserId, event.event_id),
             getUserCheckinStatus(currentUserId, event.event_id),
@@ -103,120 +90,119 @@ export default function EventCard({ event, locale, t, initialSignedUp, onSignupC
   };
 
   const location = event.venue?.name || t('user.locationTbd');
+  const hasDescription = !!event.description;
 
   return (
-    <div className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+    <div
+      className={cn(
+        'bg-card border border-border rounded-2xl overflow-hidden transition-all duration-300',
+        variant === 'signed-up' && 'border-l-[3px] border-l-primary',
+        fadingOut && 'opacity-0 scale-95 pointer-events-none',
+      )}
+    >
       {/* Cover Image */}
-      {event.cover_image && (
+      {event.cover_image ? (
+        // eslint-disable-next-line @next/next/no-img-element
         <img src={event.cover_image} alt={event.name} className="w-full h-32 object-cover" />
-      )}
-
-      <div className="p-4 space-y-2.5">
-      {/* Title & Description */}
-      <div className="space-y-1">
-        <h3 className="text-base font-semibold text-foreground leading-tight">
-          {event.name}
-        </h3>
-        {event.description && (
-          <p className="text-xs text-muted-foreground line-clamp-2">
-            {event.description}
-          </p>
-        )}
-      </div>
-
-      {/* Details */}
-      <div className="space-y-1 text-xs text-muted-foreground">
-        <div className="flex items-center gap-1.5">
-          <Calendar className="w-3.5 h-3.5 shrink-0 text-primary" />
-          <span>{formatDateRange(event.start_time, event.end_time, locale)}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <MapPin className="w-3.5 h-3.5 shrink-0 text-primary" />
-          <span>{location}</span>
-        </div>
-      </div>
-
-      {/* Sign Up */}
-      {loading ? (
-        <div className="w-full h-button flex items-center justify-center text-sm text-muted-foreground">
-          {t('common.loading')}
-        </div>
-      ) : signedUp ? (
-        <div className="flex items-center gap-2">
-          <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 border border-green-200 font-medium text-sm inline-flex items-center">
-            <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
-            {t('user.signedUp')}
-          </span>
-          <button
-            onClick={handleSignup}
-            disabled={signingUp}
-            className="px-3 py-1 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 border border-border hover:border-destructive/30 font-medium text-sm transition-colors inline-flex items-center gap-1"
-          >
-            {signingUp ? '...' : <><X className="w-3.5 h-3.5" />{t('user.cancelSignup')}</>}
-          </button>
-        </div>
       ) : (
-        <SwipeToSignup
-          label={t('user.swipeToSignup')}
-          disabled={signingUp || !userId}
-          onSwipeComplete={handleSignup}
-        />
+        <div className="h-1 bg-gradient-to-r from-primary via-primary/60 to-accent/40" />
       )}
 
-      {/* Checkin Section - only for signed-up users with checkin code */}
-      {signedUp && event.checkin_code && userId && (
-        <div className="border-t border-border pt-2.5 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-muted-foreground">{t('user.checkinStatus')}</span>
-            <span
-              className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                isCheckedIn
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-muted text-muted-foreground'
-              }`}
-            >
-              {isCheckedIn ? t('user.checkedIn') : t('user.notCheckedIn')}
-            </span>
+      <div className="p-4 space-y-3">
+        {/* Title row */}
+        <button
+          type="button"
+          onClick={() => hasDescription && setExpanded(!expanded)}
+          className={cn(
+            'w-full text-left space-y-1',
+            hasDescription && 'cursor-pointer'
+          )}
+        >
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="text-base font-semibold text-foreground leading-tight">
+              {event.name}
+            </h3>
+            {hasDescription && (
+              <ChevronDown
+                className={cn(
+                  'w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5 transition-transform duration-200',
+                  expanded && 'rotate-180'
+                )}
+              />
+            )}
           </div>
+        </button>
 
-          {!isCheckedIn && (
-            <button
-              onClick={() => setShowQR(!showQR)}
-              className="flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 font-medium transition-colors"
-            >
-              <QrCode className="w-3.5 h-3.5" />
-              {showQR ? t('user.hideCheckinCode') : t('user.showCheckinCode')}
-            </button>
-          )}
+        {/* Description */}
+        {hasDescription && (
+          <div
+            className={cn(
+              'overflow-hidden transition-all duration-200',
+              expanded ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0'
+            )}
+          >
+            <p className="text-xs text-muted-foreground line-clamp-3 pb-1">
+              {event.description}
+            </p>
+          </div>
+        )}
 
-          {!isCheckedIn && showQR && (
-            <div className="space-y-2">
-              {event.checkin_qr_enabled && (
-                <div className="flex justify-center p-4 bg-white rounded-xl border border-border">
-                  <QRCodeSVG
-                    value={generateQRValue(event.event_id, userId, event.checkin_code)}
-                    size={160}
-                    level="H"
-                  />
-                </div>
-              )}
-              <div className="text-xl font-mono text-center text-foreground font-bold tracking-widest">
-                {generateNumericCode(event.event_id, userId, event.checkin_code)}
-              </div>
-            </div>
-          )}
+        {/* Details: time + location */}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1">
+            <Calendar className="w-3.5 h-3.5 shrink-0 text-primary" />
+            {formatDateRange(event.start_time, event.end_time, locale)}
+          </span>
+          <span className="flex items-center gap-1">
+            <MapPin className="w-3.5 h-3.5 shrink-0 text-primary" />
+            {location}
+          </span>
         </div>
-      )}
 
-      {/* Preferences Modal - shown after signup or when editing */}
-      {showPreferencesModal && userId && (
-        <PreferencesModal
-          eventId={event.event_id}
+        {/* Host info */}
+        {hostProfile && (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            {hostProfile.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={hostProfile.avatar_url} alt="" className="w-5 h-5 rounded-full object-cover" />
+            ) : (
+              <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
+                <User className="w-3 h-3 text-primary" />
+              </div>
+            )}
+            <span>{t('user.hostedBy', { name: hostProfile.nickname || t('user.unknownHost') })}</span>
+          </div>
+        )}
+
+        {/* Action area */}
+        <EventCardActions
+          loading={loading}
+          signedUp={signedUp}
+          signingUp={signingUp}
           userId={userId}
+          onSignup={handleSignup}
           t={t}
-          onClose={() => setShowPreferencesModal(false)}
         />
-      )}
+
+        {/* Checkin Section */}
+        {signedUp && userId && (
+          <EventCardCheckin
+            event={event}
+            userId={userId}
+            isCheckedIn={isCheckedIn}
+            t={t}
+          />
+        )}
+
+        {/* Preferences Modal */}
+        {showPreferencesModal && userId && (
+          <PreferencesModal
+            eventId={event.event_id}
+            userId={userId}
+            t={t}
+            onClose={() => setShowPreferencesModal(false)}
+          />
+        )}
       </div>
     </div>
   );
