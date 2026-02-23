@@ -10,7 +10,7 @@ interface SwipeToSignupProps {
   disabled?: boolean;
 }
 
-const THUMB_SIZE = 48;
+const THUMB_SIZE = 64;
 const COMPLETE_THRESHOLD = 0.85;
 
 export default function SwipeToSignup({ label, onSwipeComplete, disabled }: SwipeToSignupProps) {
@@ -129,7 +129,7 @@ export default function SwipeToSignup({ label, onSwipeComplete, disabled }: Swip
   return (
     <div
       ref={trackRef}
-      className={`relative w-full h-button rounded-button overflow-hidden select-none ${
+      className={`relative w-full h-button rounded-xl overflow-hidden select-none ${
         disabled ? 'opacity-50 cursor-not-allowed' : ''
       } ${completed ? 'bg-green-500' : 'bg-primary/15'}`}
       style={{ touchAction: 'pan-y' }}
@@ -137,7 +137,7 @@ export default function SwipeToSignup({ label, onSwipeComplete, disabled }: Swip
       {/* Filled track */}
       {!completed && (
         <div
-          className="absolute inset-y-0 left-0 rounded-button bg-primary/25 transition-none"
+          className="absolute inset-y-0 left-0 rounded-xl bg-primary/25 transition-none"
           style={{ width: offsetX + THUMB_SIZE }}
         />
       )}
@@ -155,7 +155,7 @@ export default function SwipeToSignup({ label, onSwipeComplete, disabled }: Swip
       {/* Draggable thumb */}
       {!completed && (
         <div
-          className={`absolute top-0 bottom-0 left-0 flex items-center justify-center rounded-button bg-primary text-primary-foreground shadow-md ${
+          className={`absolute top-0 bottom-0 left-0 flex items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md ${
             dragging ? 'scale-105' : 'transition-transform'
           } ${disabled ? '' : 'cursor-grab active:cursor-grabbing'}`}
           style={{
