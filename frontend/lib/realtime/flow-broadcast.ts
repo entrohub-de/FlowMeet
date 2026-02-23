@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase/client';
 import { CHANNEL_NAMES } from './subscribe';
-import type { ActiveFlowStep } from '@/types/domain';
+import type { ActiveFlowPermissions, ActiveFlowStep } from '@/types/domain';
 
 export interface FlowBroadcastPayload {
   flowStatus: string;
@@ -73,6 +73,27 @@ export function broadcastGlobalResume(eventId: string) {
 }
 
 /**
+ * Host: 广播权限变更
+ */
+export function broadcastPermissionChange(
+  eventId: string,
+  permissions: ActiveFlowPermissions,
+  changedKey: string
+): void {
+  const channel = supabase.channel(CHANNEL_NAMES.flow(eventId));
+  channel.subscribe((status) => {
+    if (status === 'SUBSCRIBED') {
+      channel.send({
+        type: 'broadcast',
+        event: 'permission_changed',
+        payload: { permissions, changedKey, timestamp: new Date().toISOString() },
+      });
+      setTimeout(() => supabase.removeChannel(channel), 500);
+    }
+  });
+}
+
+/**
  * 参与者: 订阅流程状态变更
  */
 export function subscribeToFlow(
@@ -83,6 +104,7 @@ export function subscribeToFlow(
     onFlowReset?: () => void;
     onGlobalPause?: (message: string | null) => void;
     onGlobalResume?: () => void;
+    onPermissionChanged?: (permissions: ActiveFlowPermissions, changedKey: string) => void;
   }
 ) {
   const channel = supabase
@@ -101,6 +123,10 @@ export function subscribeToFlow(
     })
     .on('broadcast', { event: 'global_resume' }, () => {
       callbacks.onGlobalResume?.();
+    })
+    .on('broadcast', { event: 'permission_changed' }, ({ payload }) => {
+      const p = payload as { permissions: ActiveFlowPermissions; changedKey: string };
+      callbacks.onPermissionChanged?.(p.permissions, p.changedKey);
     })
     .subscribe();
 

@@ -16,16 +16,19 @@ import {
 } from '@/lib/api/workflow-templates';
 import { getActiveFlow, upsertActiveFlow } from '@/lib/api/active-flows';
 import { getCheckinStats } from '@/lib/api/signup';
-import { broadcastFlowUpdate, broadcastGlobalPause, broadcastGlobalResume } from '@/lib/realtime/flow-broadcast';
+import { broadcastFlowUpdate, broadcastGlobalPause, broadcastGlobalResume, broadcastPermissionChange } from '@/lib/realtime/flow-broadcast';
 import TemplateSelectionPanel from '@/components/workflow/flow-control/TemplateSelectionPanel';
 import TemplateSummaryBar from '@/components/workflow/flow-control/TemplateSummaryBar';
 import FlowStatusCards from '@/components/workflow/flow-control/FlowStatusCards';
 import FlowStepCard from '@/components/workflow/flow-control/FlowStepCard';
+import PermissionPanel from '@/components/workflow/flow-control/PermissionPanel';
 import { useHostFlowMatching } from '@/hooks/useHostFlowMatching';
 import { useHostFlowGroupMatching } from '@/hooks/useHostFlowGroupMatching';
+import { useAutoMatching } from '@/hooks/useAutoMatching';
 import { logHostAction } from '@/lib/api/host-actions';
 import ActionHistoryPanel from '@/components/workflow/flow-control/ActionHistoryPanel';
 import { FlowStepSkeleton } from '@/components/ui/skeleton';
+import type { ActiveFlowPermissions } from '@/types/domain';
 
 type FlowStatus = 'pending' | 'active' | 'paused' | 'completed';
 
@@ -65,6 +68,12 @@ export default function FlowControlPage() {
 
   // Checkin stats
   const [checkinStats, setCheckinStats] = useState<{ checkedIn: number; total: number } | null>(null);
+
+  // Permission model state
+  const [permissions, setPermissions] = useState<ActiveFlowPermissions>({
+    matching_1v1_enabled: false,
+    matching_group_enabled: false,
+  });
 
   useEffect(() => {
     const init = async () => {
@@ -147,6 +156,7 @@ export default function FlowControlPage() {
           // No active flow – reset steps so auto-apply can kick in
           setFlowSteps([]);
           setIsGloballyPaused(false);
+          setPermissions({ matching_1v1_enabled: false, matching_group_enabled: false });
           autoApplied.current = false;
           return;
         }
@@ -177,6 +187,10 @@ export default function FlowControlPage() {
           }
           // Restore global pause state
           setIsGloballyPaused(!!activeFlow.is_globally_paused);
+          // Restore permissions
+          if (activeFlow.permissions) {
+            setPermissions(activeFlow.permissions);
+          }
         }
         restoredRef.current = selectedEventId;
       } catch (error) {
@@ -343,13 +357,21 @@ export default function FlowControlPage() {
     if (!hasActive) return;
 
     timerRef.current = setInterval(() => {
-      setFlowSteps((prev) =>
-        prev.map((step) =>
+      setFlowSteps((prev) => {
+        const updated = prev.map((step) =>
           step.status === 'active'
             ? { ...step, remainingSeconds: step.remainingSeconds - 1 }
             : step
-        )
-      );
+        );
+        // Auto-advance: complete timer-only steps (no pairingMode) when they reach 0
+        const expiredStep = updated.find(
+          (s) => s.status === 'active' && s.remainingSeconds <= 0 && !s.pairingMode
+        );
+        if (expiredStep) {
+          handleStepStatusChange(expiredStep.id, 'completed');
+        }
+        return updated;
+      });
     }, 1000);
 
     return () => {
@@ -373,8 +395,8 @@ export default function FlowControlPage() {
   const activeStepForMatching = flowSteps.find((s) => s.status === 'active' || s.status === 'paused');
   const { matchingState, triggerMatching, isMatching, matchingError, matchQuality } = useHostFlowMatching(
     selectedEventId,
-    activeStepForMatching?.id ?? null,
-    activeStepForMatching?.pairingMode
+    activeStepForMatching?.pairingMode as ('group' | '1v1' | undefined),
+    !!activeStepForMatching
   );
 
   const {
@@ -388,6 +410,27 @@ export default function FlowControlPage() {
     activeStepForMatching?.id ?? null,
     activeStepForMatching?.pairingMode
   );
+
+  // Auto-matching engine (permission model)
+  const { stats: autoMatchingStats, error: autoMatchingError, triggerManualRound } = useAutoMatching(
+    selectedEventId,
+    permissions.matching_1v1_enabled
+  );
+
+  // Permission toggle handler
+  const handleTogglePermission = useCallback(async (key: 'matching_1v1_enabled' | 'matching_group_enabled') => {
+    if (!selectedEventId) return;
+    const newPermissions = { ...permissions, [key]: !permissions[key] };
+    setPermissions(newPermissions);
+    try {
+      await upsertActiveFlow(selectedEventId, { permissions: newPermissions });
+      broadcastPermissionChange(selectedEventId, newPermissions, key);
+      logHostAction(selectedEventId, newPermissions[key] ? 'permission_enabled' : 'permission_disabled', { key });
+    } catch (error) {
+      console.error('Failed to toggle permission:', error);
+      setPermissions(permissions); // rollback
+    }
+  }, [selectedEventId, permissions]);
 
   // Global pause/resume handler (Workstream D)
   const handleToggleGlobalPause = useCallback(async () => {
@@ -489,6 +532,7 @@ export default function FlowControlPage() {
     setSelectedEventId(eventId);
     setFlowSteps([]);
     setIsGloballyPaused(false);
+    setPermissions({ matching_1v1_enabled: false, matching_group_enabled: false });
     restoredRef.current = null;
     autoApplied.current = false;
   }, [selectedEventId]);
@@ -673,6 +717,22 @@ export default function FlowControlPage() {
         {/* ── Audit: Action History Panel ── */}
         {showHistory && selectedEventId && (
           <ActionHistoryPanel eventId={selectedEventId} />
+        )}
+
+        {/* ── Permission Panel ── */}
+        {selectedEventId && (
+          <div className="mb-4">
+            <PermissionPanel
+              permissions={permissions}
+              onTogglePermission={handleTogglePermission}
+              autoMatchingStats={autoMatchingStats}
+              autoMatchingError={autoMatchingError}
+              onTriggerManualRound={triggerManualRound}
+              onlineCount={autoMatchingStats.totalPresent}
+              conversationCount={matchingState.pairedCount}
+              idleCount={Math.max(0, autoMatchingStats.totalPresent - matchingState.pairedCount)}
+            />
+          </div>
         )}
 
         {/* ── Template Summary Bar ── */}

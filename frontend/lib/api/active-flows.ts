@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase/client';
-import type { ActiveFlow, ActiveFlowStep } from '@/types/domain';
+import type { ActiveFlow, ActiveFlowPermissions, ActiveFlowStep } from '@/types/domain';
 
 export async function getActiveFlow(eventId: string): Promise<ActiveFlow | null> {
   const { data, error } = await supabase
@@ -24,6 +24,7 @@ export async function upsertActiveFlow(
     active_step_remaining_seconds?: number | null;
     started_at?: string | null;
     completed_at?: string | null;
+    permissions?: ActiveFlowPermissions;
     is_globally_paused?: boolean;
     global_pause_message?: string | null;
   }

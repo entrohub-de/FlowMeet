@@ -29,8 +29,8 @@ export interface MatchQualityInfo {
 
 export function useHostFlowMatching(
   eventId: string,
-  activeStepId: string | null,
-  activeStepPairingMode?: 'group' | '1v1'
+  pairingMode?: 'group' | '1v1',
+  enabled?: boolean
 ) {
   const [matchingState, setMatchingState] = useState<StepMatchingState>({
     readyCount: 0,
@@ -47,7 +47,7 @@ export function useHostFlowMatching(
 
   // Subscribe to matching presence for the active 1v1 step
   useEffect(() => {
-    if (activeStepPairingMode !== '1v1' || !activeStepId || !eventId) {
+    if (pairingMode !== '1v1' || !enabled || !eventId) {
       if (channelRef.current) {
         channelRef.current.unsubscribe();
         channelRef.current = null;
@@ -68,7 +68,7 @@ export function useHostFlowMatching(
       }));
     };
 
-    const channel = observeMatchingQueue(eventId, activeStepId, {
+    const channel = observeMatchingQueue(eventId, {
       onPresenceSync: handlePresenceSync,
     });
     channelRef.current = channel;
@@ -86,25 +86,24 @@ export function useHostFlowMatching(
       channelRef.current = null;
       clearInterval(staleCheckInterval);
     };
-  }, [eventId, activeStepId, activeStepPairingMode]);
+  }, [eventId, enabled, pairingMode]);
 
   const triggerMatching = useCallback(async () => {
-    if (!activeStepId || !eventId || isMatching) return;
+    if (!enabled || !eventId || isMatching) return;
     if (matchingState.readyUserIds.length < 2) return;
 
     setIsMatching(true);
     setMatchingError(null);
     logHostAction(eventId, 'matching_triggered', {
       readyCount: matchingState.readyUserIds.length,
-      stepId: activeStepId,
-    }, activeStepId ?? undefined);
+    });
     try {
       // 0. Create active module record for this matching round
       const { data: { session } } = await (await import('@/lib/supabase/client')).supabase.auth.getSession();
       const activeModule = await createActiveModule(
         eventId,
-        activeStepId,
-        activeStepPairingMode ?? '1v1',
+        'permission-matching',
+        pairingMode ?? '1v1',
         matchingState.readyUserIds.length,
         session?.user?.id ?? ''
       );
@@ -150,7 +149,7 @@ export function useHostFlowMatching(
           },
         });
       } else {
-        broadcastMatchAssignments(eventId, activeStepId, {
+        broadcastMatchAssignments(eventId, {
           pairs: persisted,
           unpaired: unpairedUserId ? [unpairedUserId] : undefined,
           timestamp: new Date().toISOString(),
@@ -169,7 +168,7 @@ export function useHostFlowMatching(
     } finally {
       setIsMatching(false);
     }
-  }, [eventId, activeStepId, activeStepPairingMode, isMatching, matchingState.readyUserIds]);
+  }, [eventId, enabled, pairingMode, isMatching, matchingState.readyUserIds]);
 
   return { matchingState, triggerMatching, isMatching, matchingError, matchQuality };
 }

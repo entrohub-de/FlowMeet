@@ -177,7 +177,7 @@ export function useFlowGroupMatching(
       }
     };
 
-    const channel = joinMatchingQueue(eventId, stepId, userId, {
+    const channel = joinMatchingQueue(eventId, userId, {
       onPresenceSync: handlePresenceSync,
       onGroupAssigned: handleGroupAssigned,
     });

@@ -253,6 +253,12 @@ export interface TopicRating {
 
 export type FlowStepStatus = 'pending' | 'active' | 'paused' | 'completed';
 
+export interface ActiveFlowPermissions {
+  matching_1v1_enabled: boolean;
+  matching_group_enabled: boolean;
+  group_size?: number;
+}
+
 export interface ActiveFlowStep {
   id: string;
   title: string;
@@ -260,6 +266,7 @@ export interface ActiveFlowStep {
   status: FlowStepStatus;
   remainingSeconds: number;
   pairingMode?: 'group' | '1v1';
+  autoAdvance?: boolean;
 }
 
 export interface ActiveFlow {
@@ -274,6 +281,7 @@ export interface ActiveFlow {
   active_step_remaining_seconds: number | null;
   started_at: string | null;
   completed_at: string | null;
+  permissions?: ActiveFlowPermissions;
   is_globally_paused?: boolean;
   global_pause_message?: string | null;
   created_at: string;
@@ -299,7 +307,8 @@ export type HostActionType =
   | 'matching_triggered' | 'grouping_triggered'
   | 'manual_pair' | 'manual_unpair' | 'manual_regroup'
   | 'global_pause' | 'global_resume'
-  | 'time_adjusted';
+  | 'time_adjusted'
+  | 'permission_enabled' | 'permission_disabled' | 'auto_match_triggered';
 
 export interface HostAction {
   action_id: string;

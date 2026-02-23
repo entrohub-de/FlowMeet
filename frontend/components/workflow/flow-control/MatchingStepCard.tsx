@@ -28,7 +28,7 @@ interface MatchingStepCardProps {
 
 export default function MatchingStepCard({
   index,
-  stepId,
+  stepId: _stepId,
   title,
   status,
   remainingSeconds,
@@ -36,7 +36,7 @@ export default function MatchingStepCard({
   eventId,
 }: MatchingStepCardProps) {
   const { t } = useTranslation();
-  const { state, toggleReady } = useFlowMatching(eventId, stepId, status, '1v1');
+  const { state, toggleReady } = useFlowMatching(eventId, '1v1', status === 'active');
 
   const [areas, setAreas] = useState<Area[]>([]);
   const [isUpdatingLocation, setIsUpdatingLocation] = useState(false);

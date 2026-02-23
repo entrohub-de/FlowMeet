@@ -47,7 +47,7 @@ export function useHostFlowGroupMatching(
       setReadyUserIds(readyUsers.map((u) => u.userId));
     };
 
-    const channel = observeMatchingQueue(eventId, activeStepId, {
+    const channel = observeMatchingQueue(eventId, {
       onPresenceSync: handlePresenceSync,
     });
     channelRef.current = channel;
@@ -90,7 +90,7 @@ export function useHostFlowGroupMatching(
             payload,
           });
         } else {
-          broadcastGroupAssignments(eventId, activeStepId, payload);
+          broadcastGroupAssignments(eventId, payload);
         }
       } finally {
         setIsGrouping(false);

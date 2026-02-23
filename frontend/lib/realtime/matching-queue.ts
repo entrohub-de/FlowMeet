@@ -26,20 +26,19 @@ export interface MatchingQueueCallbacks {
   onGroupAssigned?: (payload: GroupAssignmentPayload) => void;
 }
 
-const MATCHING_CHANNEL = (eventId: string, stepId: string) =>
-  `event:${eventId}:matching:${stepId}`;
+const MATCHING_CHANNEL = (eventId: string) =>
+  `event:${eventId}:matching`;
 
 /**
- * Join the matching queue for a specific flow step.
+ * Join the matching queue for an event.
  * Returns the channel for cleanup.
  */
 export function joinMatchingQueue(
   eventId: string,
-  stepId: string,
   userId: string,
   callbacks: MatchingQueueCallbacks
 ): RealtimeChannel {
-  const channelName = MATCHING_CHANNEL(eventId, stepId);
+  const channelName = MATCHING_CHANNEL(eventId);
   const channel = supabase.channel(channelName, {
     config: { presence: { key: userId } },
   });
@@ -148,10 +147,9 @@ export function getStaleUserIds(
  */
 export function observeMatchingQueue(
   eventId: string,
-  stepId: string,
   callbacks: MatchingQueueCallbacks
 ): RealtimeChannel {
-  const channelName = MATCHING_CHANNEL(eventId, stepId);
+  const channelName = MATCHING_CHANNEL(eventId);
   console.log('[Host] observeMatchingQueue channel:', channelName);
   const channel = supabase.channel(channelName);
 
@@ -187,10 +185,9 @@ export function observeMatchingQueue(
  */
 export function broadcastGroupAssignments(
   eventId: string,
-  stepId: string,
   payload: GroupAssignmentPayload
 ): void {
-  const channelName = MATCHING_CHANNEL(eventId, stepId);
+  const channelName = MATCHING_CHANNEL(eventId);
   const channel = supabase.channel(channelName);
   channel.subscribe((status) => {
     if (status === 'SUBSCRIBED') {
@@ -209,10 +206,9 @@ export function broadcastGroupAssignments(
  */
 export function broadcastMatchAssignments(
   eventId: string,
-  stepId: string,
   payload: MatchAssignmentPayload
 ): void {
-  const channelName = MATCHING_CHANNEL(eventId, stepId);
+  const channelName = MATCHING_CHANNEL(eventId);
   const channel = supabase.channel(channelName);
   channel.subscribe((status) => {
     if (status === 'SUBSCRIBED') {

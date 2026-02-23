@@ -32,9 +32,8 @@ export interface FlowMatchingState {
 
 export function useFlowMatching(
   eventId: string,
-  stepId: string,
-  stepStatus: string,
-  pairingMode?: 'group' | '1v1'
+  pairingMode?: 'group' | '1v1',
+  enabled?: boolean
 ) {
   const [phase, setPhase] = useState<FlowMatchingPhase>('idle');
   const [readyCount, setReadyCount] = useState(0);
@@ -67,7 +66,7 @@ export function useFlowMatching(
 
   // State recovery: attempt to restore state from DB before joining queue
   useEffect(() => {
-    if (pairingMode !== '1v1' || stepStatus !== 'active' || !userId || !eventId || !stepId) return;
+    if (pairingMode !== '1v1' || !enabled || !userId || !eventId) return;
     if (recoveryAttemptedRef.current || matchedRef.current) return;
     if (isCheckedIn !== true) return;
 
@@ -76,7 +75,7 @@ export function useFlowMatching(
     const recover = async () => {
       try {
         const saved = await getParticipantState(eventId, userId);
-        if (!saved || saved.flow_step_id !== stepId) return;
+        if (!saved) return;
 
         if (saved.participant_status === 'matched' && saved.current_match_id) {
           // Fetch match to get partner ID
@@ -111,13 +110,13 @@ export function useFlowMatching(
     };
 
     recover();
-  }, [pairingMode, stepStatus, userId, eventId, stepId, isCheckedIn]);
+  }, [pairingMode, enabled, userId, eventId, isCheckedIn]);
 
-  // Join/leave matching queue based on step status
+  // Join/leave matching queue based on enabled state
   // NOTE: phase is intentionally NOT in the dependency array to avoid
   // reconnecting when the user toggles ready or gets matched.
   useEffect(() => {
-    if (pairingMode !== '1v1' || stepStatus !== 'active' || !userId || !eventId || !stepId) {
+    if (pairingMode !== '1v1' || !enabled || !userId || !eventId) {
       if (channelRef.current) {
         channelRef.current.unsubscribe();
         channelRef.current = null;
@@ -170,7 +169,7 @@ export function useFlowMatching(
 
         // Persist matched state for recovery
         upsertParticipantState(eventId, userId, {
-          flow_step_id: stepId,
+          flow_step_id: null,
           participant_status: 'matched',
           current_match_id: myPair.matchId,
           current_group_id: null,
@@ -180,7 +179,7 @@ export function useFlowMatching(
       }
     };
 
-    const channel = joinMatchingQueue(eventId, stepId, userId, {
+    const channel = joinMatchingQueue(eventId, userId, {
       onPresenceSync: handlePresenceSync,
       onMatchAssigned: handleMatchAssigned,
     });
@@ -191,7 +190,7 @@ export function useFlowMatching(
       channelRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pairingMode, stepStatus, userId, eventId, stepId, isCheckedIn]);
+  }, [pairingMode, enabled, userId, eventId, isCheckedIn]);
 
   const toggleReady = useCallback(async () => {
     if (!channelRef.current || !userId) return;
@@ -202,10 +201,24 @@ export function useFlowMatching(
 
     // Persist ready state for recovery
     upsertParticipantState(eventId, userId, {
-      flow_step_id: stepId,
+      flow_step_id: null,
       participant_status: newReady ? 'ready' : 'waiting',
     }).catch((err) => console.error('Failed to persist ready state:', err));
-  }, [isReady, userId, eventId, stepId]);
+  }, [isReady, userId, eventId]);
+
+  const resetMatch = useCallback(() => {
+    setPartner(null);
+    setIsUnpaired(false);
+    setPhase('ready_prompt');
+    setIsReady(false);
+    matchedRef.current = false;
+    recoveryAttemptedRef.current = false;
+    // Unsubscribe so the next render re-joins the queue
+    if (channelRef.current) {
+      channelRef.current.unsubscribe();
+      channelRef.current = null;
+    }
+  }, []);
 
   const state: FlowMatchingState = {
     phase,
@@ -216,5 +229,5 @@ export function useFlowMatching(
     isUnpaired,
   };
 
-  return { state, toggleReady };
+  return { state, toggleReady, resetMatch };
 }

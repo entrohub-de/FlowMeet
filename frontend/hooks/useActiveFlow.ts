@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getEvents } from '@/lib/api/events';
 import { getActiveFlow } from '@/lib/api/active-flows';
 import { subscribeToFlow, type FlowBroadcastPayload } from '@/lib/realtime/flow-broadcast';
-import type { Event, ActiveFlowStep } from '@/types/domain';
+import type { ActiveFlowPermissions, Event, ActiveFlowStep } from '@/types/domain';
 
 type FlowStatus = 'pending' | 'active' | 'paused' | 'completed';
 
@@ -21,6 +21,7 @@ export interface ActiveFlowState {
   flowStatus: 'idle' | 'running' | 'paused' | 'completed';
   templateName: string;
   steps: FlowStep[];
+  permissions: ActiveFlowPermissions | null;
 }
 
 function applyBroadcastPayload(payload: FlowBroadcastPayload): ActiveFlowState {
@@ -42,6 +43,7 @@ function applyBroadcastPayload(payload: FlowBroadcastPayload): ActiveFlowState {
     flowStatus: payload.flowStatus as ActiveFlowState['flowStatus'],
     templateName: payload.templateName ?? '',
     steps,
+    permissions: null,
   };
 }
 
@@ -100,6 +102,7 @@ export function useActiveFlow() {
             flowStatus: activeFlow.flow_status as ActiveFlowState['flowStatus'],
             templateName: activeFlow.template_name,
             steps,
+            permissions: activeFlow.permissions ?? null,
           });
 
           // Restore global pause state from DB
@@ -144,6 +147,11 @@ export function useActiveFlow() {
         if (!cancelled) {
           setIsGloballyPaused(false);
           setGlobalPauseMessage(null);
+        }
+      },
+      onPermissionChanged: (permissions) => {
+        if (!cancelled) {
+          setFlowState((prev) => prev ? { ...prev, permissions } : prev);
         }
       },
     });

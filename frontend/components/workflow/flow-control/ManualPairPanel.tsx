@@ -18,7 +18,7 @@ interface MatchWithProfiles extends Match {
   user2_profile?: Profile;
 }
 
-export default function ManualPairPanel({ eventId, stepId }: ManualPairPanelProps) {
+export default function ManualPairPanel({ eventId, stepId: _stepId }: ManualPairPanelProps) {
   const { t } = useTranslation();
   const [matches, setMatches] = useState<MatchWithProfiles[]>([]);
   const [unpairedUsers, setUnpairedUsers] = useState<{ user_id: string; nickname: string | null }[]>([]);
@@ -79,7 +79,7 @@ export default function ManualPairPanel({ eventId, stepId }: ManualPairPanelProp
     try {
       await manualUnpair(match.match_id, eventId);
       // Broadcast updated state
-      broadcastMatchAssignments(eventId, stepId, {
+      broadcastMatchAssignments(eventId, {
         pairs: [],
         unpaired: [match.user1_id, match.user2_id],
         timestamp: new Date().toISOString(),
@@ -96,7 +96,7 @@ export default function ManualPairPanel({ eventId, stepId }: ManualPairPanelProp
     try {
       const matchId = await manualPair(eventId, selectedUser1, selectedUser2);
       // Broadcast the new match
-      broadcastMatchAssignments(eventId, stepId, {
+      broadcastMatchAssignments(eventId, {
         pairs: [{ user1Id: selectedUser1, user2Id: selectedUser2, matchId }],
         timestamp: new Date().toISOString(),
       });
