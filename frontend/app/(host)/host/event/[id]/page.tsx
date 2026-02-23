@@ -6,12 +6,12 @@ import { useTranslation } from '@/lib/i18n/context';
 import { getEvents } from '@/lib/api/events';
 import { getEventSignups } from '@/lib/api/signup';
 import type { Event, Signup } from '@/types/domain';
-import { ArrowLeft, Users } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import EventInfoCard from '@/components/event/detail/EventInfoCard';
 import StatsCard from '@/components/event/detail/StatsCard';
 import ParticipantsCard from '@/components/event/detail/ParticipantsCard';
 import ExpectationsCard from '@/components/event/detail/ExpectationsCard';
-import Link from 'next/link';
+
 
 export default function EventDetailPage() {
   const { t } = useTranslation();
@@ -132,29 +132,6 @@ export default function EventDetailPage() {
               withExpectations={signupsWithExpectations.length}
             />
           </div>
-        </div>
-
-        {/* Participants Link */}
-        <div className="mb-6">
-          <Link
-            href="/host/live/checkin"
-            className="flex items-center justify-between bg-card border border-border rounded-xl p-5 hover:shadow-md hover:border-primary/30 transition-all group"
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Users className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-foreground">
-                  {t('host.events.participants.title')}
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  {t('host.events.participants.viewAllDesc', { count: signups.length })}
-                </p>
-              </div>
-            </div>
-            <ArrowLeft className="w-5 h-5 text-muted-foreground rotate-180 group-hover:text-primary transition-colors" />
-          </Link>
         </div>
 
         {/* Participants and Expectations */}

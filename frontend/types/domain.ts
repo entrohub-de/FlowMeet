@@ -341,7 +341,7 @@ export interface ActiveModule {
   updated_at: string;
 }
 
-export type ParticipantStatus = 'checkin' | 'waiting' | 'ready' | 'matched' | 'in_conversation' | 'feedback';
+export type ParticipantStatus = 'waiting' | 'ready' | 'matched' | 'in_conversation' | 'feedback';
 
 export interface ParticipantState {
   id: string;

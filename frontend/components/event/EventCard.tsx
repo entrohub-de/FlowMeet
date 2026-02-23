@@ -7,11 +7,11 @@ import { toast } from 'sonner';
 import { formatDateRange } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 import { signupForEvent, cancelSignup, getUserSignupStatus } from '@/lib/api/signup';
-import { getUserCheckinStatus } from '@/lib/api/checkin';
+
 import { supabase } from '@/lib/supabase/client';
 import PreferencesModal from './PreferencesModal';
 import EventCardActions from './EventCardActions';
-import EventCardCheckin from './EventCardCheckin';
+
 
 interface EventCardProps {
   event: Event;
@@ -30,7 +30,7 @@ export default function EventCard({ event, locale, t, initialSignedUp, onSignupC
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(initialSignedUp === undefined);
   const [showPreferencesModal, setShowPreferencesModal] = useState(false);
-  const [isCheckedIn, setIsCheckedIn] = useState(false);
+
   const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
@@ -39,17 +39,9 @@ export default function EventCard({ event, locale, t, initialSignedUp, onSignupC
       setUserId(currentUserId);
 
       if (currentUserId) {
-        if (initialSignedUp !== undefined) {
-          getUserCheckinStatus(currentUserId, event.event_id).then((checkinStatuses) => {
-            setIsCheckedIn(checkinStatuses.some((s) => s.checked_in));
-          });
-        } else {
-          Promise.all([
-            getUserSignupStatus(currentUserId, event.event_id),
-            getUserCheckinStatus(currentUserId, event.event_id),
-          ]).then(([signupStatus, checkinStatuses]) => {
+        if (initialSignedUp === undefined) {
+          getUserSignupStatus(currentUserId, event.event_id).then((signupStatus) => {
             setSignedUp(signupStatus);
-            setIsCheckedIn(checkinStatuses.some((s) => s.checked_in));
             setLoading(false);
           });
         }
@@ -183,16 +175,6 @@ export default function EventCard({ event, locale, t, initialSignedUp, onSignupC
           onSignup={handleSignup}
           t={t}
         />
-
-        {/* Checkin Section */}
-        {signedUp && userId && (
-          <EventCardCheckin
-            event={event}
-            userId={userId}
-            isCheckedIn={isCheckedIn}
-            t={t}
-          />
-        )}
 
         {/* Preferences Modal */}
         {showPreferencesModal && userId && (

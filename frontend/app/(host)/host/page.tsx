@@ -131,14 +131,7 @@ export default function HostDashboardPage() {
               <Plus className="w-4 h-4" />
               {t('host.dashboard.createEvent')}
             </Link>
-            <Link
-              href="/host/live/checkin"
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-muted text-foreground text-sm font-medium hover:bg-muted/80 transition-colors"
-            >
-              <ClipboardCheck className="w-4 h-4" />
-              {t('host.dashboard.startCheckin')}
-            </Link>
-            <Link
+<Link
               href="/host/live/flow"
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-muted text-foreground text-sm font-medium hover:bg-muted/80 transition-colors"
             >

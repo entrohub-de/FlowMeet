@@ -558,7 +558,7 @@
       "addMinute": "+1 分钟",
       "removeMinute": "-1 分钟",
       "addFiveMinutes": "+5 分钟",
-      "checkinStats": "签到 {checked}/{total}"
+      "onlineStats": "在线 {count}"
     }
   },
   "profile": {
@@ -1018,43 +1018,6 @@
     "complete": "完成",
     "skipPreferences": "跳过，稍后填写",
     "stepOf": "{current}/{total}"
-  },
-  "checkin": {
-    "selectEvent": "选择活动",
-    "checkinParticipant": "签到参与者",
-    "checkinRate": "签到率",
-    "noParticipants": "暂无报名参与者",
-    "dialog": {
-      "title": "参与者签到",
-      "manualTab": "手动输入",
-      "scanTab": "扫描二维码",
-      "codeLabel": "签到码",
-      "codePlaceholder": "请输入签到码",
-      "codeHint": "请输入参与者的签到码（扫描二维码或手动输入）",
-      "confirmButton": "确认签到",
-      "processing": "处理中...",
-      "startCameraButton": "启动摄像头",
-      "startCameraHint": "正在启动摄像头...",
-      "stopScanButton": "停止扫描",
-      "closeDialog": "完成签到",
-      "alignQrCode": "将二维码对准扫描框",
-      "scanning": "正在扫描...",
-      "qrDetected": "✓ 检测到二维码！",
-      "cameraError": "无法启动摄像头，请检查权限",
-      "enterCodeError": "请输入签到码",
-      "checkinSuccess": "{userName} 签到成功！",
-      "checkinError": "签到失败，请重试",
-      "defaultUser": "用户",
-      "errors": {
-        "eventNotFound": "活动不存在",
-        "invalidCode": "无效的签到码",
-        "invalidCodeFormat": "无效的二维码",
-        "wrongEvent": "此二维码不属于当前活动",
-        "notSignedUp": "该用户未报名此活动",
-        "alreadyCheckedIn": "该用户已签到",
-        "fetchFailed": "获取报名信息失败"
-      }
-    }
   },
   "recovery": {
     "reconnecting": "正在重新连接...",

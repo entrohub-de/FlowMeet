@@ -9,7 +9,6 @@ import {
   type MatchingPresenceState,
 } from '@/lib/realtime/matching-queue';
 import { getParticipantState, upsertParticipantState } from '@/lib/api/participant-state';
-import { getUserCheckinStatus } from '@/lib/api/checkin';
 import type { Profile } from '@/types/domain';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
@@ -43,8 +42,6 @@ export function useFlowMatching(
   const [isUnpaired, setIsUnpaired] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
 
-  const [isCheckedIn, setIsCheckedIn] = useState<boolean | null>(null);
-
   const channelRef = useRef<RealtimeChannel | null>(null);
   const matchedRef = useRef(false);
   const recoveryAttemptedRef = useRef(false);
@@ -56,19 +53,10 @@ export function useFlowMatching(
     });
   }, []);
 
-  // Check if user has checked in for this event
-  useEffect(() => {
-    if (!userId || !eventId) return;
-    getUserCheckinStatus(userId, eventId)
-      .then(statuses => setIsCheckedIn(statuses.some(s => s.checked_in)))
-      .catch(() => setIsCheckedIn(false));
-  }, [userId, eventId]);
-
   // State recovery: attempt to restore state from DB before joining queue
   useEffect(() => {
     if (pairingMode !== '1v1' || !enabled || !userId || !eventId) return;
     if (recoveryAttemptedRef.current || matchedRef.current) return;
-    if (isCheckedIn !== true) return;
 
     recoveryAttemptedRef.current = true;
 
@@ -110,7 +98,7 @@ export function useFlowMatching(
     };
 
     recover();
-  }, [pairingMode, enabled, userId, eventId, isCheckedIn]);
+  }, [pairingMode, enabled, userId, eventId]);
 
   // Join/leave matching queue based on enabled state
   // NOTE: phase is intentionally NOT in the dependency array to avoid
@@ -127,9 +115,6 @@ export function useFlowMatching(
       }
       return;
     }
-
-    // Don't join queue if not checked in
-    if (isCheckedIn !== true) return;
 
     // Already matched or already connected — don't rejoin
     if (matchedRef.current || channelRef.current) return;
@@ -190,7 +175,7 @@ export function useFlowMatching(
       channelRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pairingMode, enabled, userId, eventId, isCheckedIn]);
+  }, [pairingMode, enabled, userId, eventId]);
 
   const toggleReady = useCallback(async () => {
     if (!channelRef.current || !userId) return;

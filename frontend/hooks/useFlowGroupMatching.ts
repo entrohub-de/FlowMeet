@@ -9,7 +9,6 @@ import {
   type MatchingPresenceState,
 } from '@/lib/realtime/matching-queue';
 import { getParticipantState, upsertParticipantState } from '@/lib/api/participant-state';
-import { getUserCheckinStatus } from '@/lib/api/checkin';
 import type { Profile } from '@/types/domain';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
@@ -48,8 +47,6 @@ export function useFlowGroupMatching(
   const [isUngrouped, setIsUngrouped] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
 
-  const [isCheckedIn, setIsCheckedIn] = useState<boolean | null>(null);
-
   const channelRef = useRef<RealtimeChannel | null>(null);
   const groupedRef = useRef(false);
   const recoveryAttemptedRef = useRef(false);
@@ -60,19 +57,10 @@ export function useFlowGroupMatching(
     });
   }, []);
 
-  // Check if user has checked in for this event
-  useEffect(() => {
-    if (!userId || !eventId) return;
-    getUserCheckinStatus(userId, eventId)
-      .then(statuses => setIsCheckedIn(statuses.some(s => s.checked_in)))
-      .catch(() => setIsCheckedIn(false));
-  }, [userId, eventId]);
-
   // State recovery: attempt to restore state from DB before joining queue
   useEffect(() => {
     if (pairingMode !== 'group' || stepStatus !== 'active' || !userId || !eventId || !stepId) return;
     if (recoveryAttemptedRef.current || groupedRef.current) return;
-    if (isCheckedIn !== true) return;
 
     recoveryAttemptedRef.current = true;
 
@@ -112,7 +100,7 @@ export function useFlowGroupMatching(
     };
 
     recover();
-  }, [pairingMode, stepStatus, userId, eventId, stepId, isCheckedIn]);
+  }, [pairingMode, stepStatus, userId, eventId, stepId]);
 
   useEffect(() => {
     if (pairingMode !== 'group' || stepStatus !== 'active' || !userId || !eventId || !stepId) {
@@ -126,9 +114,6 @@ export function useFlowGroupMatching(
       }
       return;
     }
-
-    // Don't join queue if not checked in
-    if (isCheckedIn !== true) return;
 
     if (groupedRef.current || channelRef.current) return;
 
@@ -188,7 +173,7 @@ export function useFlowGroupMatching(
       channelRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pairingMode, stepStatus, userId, eventId, stepId, isCheckedIn]);
+  }, [pairingMode, stepStatus, userId, eventId, stepId]);
 
   const toggleReady = useCallback(async () => {
     if (!channelRef.current || !userId) return;

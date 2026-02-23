@@ -16,7 +16,6 @@ export default function HostLayout({
     {
       label: t('nav.host.eventLive'),
       children: [
-        { label: t('nav.host.eventLiveCheckin'), href: '/host/live/checkin' },
         { label: t('nav.host.eventLiveFlow'), href: '/host/live/flow' },
       ],
     },

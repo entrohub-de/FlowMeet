@@ -558,7 +558,7 @@
       "addMinute": "+1 min",
       "removeMinute": "-1 min",
       "addFiveMinutes": "+5 min",
-      "checkinStats": "Check-in {checked}/{total}"
+      "onlineStats": "Online {count}"
     }
   },
   "profile": {
@@ -1018,43 +1018,6 @@
     "complete": "Complete",
     "skipPreferences": "Skip for now",
     "stepOf": "{current}/{total}"
-  },
-  "checkin": {
-    "selectEvent": "Select Event",
-    "checkinParticipant": "Check In Participant",
-    "checkinRate": "Check-in Rate",
-    "noParticipants": "No participants yet",
-    "dialog": {
-      "title": "Participant Check-in",
-      "manualTab": "Manual Input",
-      "scanTab": "Scan QR Code",
-      "codeLabel": "Check-in Code",
-      "codePlaceholder": "Enter check-in code",
-      "codeHint": "Enter participant's check-in code (scan QR or manual input)",
-      "confirmButton": "Confirm Check-in",
-      "processing": "Processing...",
-      "startCameraButton": "Start Camera",
-      "startCameraHint": "Starting camera...",
-      "stopScanButton": "Stop Scanning",
-      "closeDialog": "Done",
-      "alignQrCode": "Align QR code with scan frame",
-      "scanning": "Scanning...",
-      "qrDetected": "✓ QR code detected!",
-      "cameraError": "Unable to start camera, please check permissions",
-      "enterCodeError": "Please enter check-in code",
-      "checkinSuccess": "{userName} checked in successfully!",
-      "checkinError": "Check-in failed, please retry",
-      "defaultUser": "User",
-      "errors": {
-        "eventNotFound": "Event not found",
-        "invalidCode": "Invalid check-in code",
-        "invalidCodeFormat": "Invalid QR code",
-        "wrongEvent": "This QR code is not for the current event",
-        "notSignedUp": "User not signed up for this event",
-        "alreadyCheckedIn": "User already checked in",
-        "fetchFailed": "Failed to fetch signup info"
-      }
-    }
   },
   "recovery": {
     "reconnecting": "Reconnecting...",

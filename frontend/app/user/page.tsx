@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabase/client';
 import { getProfile } from '@/lib/api/profile';
 import { getEvents } from '@/lib/api/events';
 import { getUserSignedUpEvents, getUserSignups } from '@/lib/api/signup';
-import { getAllUserCheckinStatuses } from '@/lib/api/checkin';
+
 import { getUserConnections } from '@/lib/api/connections';
 import { getPendingRequests } from '@/lib/api/post-event-matching';
 import { useActiveFlow } from '@/hooks/useActiveFlow';
@@ -23,7 +23,7 @@ export default function UserHomePage() {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
-  const [checkinMap, setCheckinMap] = useState<Map<string, boolean>>(new Map());
+
   const [discoverEvents, setDiscoverEvents] = useState<Event[]>([]);
   const [connections, setConnections] = useState<Connection[]>([]);
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
@@ -38,7 +38,6 @@ export default function UserHomePage() {
         signedUpEvents,
         allEvents,
         signups,
-        checkinStatuses,
         conns,
         pending,
       ] = await Promise.all([
@@ -46,13 +45,11 @@ export default function UserHomePage() {
         getUserSignedUpEvents(user.id),
         getEvents(),
         getUserSignups(user.id),
-        getAllUserCheckinStatuses(user.id),
         getUserConnections(user.id),
         getPendingRequests(user.id),
       ]);
 
       setProfile(profileData);
-      setCheckinMap(checkinStatuses);
       setConnections(conns);
       setPendingRequests(pending.filter(r => r.direction === 'received'));
 
@@ -197,37 +194,27 @@ export default function UserHomePage() {
             </div>
           ) : (
             <div className="space-y-2">
-              {upcomingEvents.map(event => {
-                const isCheckedIn = checkinMap.get(event.event_id) === true;
-                return (
-                  <Link
-                    key={event.event_id}
-                    href="/user/flow"
-                    className="flex items-center gap-3 bg-card border border-border rounded-xl p-4 hover:shadow-sm transition-shadow"
-                  >
-                    <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-secondary flex items-center justify-center">
-                      <CalendarDays className="w-4 h-4 text-muted-foreground" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">
-                        {event.name}
-                      </p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {formatEventTime(event.start_time)}
-                        </span>
-                        {isCheckedIn && (
-                          <span className="text-xs text-green-600 dark:text-green-400 font-medium">
-                            {t('user.checkedIn')}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                  </Link>
-                );
-              })}
+              {upcomingEvents.map(event => (
+                <Link
+                  key={event.event_id}
+                  href="/user/flow"
+                  className="flex items-center gap-3 bg-card border border-border rounded-xl p-4 hover:shadow-sm transition-shadow"
+                >
+                  <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-secondary flex items-center justify-center">
+                    <CalendarDays className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">
+                      {event.name}
+                    </p>
+                    <span className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                      <Clock className="w-3 h-3" />
+                      {formatEventTime(event.start_time)}
+                    </span>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                </Link>
+              ))}
             </div>
           )}
         </section>

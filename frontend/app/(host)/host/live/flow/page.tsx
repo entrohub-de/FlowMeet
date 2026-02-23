@@ -15,7 +15,7 @@ import {
   type WorkflowTemplateRecord,
 } from '@/lib/api/workflow-templates';
 import { getActiveFlow, upsertActiveFlow } from '@/lib/api/active-flows';
-import { getCheckinStats } from '@/lib/api/signup';
+
 import { broadcastFlowUpdate, broadcastGlobalPause, broadcastGlobalResume, broadcastPermissionChange } from '@/lib/realtime/flow-broadcast';
 import TemplateSelectionPanel from '@/components/workflow/flow-control/TemplateSelectionPanel';
 import TemplateSummaryBar from '@/components/workflow/flow-control/TemplateSummaryBar';
@@ -66,9 +66,6 @@ export default function FlowControlPage() {
   // End event confirmation
   const [showEndConfirm, setShowEndConfirm] = useState(false);
 
-  // Checkin stats
-  const [checkinStats, setCheckinStats] = useState<{ checkedIn: number; total: number } | null>(null);
-
   // Permission model state
   const [permissions, setPermissions] = useState<ActiveFlowPermissions>({
     matching_1v1_enabled: false,
@@ -97,25 +94,6 @@ export default function FlowControlPage() {
 
     init();
   }, []);
-
-  // Fetch checkin stats for selected event (refresh every 30s)
-  useEffect(() => {
-    if (!selectedEventId) return;
-    let cancelled = false;
-
-    const fetchStats = async () => {
-      try {
-        const stats = await getCheckinStats(selectedEventId);
-        if (!cancelled) setCheckinStats(stats);
-      } catch (error) {
-        console.error('Failed to fetch checkin stats:', error);
-      }
-    };
-
-    fetchStats();
-    const interval = setInterval(fetchStats, 30000);
-    return () => { cancelled = true; clearInterval(interval); };
-  }, [selectedEventId]);
 
   // Fetch all templates and auto-apply the first one
   useEffect(() => {
@@ -594,12 +572,10 @@ export default function FlowControlPage() {
             <h1 className="text-2xl font-bold text-foreground">
               {t('host.flowControl.title')}
             </h1>
-            {/* ── Checkin Stats Badge ── */}
-            {checkinStats && (
-              <span className="px-3 py-1 text-sm font-medium bg-primary/10 text-primary rounded-full whitespace-nowrap">
-                {t('host.flowControl.checkinStats', { checked: checkinStats.checkedIn, total: checkinStats.total })}
-              </span>
-            )}
+            {/* ── Online Stats Badge ── */}
+            <span className="px-3 py-1 text-sm font-medium bg-primary/10 text-primary rounded-full whitespace-nowrap">
+              {t('host.flowControl.onlineStats', { count: autoMatchingStats.totalPresent })}
+            </span>
             {/* ── Audit: History Toggle ── */}
             <button
               type="button"
