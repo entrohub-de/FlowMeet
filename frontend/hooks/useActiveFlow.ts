@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getEvents } from '@/lib/api/events';
 import { getActiveFlow } from '@/lib/api/active-flows';
+import { getUserSignups } from '@/lib/api/signup';
 import { subscribeToFlow, type FlowBroadcastPayload } from '@/lib/realtime/flow-broadcast';
+import { supabase } from '@/lib/supabase/client';
 import type { ActiveFlowPermissions, Event, ActiveFlowStep } from '@/types/domain';
 
 type FlowStatus = 'pending' | 'active' | 'paused' | 'completed';
@@ -61,9 +63,33 @@ export function useActiveFlow() {
   useEffect(() => {
     const load = async () => {
       try {
-        const data = await getEvents();
+        const [data, { data: { user } }] = await Promise.all([
+          getEvents(),
+          supabase.auth.getUser(),
+        ]);
         setEvents(data);
-        if (data.length > 0) setSelectedEventId(data[0].event_id);
+        if (data.length > 0) {
+          // Filter to user's signed-up events if logged in
+          let candidates = data;
+          if (user) {
+            const signupMap = await getUserSignups(user.id);
+            const signedUp = data.filter((ev) => signupMap.has(ev.event_id));
+            if (signedUp.length > 0) candidates = signedUp;
+          }
+          const now = Date.now();
+          let best = candidates[0];
+          let bestDist = Infinity;
+          for (const ev of candidates) {
+            const start = new Date(ev.start_time).getTime();
+            const end = new Date(ev.end_time).getTime();
+            const dist = (now >= start && now <= end) ? 0 : Math.min(Math.abs(now - start), Math.abs(now - end));
+            if (dist < bestDist) {
+              bestDist = dist;
+              best = ev;
+            }
+          }
+          setSelectedEventId(best.event_id);
+        }
       } catch (error) {
         console.error('Failed to load events:', error);
       } finally {
