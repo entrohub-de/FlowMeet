@@ -607,43 +607,6 @@
     "stats": {
       "eventsJoined": "{count} events joined",
       "matchesMade": "{count} matches"
-    },
-    "roleUpgrade": {
-      "title": "Upgrade to Host",
-      "currentRole": "Current Role",
-      "roles": {
-        "user": "User",
-        "organizer": "Active Organizer",
-        "host": "Host",
-        "admin": "Admin"
-      },
-      "organizerTitle": "Become an Active Organizer",
-      "organizerDescription": "Host small meetups and invite friends to events",
-      "organizerBenefits": {
-        "smallEvents": "Create small events (up to 20 people)",
-        "inviteLink": "Generate personal invite links",
-        "badge": "Earn community badge"
-      },
-      "applyOrganizer": "Apply to Become an Organizer",
-      "applyToHost": "Apply to Become a Host",
-      "upgradeDescription": "As a host, you'll be able to create and manage events, view registration data, manage check-ins, and more.",
-      "benefits": {
-        "title": "Host permissions include:",
-        "createEvents": "Create and manage events",
-        "manageSignups": "Manage participant registrations",
-        "checkin": "On-site check-in management",
-        "viewStats": "View event statistics"
-      },
-      "applying": "Submitting...",
-      "applied": "Application submitted! Please wait for admin review.",
-      "alreadyApplied": "You have already submitted an application",
-      "pendingTitle": "Application Under Review",
-      "pendingDescription": "Your application is being reviewed. You will be notified once it's approved.",
-      "rejectedTitle": "Application Rejected",
-      "rejectedDescription": "Your application was not approved. You may contact an admin for more details.",
-      "reapply": "Contact Admin",
-      "reapplyHint": "Please contact an admin to resubmit your application.",
-      "error": "Application failed, please try again"
     }
   },
   "home": {

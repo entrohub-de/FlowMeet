@@ -216,10 +216,6 @@ export default function ProfilePage() {
       <div className="pointer-events-none absolute -bottom-32 -left-32 w-[400px] h-[400px] rounded-full bg-accent/[0.08] blur-[100px]" />
 
       <div className="max-w-lg mx-auto space-y-4 relative z-10">
-        {greeting && (
-          <p className="text-lg font-semibold text-foreground px-1">{greeting}</p>
-        )}
-
         <ProfileHeaderCard
           nickname={nickname}
           gender={gender}
@@ -254,13 +250,6 @@ export default function ProfilePage() {
           onSave={handleSavePrefs}
         />
 
-        <RoleUpgradeCard
-          userRole={userRole}
-          applicationStatus={hostApplication?.status ?? null}
-          applying={applying}
-          onApply={handleApplyForHost}
-          onReapply={handleReapply}
-        />
       </div>
     </div>
   );
