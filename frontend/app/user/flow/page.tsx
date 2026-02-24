@@ -12,8 +12,6 @@ import { upsertParticipantState } from '@/lib/api/participant-state';
 import { toast } from 'sonner';
 
 
-import ActiveStepCard from '@/components/workflow/flow-control/ActiveStepCard';
-import FlowStepCardReadOnly from '@/components/workflow/flow-control/FlowStepCardReadOnly';
 import MatchingStepCard from '@/components/workflow/flow-control/MatchingStepCard';
 import GroupMatchingStepCard from '@/components/workflow/flow-control/GroupMatchingStepCard';
 import { FlowStepSkeleton } from '@/components/ui/skeleton';
