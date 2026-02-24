@@ -6,8 +6,7 @@ import Link from 'next/link';
 import { CalendarDays, Users, ArrowRight, Play, Inbox, Search, Clock } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { getProfile } from '@/lib/api/profile';
-import { getEvents } from '@/lib/api/events';
-import { getUserSignedUpEvents, getUserSignups } from '@/lib/api/signup';
+import { getUserSignedUpEvents } from '@/lib/api/signup';
 
 import { getUserConnections } from '@/lib/api/connections';
 import { getPendingRequests } from '@/lib/api/post-event-matching';
@@ -24,7 +23,6 @@ export default function UserHomePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
 
-  const [discoverEvents, setDiscoverEvents] = useState<Event[]>([]);
   const [connections, setConnections] = useState<Connection[]>([]);
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
 
@@ -36,15 +34,11 @@ export default function UserHomePage() {
       const [
         profileData,
         signedUpEvents,
-        allEvents,
-        signups,
         conns,
         pending,
       ] = await Promise.all([
         getProfile(user.id),
         getUserSignedUpEvents(user.id),
-        getEvents(),
-        getUserSignups(user.id),
         getUserConnections(user.id),
         getPendingRequests(user.id),
       ]);
@@ -59,13 +53,6 @@ export default function UserHomePage() {
       upcoming.sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
       setUpcomingEvents(upcoming);
 
-      // Discover: not signed up + not passed, max 3
-      const signupIds = new Set(signups.keys());
-      const discover = allEvents
-        .filter(e => !signupIds.has(e.event_id) && new Date(e.end_time) >= now)
-        .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
-        .slice(0, 3);
-      setDiscoverEvents(discover);
     } finally {
       setLoading(false);
     }
@@ -120,11 +107,6 @@ export default function UserHomePage() {
               ? t('dashboard.greeting', { name: profile.nickname })
               : t('dashboard.greetingDefault')}
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {upcomingEvents.length > 0
-              ? t('dashboard.upcomingSummary', { count: upcomingEvents.length })
-              : t('dashboard.noUpcomingSummary')}
-          </p>
         </div>
 
         {/* 2. Active Flow Banner */}
@@ -219,44 +201,7 @@ export default function UserHomePage() {
           )}
         </section>
 
-        {/* 5. Discover Events */}
-        {discoverEvents.length > 0 && (
-          <section>
-            <div className="flex items-center justify-between mb-3 px-1">
-              <h2 className="text-base font-semibold text-foreground">
-                {t('user.discoverEvents')}
-              </h2>
-              <Link href="/user/event" className="text-xs text-primary hover:underline">
-                {t('dashboard.viewAll')}
-              </Link>
-            </div>
-            <div className="space-y-2">
-              {discoverEvents.map(event => (
-                <Link
-                  key={event.event_id}
-                  href="/user/event"
-                  className="flex items-center gap-3 bg-card border border-border rounded-xl p-4 hover:shadow-sm transition-shadow"
-                >
-                  <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-secondary flex items-center justify-center">
-                    <CalendarDays className="w-4 h-4 text-muted-foreground" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">
-                      {event.name}
-                    </p>
-                    <span className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                      <Clock className="w-3 h-3" />
-                      {formatEventTime(event.start_time)}
-                    </span>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* 6. My Connections */}
+        {/* 5. My Connections */}
         <section>
           <div className="flex items-center justify-between mb-3 px-1">
             <h2 className="text-base font-semibold text-foreground">
