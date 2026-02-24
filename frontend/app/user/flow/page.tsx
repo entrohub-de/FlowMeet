@@ -1,22 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { PauseCircle, Users } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 import { useActiveFlow } from '@/hooks/useActiveFlow';
 import { useFlowMatching } from '@/hooks/useFlowMatching';
 import { supabase } from '@/lib/supabase/client';
-
-
 import { upsertParticipantState } from '@/lib/api/participant-state';
 import { toast } from 'sonner';
-
-
-import MatchingStepCard from '@/components/workflow/flow-control/MatchingStepCard';
-import GroupMatchingStepCard from '@/components/workflow/flow-control/GroupMatchingStepCard';
-import { FlowStepSkeleton } from '@/components/ui/skeleton';
-
-
 
 export default function UserFlowPage() {
   const { t } = useTranslation();
@@ -26,8 +17,6 @@ export default function UserFlowPage() {
     loading,
     selectedEventId,
     flowState,
-    activeStep,
-    formatTime,
     isGloballyPaused,
     globalPauseMessage,
   } = useActiveFlow();
@@ -41,23 +30,11 @@ export default function UserFlowPage() {
     matching1v1Enabled
   );
 
-  const completedCount = useMemo(
-    () => flowState?.steps.filter((s) => s.status === 'completed').length ?? 0,
-    [flowState?.steps]
-  );
-  const totalCount = flowState?.steps.length ?? 0;
-  const nextPendingStep = useMemo(
-    () => flowState?.steps.find((s) => s.status === 'pending'),
-    [flowState?.steps]
-  );
-
-  // Get current user ID
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) setCurrentUserId(user.id);
     });
   }, []);
-
 
   const handleFinishRound = useCallback(async () => {
     if (!currentUserId || !selectedEventId) return;
@@ -76,23 +53,19 @@ export default function UserFlowPage() {
     return (
       <div className="min-h-[calc(100vh-60px)] p-4 bg-muted/30">
         <div className="max-w-4xl mx-auto">
-          <div className="space-y-3">
-            <FlowStepSkeleton />
-            <FlowStepSkeleton />
-            <FlowStepSkeleton />
+          <div className="animate-pulse space-y-3">
+            <div className="h-10 bg-muted rounded-lg" />
+            <div className="h-32 bg-muted rounded-xl" />
           </div>
         </div>
       </div>
     );
   }
 
-  // Show flow content
   return (
     <div className="min-h-[calc(100vh-60px)] p-4 bg-muted/30 relative">
-      {/* Brand glow */}
       <div className="pointer-events-none absolute -top-32 -right-32 w-[400px] h-[400px] rounded-full bg-primary/[0.06] blur-[100px]" />
 
-      {/* Global Pause Overlay */}
       {isGloballyPaused && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm">
           <PauseCircle className="w-16 h-16 text-white mb-4" />
@@ -103,12 +76,8 @@ export default function UserFlowPage() {
       )}
 
       <div className="max-w-4xl mx-auto relative">
-
-
-
-        {/* Permission-driven 1v1 matching entry */}
-        {matching1v1Enabled && (
-          <div className="bg-card rounded-2xl border border-primary/20 p-5 space-y-4 mb-4">
+        {matching1v1Enabled ? (
+          <div className="bg-card rounded-2xl border border-primary/20 p-5 space-y-4">
             <div className="flex items-center gap-2">
               <Users className="w-5 h-5 text-primary" />
               <h3 className="font-semibold">{t('userFlow.matchingOpen')}</h3>
@@ -158,9 +127,7 @@ export default function UserFlowPage() {
               </div>
             )}
           </div>
-        )}
-
-        {!flowState ? (
+        ) : (
           <div className="rounded-xl border border-dashed border-border p-10 text-center">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
               <Users className="w-8 h-8 text-primary/40" />
@@ -168,51 +135,8 @@ export default function UserFlowPage() {
             <p className="text-muted-foreground font-medium">{t('userFlow.noActiveFlow')}</p>
             <p className="text-sm text-muted-foreground mt-1">{t('userFlow.waitingHint')}</p>
           </div>
-        ) : (
-          <>
-
-            {/* Active steps */}
-            {flowState.steps.map((step, index) => {
-              const isActive = step.status === 'active' || step.status === 'paused';
-              if (!isActive) return null;
-
-              if (step.pairingMode === '1v1') {
-                return (
-                  <MatchingStepCard
-                    key={step.id}
-                    index={index}
-                    stepId={step.id}
-                    title={step.title}
-                    status={step.status}
-                    remainingSeconds={step.remainingSeconds}
-                    formatTime={formatTime}
-                    eventId={selectedEventId}
-                  />
-                );
-              }
-
-              if (step.pairingMode === 'group') {
-                return (
-                  <GroupMatchingStepCard
-                    key={step.id}
-                    index={index}
-                    stepId={step.id}
-                    title={step.title}
-                    status={step.status}
-                    remainingSeconds={step.remainingSeconds}
-                    formatTime={formatTime}
-                    eventId={selectedEventId}
-                  />
-                );
-              }
-
-              return null;
-            })}
-
-          </>
         )}
       </div>
-
     </div>
   );
 }

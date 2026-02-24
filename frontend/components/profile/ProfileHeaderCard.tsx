@@ -3,7 +3,6 @@
 import { useTranslation } from '@/lib/i18n/context';
 import { cn } from '@/lib/utils';
 import { Pencil, Check, Mail } from 'lucide-react';
-import type { UserRole } from '@/lib/api/role';
 
 const GENDER_OPTIONS = ['male', 'female', 'other'] as const;
 const AGE_GROUP_OPTIONS = ['18-24', '25-34', '35-44', '45+'] as const;
@@ -20,11 +19,7 @@ interface ProfileHeaderCardProps {
   nickname: string;
   gender: string;
   ageGroup: string;
-  avatarUrl: string | null;
-  avatarUploading: boolean;
-  userRole: UserRole;
   email: string | undefined;
-  completeness: number;
   isEditing: boolean;
   saving: boolean;
   onEditToggle: () => void;
@@ -32,18 +27,13 @@ interface ProfileHeaderCardProps {
   onNicknameChange: (v: string) => void;
   onGenderChange: (v: string) => void;
   onAgeGroupChange: (v: string) => void;
-  onAvatarChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export default function ProfileHeaderCard({
   nickname,
   gender,
   ageGroup,
-  avatarUrl,
-  avatarUploading,
-  userRole,
   email,
-  completeness,
   isEditing,
   saving,
   onEditToggle,
@@ -51,7 +41,6 @@ export default function ProfileHeaderCard({
   onNicknameChange,
   onGenderChange,
   onAgeGroupChange,
-  onAvatarChange,
 }: ProfileHeaderCardProps) {
   const { t } = useTranslation();
 

@@ -70,7 +70,7 @@ export default function CreateEventDialog({
     setLoading(true);
     try {
       const endTime = computeEndTime(formData.start_time, formData.duration);
-      const created = await createEvent({
+      await createEvent({
         name: formData.name,
         description: formData.description || null,
         start_time: formData.start_time,

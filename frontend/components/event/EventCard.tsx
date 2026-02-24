@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import type { Event, Profile } from '@/types/domain';
-import { Calendar, MapPin, ChevronDown, User } from 'lucide-react';
+import { Calendar, MapPin, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDateRange } from '@/lib/utils';
 import { cn } from '@/lib/utils';
@@ -24,7 +24,7 @@ interface EventCardProps {
   fadingOut?: boolean;
 }
 
-export default function EventCard({ event, locale, t, initialSignedUp, onSignupChange, hostProfile, variant = 'default', fadingOut }: EventCardProps) {
+export default function EventCard({ event, locale, t, initialSignedUp, onSignupChange, fadingOut }: EventCardProps) {
   const [signingUp, setSigningUp] = useState(false);
   const [signedUp, setSignedUp] = useState(initialSignedUp ?? false);
   const [userId, setUserId] = useState<string | null>(null);

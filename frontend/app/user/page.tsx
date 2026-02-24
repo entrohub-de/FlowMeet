@@ -3,16 +3,14 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from '@/lib/i18n/context';
 import Link from 'next/link';
-import { CalendarDays, Users, ArrowRight, Play, Inbox, Search, Clock } from 'lucide-react';
+import { CalendarDays, ArrowRight, Play, Inbox, Search, Clock } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { getProfile } from '@/lib/api/profile';
 import { getUserSignedUpEvents } from '@/lib/api/signup';
 
-import { getUserConnections } from '@/lib/api/connections';
 import { getPendingRequests } from '@/lib/api/post-event-matching';
 import { useActiveFlow } from '@/hooks/useActiveFlow';
 import type { Event, Profile } from '@/types/domain';
-import type { Connection } from '@/lib/api/connections';
 import type { PendingRequest } from '@/lib/api/post-event-matching';
 
 export default function UserHomePage() {
@@ -23,7 +21,6 @@ export default function UserHomePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
 
-  const [connections, setConnections] = useState<Connection[]>([]);
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
 
   const loadDashboard = useCallback(async () => {
@@ -34,17 +31,14 @@ export default function UserHomePage() {
       const [
         profileData,
         signedUpEvents,
-        conns,
         pending,
       ] = await Promise.all([
         getProfile(user.id),
         getUserSignedUpEvents(user.id),
-        getUserConnections(user.id),
         getPendingRequests(user.id),
       ]);
 
       setProfile(profileData);
-      setConnections(conns);
       setPendingRequests(pending.filter(r => r.direction === 'received'));
 
       // Filter upcoming signed-up events (not passed)

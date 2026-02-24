@@ -1,11 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/features/auth/useAuth';
 import { useTranslation } from '@/lib/i18n/context';
 import { getProfile, upsertProfile, getPreferences, upsertPreferences } from '@/lib/api/profile';
-import { getUserRole, applyForHost, getHostApplication, type UserRole, type HostApplication } from '@/lib/api/role';
-import { uploadUserAvatar } from '@/lib/api/storage';
 import { toast } from 'sonner';
 import {
   LANGUAGE_OPTIONS,
@@ -17,36 +15,6 @@ import {
 } from '@/lib/preference-options';
 import ProfileHeaderCard from '@/components/profile/ProfileHeaderCard';
 import PreferencesCard from '@/components/profile/PreferencesCard';
-import RoleUpgradeCard from '@/components/profile/RoleUpgradeCard';
-
-function getGreeting(nickname: string, t: (key: string, params?: Record<string, string | number>) => string): string {
-  const hour = new Date().getHours();
-  if (hour >= 6 && hour < 12) return t('profile.greeting.morning', { name: nickname });
-  if (hour >= 12 && hour < 18) return t('profile.greeting.afternoon', { name: nickname });
-  if (hour >= 18 && hour < 24) return t('profile.greeting.evening', { name: nickname });
-  return t('profile.greeting.lateNight', { name: nickname });
-}
-
-function getProfileCompleteness(
-  nickname: string,
-  gender: string,
-  ageGroup: string,
-  avatarUrl: string | null,
-  selectedLanguages: string[],
-  selectedInterests: string[],
-  selectedIndustries: string[],
-  selectedStartupStage: string,
-): number {
-  let score = 0;
-  if (nickname.trim()) score += 20;
-  if (gender) score += 10;
-  if (ageGroup) score += 10;
-  if (avatarUrl) score += 10;
-  const hasPrefs = selectedLanguages.length > 0 || selectedInterests.length > 0 ||
-    selectedIndustries.length > 0 || selectedStartupStage;
-  if (hasPrefs) score += 50;
-  return score;
-}
 
 export default function ProfilePage() {
   const { user, isLoading: authLoading } = useAuth();
@@ -60,32 +28,22 @@ export default function ProfilePage() {
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [selectedStartupStage, setSelectedStartupStage] = useState('');
 
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [avatarUploading, setAvatarUploading] = useState(false);
-
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isBasicEditing, setIsBasicEditing] = useState(false);
   const [isPrefsEditing, setIsPrefsEditing] = useState(false);
   const [prefsSaving, setPrefsSaving] = useState(false);
 
-  const [userRole, setUserRole] = useState<UserRole>('user');
-  const [hostApplication, setHostApplication] = useState<HostApplication | null>(null);
-  const [applying, setApplying] = useState(false);
-
   const loadData = useCallback(async (userId: string) => {
     try {
-      const [profile, prefs, role, application] = await Promise.all([
+      const [profile, prefs] = await Promise.all([
         getProfile(userId),
         getPreferences(userId),
-        getUserRole(userId),
-        getHostApplication(userId),
       ]);
       if (profile) {
         setNickname(profile.nickname ?? '');
         setGender(profile.gender ?? '');
         setAgeGroup(profile.age_group ?? '');
-        setAvatarUrl(profile.avatar_url ?? null);
       }
       if (prefs) {
         const filterValid = (values: string[], options: readonly string[]) =>
@@ -99,8 +57,6 @@ export default function ProfilePage() {
             : ''
         );
       }
-      setUserRole(role);
-      setHostApplication(application);
     } finally {
       setLoading(false);
     }
@@ -148,56 +104,6 @@ export default function ProfilePage() {
     }
   };
 
-  const handleApplyForHost = async () => {
-    if (!user?.id) return;
-    setApplying(true);
-    try {
-      const result = await applyForHost(user.id);
-      if (result.success) {
-        toast.success(t('profile.roleUpgrade.applied'));
-        setHostApplication({ id: '', user_id: user.id, status: 'pending', created_at: new Date().toISOString(), reviewed_at: null, reviewed_by: null });
-      } else if (result.error === 'already_applied') {
-        toast.info(t('profile.roleUpgrade.alreadyApplied'));
-      } else {
-        toast.error(result.error || t('profile.roleUpgrade.error'));
-      }
-    } catch {
-      toast.error(t('profile.roleUpgrade.error'));
-    } finally {
-      setApplying(false);
-    }
-  };
-
-  const handleReapply = async () => {
-    toast.info(t('profile.roleUpgrade.reapplyHint'));
-  };
-
-  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user?.id) return;
-    setAvatarUploading(true);
-    try {
-      const url = await uploadUserAvatar(file, user.id);
-      await upsertProfile(user.id, { avatar_url: url });
-      setAvatarUrl(url);
-    } catch (err) {
-      console.error('[Avatar] upload failed:', err);
-      toast.error(t('profile.avatarUploadFailed'));
-    } finally {
-      setAvatarUploading(false);
-    }
-  };
-
-  const completeness = useMemo(
-    () => getProfileCompleteness(nickname, gender, ageGroup, avatarUrl, selectedLanguages, selectedInterests, selectedIndustries, selectedStartupStage),
-    [nickname, gender, ageGroup, avatarUrl, selectedLanguages, selectedInterests, selectedIndustries, selectedStartupStage]
-  );
-
-  const greeting = useMemo(
-    () => nickname ? getGreeting(nickname, t) : '',
-    [nickname, t]
-  );
-
   if (authLoading || loading) {
     return (
       <div className="min-h-[calc(100vh-60px)] flex items-center justify-center">
@@ -220,11 +126,7 @@ export default function ProfilePage() {
           nickname={nickname}
           gender={gender}
           ageGroup={ageGroup}
-          avatarUrl={avatarUrl}
-          avatarUploading={avatarUploading}
-          userRole={userRole}
           email={user?.email}
-          completeness={completeness}
           isEditing={isBasicEditing}
           saving={saving}
           onEditToggle={() => setIsBasicEditing(true)}
@@ -232,7 +134,6 @@ export default function ProfilePage() {
           onNicknameChange={setNickname}
           onGenderChange={setGender}
           onAgeGroupChange={setAgeGroup}
-          onAvatarChange={handleAvatarChange}
         />
 
         <PreferencesCard

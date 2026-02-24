@@ -43,7 +43,6 @@ export default function ProfileAvatar() {
     router.push('/');
   };
 
-  const isAdminArea = pathname?.startsWith('/admin');
   const isHostArea = pathname?.startsWith('/host');
   const isUserArea = pathname?.startsWith('/user');
   const profileHref = isHostArea ? '/host/profile' : '/user/profile';
