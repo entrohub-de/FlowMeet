@@ -125,7 +125,6 @@
     "notCheckedInHint": "Please check in first to join the event flow and matching",
     "goCheckin": "Check In",
     "checkedIn": "Checked In",
-    "showBadge": "My Badge",
     "waitingToBegin": "Waiting to Start",
     "waitingToBeginHint": "The host will begin the first step shortly",
     "intermission": "Between Steps",

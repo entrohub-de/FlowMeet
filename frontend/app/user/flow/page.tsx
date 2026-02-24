@@ -1,9 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ListChecks, PauseCircle, ChevronDown, ChevronUp, BadgeCheck, LogOut, Calendar, MapPin, Users } from 'lucide-react';
+import { ListChecks, PauseCircle, ChevronDown, ChevronUp, LogOut, Calendar, MapPin, Users } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
-import FullscreenBadge from '@/components/event/FullscreenBadge';
 import { useActiveFlow } from '@/hooks/useActiveFlow';
 import { useFlowMatching } from '@/hooks/useFlowMatching';
 import { supabase } from '@/lib/supabase/client';
@@ -48,8 +47,6 @@ export default function UserFlowPage() {
   const { t, locale } = useTranslation();
   const [showAllSteps, setShowAllSteps] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string>('');
-  const [showBadge, setShowBadge] = useState(false);
-
   // Leave/pause state
   const [isOnLeave, setIsOnLeave] = useState(false);
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
@@ -420,26 +417,6 @@ export default function UserFlowPage() {
           </>
         )}
       </div>
-
-      {/* Fullscreen badge FAB */}
-      {currentUserId && !isOnLeave && (
-        <button
-          onClick={() => setShowBadge(true)}
-          className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-5 py-3 bg-primary text-white rounded-full shadow-lg hover:opacity-90 transition-opacity touch-feedback"
-        >
-          <BadgeCheck className="w-5 h-5" />
-          <span className="font-medium text-sm">{t('userFlow.showBadge')}</span>
-        </button>
-      )}
-
-      {/* Fullscreen badge overlay */}
-      {currentUserId && (
-        <FullscreenBadge
-          userId={currentUserId}
-          open={showBadge}
-          onClose={() => setShowBadge(false)}
-        />
-      )}
 
       {/* Leave confirmation dialog */}
       <AlertDialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
