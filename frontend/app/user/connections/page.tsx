@@ -3,14 +3,16 @@
 import { useTranslation } from '@/lib/i18n/context';
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import { getUserConnections, type Connection } from '@/lib/api/connections';
+import {
+  getUserConnections,
+  getPendingConnections,
+  createConnectionRequest,
+  respondToConnection,
+  type Connection,
+} from '@/lib/api/connections';
 import {
   getAllRecommendations,
-  getPendingRequests,
-  sendConnectionRequest,
-  respondToConnectionRequest,
   type Recommendation,
-  type PendingRequest,
 } from '@/lib/api/post-event-matching';
 import { getMatchLevel } from '@/lib/api/matching-algorithm';
 import {
@@ -22,7 +24,7 @@ export default function ConnectionsPage() {
   const { t } = useTranslation();
   const [connections, setConnections] = useState<Connection[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
-  const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<Connection[]>([]);
   const [loading, setLoading] = useState(true);
   const [sendingTo, setSendingTo] = useState<string | null>(null);
   const [respondingTo, setRespondingTo] = useState<string | null>(null);
@@ -36,7 +38,7 @@ export default function ConnectionsPage() {
       const [conns, recs, pending] = await Promise.all([
         getUserConnections(uid),
         getAllRecommendations(uid),
-        getPendingRequests(uid),
+        getPendingConnections(uid),
       ]);
       setConnections(conns);
       setRecommendations(recs);
@@ -52,21 +54,23 @@ export default function ConnectionsPage() {
 
   const handleSendRequest = async (rec: Recommendation) => {
     setSendingTo(rec.userId);
-    const result = await sendConnectionRequest(rec.eventId, rec.userId);
+    const result = await createConnectionRequest(rec.userId, rec.eventId);
     if (result) {
-      // Remove from recommendations, add to pending
       setRecommendations((prev) => prev.filter((r) => r.userId !== rec.userId));
       setPendingRequests((prev) => [
         {
-          matchId: result.matchId,
-          eventId: rec.eventId,
-          eventName: rec.eventName,
-          partnerId: rec.userId,
+          user_id: rec.userId,
           nickname: rec.nickname,
           gender: rec.gender,
           age_group: rec.age_group,
+          avatar_url: null,
+          event_name: rec.eventName,
+          event_id: rec.eventId,
+          connection_id: result.connectionId,
+          note: null,
+          connected_at: new Date().toISOString(),
+          status: 'pending',
           direction: 'sent',
-          createdAt: new Date().toISOString(),
         },
         ...prev,
       ]);
@@ -74,24 +78,14 @@ export default function ConnectionsPage() {
     setSendingTo(null);
   };
 
-  const handleRespond = async (req: PendingRequest, accept: boolean) => {
-    setRespondingTo(req.matchId);
-    const ok = await respondToConnectionRequest(req.matchId, accept);
+  const handleRespond = async (req: Connection, accept: boolean) => {
+    setRespondingTo(req.connection_id);
+    const ok = await respondToConnection(req.connection_id, accept);
     if (ok) {
-      setPendingRequests((prev) => prev.filter((r) => r.matchId !== req.matchId));
+      setPendingRequests((prev) => prev.filter((r) => r.connection_id !== req.connection_id));
       if (accept) {
-        // Add to connections
         setConnections((prev) => [
-          {
-            user_id: req.partnerId,
-            nickname: req.nickname,
-            gender: req.gender,
-            age_group: req.age_group,
-            event_name: req.eventName,
-            event_id: req.eventId,
-            match_id: req.matchId,
-            matched_at: req.createdAt,
-          },
+          { ...req, status: 'accepted', direction: null },
           ...prev,
         ]);
       }
@@ -131,7 +125,7 @@ export default function ConnectionsPage() {
 
           {receivedRequests.map((req) => (
             <div
-              key={req.matchId}
+              key={req.connection_id}
               className="bg-card border border-primary/20 rounded-xl p-4 space-y-3"
             >
               <div className="flex items-center gap-3">
@@ -144,7 +138,7 @@ export default function ConnectionsPage() {
                   </h3>
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
                     <CalendarDays className="w-3 h-3" />
-                    <span>{req.eventName}</span>
+                    <span>{req.event_name}</span>
                   </div>
                 </div>
               </div>
@@ -152,10 +146,10 @@ export default function ConnectionsPage() {
               <div className="flex gap-2">
                 <button
                   onClick={() => handleRespond(req, true)}
-                  disabled={respondingTo === req.matchId}
+                  disabled={respondingTo === req.connection_id}
                   className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
                 >
-                  {respondingTo === req.matchId ? (
+                  {respondingTo === req.connection_id ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     <Check className="w-4 h-4" />
@@ -164,7 +158,7 @@ export default function ConnectionsPage() {
                 </button>
                 <button
                   onClick={() => handleRespond(req, false)}
-                  disabled={respondingTo === req.matchId}
+                  disabled={respondingTo === req.connection_id}
                   className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-muted text-muted-foreground rounded-lg text-sm font-medium hover:bg-muted/80 transition-colors disabled:opacity-50"
                 >
                   <X className="w-4 h-4" />
@@ -253,7 +247,7 @@ export default function ConnectionsPage() {
 
           {sentRequests.map((req) => (
             <div
-              key={req.matchId}
+              key={req.connection_id}
               className="bg-card border border-dashed border-border rounded-xl p-4"
             >
               <div className="flex items-center gap-3">
@@ -266,7 +260,7 @@ export default function ConnectionsPage() {
                   </h3>
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
                     <CalendarDays className="w-3 h-3" />
-                    <span>{req.eventName}</span>
+                    <span>{req.event_name}</span>
                   </div>
                 </div>
                 <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
@@ -319,7 +313,7 @@ export default function ConnectionsPage() {
 
                 <div className="text-xs text-muted-foreground">
                   {t('connections.connectedAt', {
-                    time: new Date(conn.matched_at).toLocaleDateString(),
+                    time: new Date(conn.connected_at).toLocaleDateString(),
                   })}
                 </div>
               </div>

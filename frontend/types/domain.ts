@@ -381,3 +381,25 @@ export interface Advertisement {
   created_at: string;
   updated_at: string;
 }
+
+export type ConnectionStatus = 'pending' | 'accepted' | 'declined';
+
+export interface Connection {
+  connection_id: string;
+  user1_id: string;
+  user2_id: string;
+  source_event_id: string | null;
+  source_match_id: string | null;
+  status: ConnectionStatus;
+  requested_by: string;
+  user1_note: string | null;
+  user2_note: string | null;
+  connected_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ConnectionWithProfile extends Connection {
+  partner_profile: Profile | null;
+  source_event_name: string | null;
+}

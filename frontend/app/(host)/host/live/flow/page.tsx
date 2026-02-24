@@ -17,8 +17,9 @@ import {
 import { getActiveFlow, upsertActiveFlow } from '@/lib/api/active-flows';
 
 import { broadcastFlowUpdate, broadcastGlobalPause, broadcastGlobalResume, broadcastPermissionChange } from '@/lib/realtime/flow-broadcast';
-import TemplateSelectionPanel from '@/components/workflow/flow-control/TemplateSelectionPanel';
-import TemplateSummaryBar from '@/components/workflow/flow-control/TemplateSummaryBar';
+// Phase 1: template selection UI hidden
+// import TemplateSelectionPanel from '@/components/workflow/flow-control/TemplateSelectionPanel';
+// import TemplateSummaryBar from '@/components/workflow/flow-control/TemplateSummaryBar';
 import FlowStatusCards from '@/components/workflow/flow-control/FlowStatusCards';
 import FlowStepCard from '@/components/workflow/flow-control/FlowStepCard';
 import PermissionPanel from '@/components/workflow/flow-control/PermissionPanel';
@@ -50,9 +51,10 @@ export default function FlowControlPage() {
 
   // Template selection stage
   const [templates, setTemplates] = useState<WorkflowTemplateRecord[]>([]);
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
-  const [loadingTemplates, setLoadingTemplates] = useState(false);
-  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  const [, setSelectedTemplateId] = useState<string>('');
+  // Phase 1: template UI state unused but kept for future restoration
+  const [, setLoadingTemplates] = useState(false);
+  // const [showTemplateSelector, setShowTemplateSelector] = useState(false);
 
   // Flow execution stage
   const [flowSteps, setFlowSteps] = useState<FlowStep[]>([]);
@@ -245,11 +247,11 @@ export default function FlowControlPage() {
     }
   }, [templates, modules, flowSteps.length, applyTemplate]);
 
-  // Confirm from modal
-  const handleConfirm = () => {
-    applyTemplate(selectedTemplateId);
-    setShowTemplateSelector(false);
-  };
+  // Phase 1: template modal confirm hidden
+  // const handleConfirm = () => {
+  //   applyTemplate(selectedTemplateId);
+  //   setShowTemplateSelector(false);
+  // };
 
   const handleStepStatusChange = async (stepId: string, newStatus: FlowStatus) => {
     // Compute new steps from current flowSteps
@@ -530,7 +532,8 @@ export default function FlowControlPage() {
   }, [showEventDropdown]);
 
   const selectedEvent = events.find((e) => e.event_id === selectedEventId);
-  const selectedTemplate = templates.find((tpl) => tpl.template_id === selectedTemplateId);
+  // Phase 1: selectedTemplate unused with template UI hidden
+  // const selectedTemplate = templates.find((tpl) => tpl.template_id === selectedTemplateId);
 
   // Auto-scroll to active step
   const activeStepRef = useRef<HTMLDivElement>(null);
@@ -711,28 +714,13 @@ export default function FlowControlPage() {
           </div>
         )}
 
-        {/* ── Template Summary Bar ── */}
-        <TemplateSummaryBar
+        {/* Phase 1: Template selection UI hidden (A+C model - uses default template automatically) */}
+        {/* <TemplateSummaryBar
           templateName={selectedTemplate?.name}
           onChangeTemplate={() => setShowTemplateSelector(true)}
-        />
+        /> */}
 
-        {/* ── Template Selection Modal ── */}
-        {showTemplateSelector && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-            <div className="w-full max-w-lg mx-4">
-              <TemplateSelectionPanel
-                templates={templates}
-                selectedTemplateId={selectedTemplateId}
-                onTemplateChange={setSelectedTemplateId}
-                loadingTemplates={loadingTemplates}
-                modules={modules}
-                onConfirm={handleConfirm}
-                onCancel={() => setShowTemplateSelector(false)}
-              />
-            </div>
-          </div>
-        )}
+        {/* <TemplateSelectionPanel modal hidden - auto-applies first template */ }
 
         {/* ── Execution Stage ── */}
         <FlowStatusCards

@@ -24,10 +24,11 @@ export default function AdminLayout({
         { label: t('nav.admin.hostManagement'), href: '/admin/hosts' },
       ],
     },
-    {
-      label: t('nav.admin.adManagement'),
-      href: '/admin/ads',
-    },
+    // Phase 1: ad management entry hidden (A+C model simplification)
+    // {
+    //   label: t('nav.admin.adManagement'),
+    //   href: '/admin/ads',
+    // },
     {
       label: t('nav.admin.test'),
       children: [

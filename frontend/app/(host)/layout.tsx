@@ -24,7 +24,8 @@ export default function HostLayout({
       children: [
         { label: t('nav.host.eventManagement'), href: '/host/event' },
         { label: t('nav.host.venueManagement'), href: '/host/venues' },
-        { label: t('nav.host.workflowSettings'), href: '/host/workflows' },
+        // Phase 1: workflow editor entry hidden (A+C model simplification)
+        // { label: t('nav.host.workflowSettings'), href: '/host/workflows' },
       ],
     },
     { label: t('pages.rating.title'), href: '/host/rating' },

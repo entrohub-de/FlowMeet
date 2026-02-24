@@ -9,7 +9,8 @@ import { supabase } from '@/lib/supabase/client';
 import type { Event, Profile } from '@/types/domain';
 import EventCard from '@/components/event/EventCard';
 import PastEventCard from '@/components/event/PastEventCard';
-import AdBanner from '@/components/ads/AdBanner';
+// Phase 1: ad banner hidden (A+C model simplification)
+// import AdBanner from '@/components/ads/AdBanner';
 import { CalendarCheck, Search, History, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function EventPage() {
@@ -146,8 +147,8 @@ export default function EventPage() {
       <div className="pointer-events-none absolute -bottom-48 -left-32 w-[400px] h-[400px] rounded-full bg-accent/[0.06] blur-[100px]" />
 
       <div className="container mx-auto px-4 py-6 max-w-4xl space-y-8 relative z-10">
-        {/* Ad Banner */}
-        <AdBanner />
+        {/* Phase 1: ad banner hidden (A+C model simplification) */}
+        {/* <AdBanner /> */}
 
         {/* My Upcoming Events */}
         <section className="space-y-3">
