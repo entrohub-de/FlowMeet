@@ -4,10 +4,9 @@ import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from '@/lib/i18n/context';
 import { createEvent } from '@/lib/api/events';
-import { uploadEventCover } from '@/lib/api/storage';
 import { supabase } from '@/lib/supabase/client';
 import type { Venue } from '@/types/domain';
-import { X, ImagePlus, Trash2 } from 'lucide-react';
+import { X } from 'lucide-react';
 
 const DURATION_OPTIONS = [30, 60, 90, 120, 150, 180, 240, 300, 360];
 
@@ -38,8 +37,6 @@ export default function CreateEventDialog({
   const { t } = useTranslation();
   const [venues, setVenues] = useState<Venue[]>([]);
   const [loading, setLoading] = useState(false);
-  const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -80,17 +77,6 @@ export default function CreateEventDialog({
         end_time: endTime,
         venue_id: formData.venue_id || null,
       });
-
-      // Upload cover image if selected
-      if (coverFile) {
-        try {
-          const url = await uploadEventCover(coverFile, created.event_id);
-          const { updateEvent } = await import('@/lib/api/events');
-          await updateEvent(created.event_id, { cover_image: url });
-        } catch {
-          toast.error(t('host.events.coverUploadFailed'));
-        }
-      }
 
       onSuccess();
     } catch (error) {
@@ -150,42 +136,6 @@ export default function CreateEventDialog({
               rows={4}
               className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
             />
-          </div>
-
-          {/* Cover Image */}
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              {t('host.events.coverImage')}
-            </label>
-            {coverPreview ? (
-              <div className="relative rounded-lg overflow-hidden border border-border">
-                <img src={coverPreview} alt="" className="w-full h-40 object-cover" />
-                <button
-                  type="button"
-                  onClick={() => { setCoverFile(null); setCoverPreview(null); }}
-                  className="absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-lg hover:bg-black/70 transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ) : (
-              <label className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors">
-                <ImagePlus className="w-8 h-8 text-muted-foreground mb-2" />
-                <span className="text-sm text-muted-foreground">{t('host.events.uploadCover')}</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      setCoverFile(file);
-                      setCoverPreview(URL.createObjectURL(file));
-                    }
-                  }}
-                />
-              </label>
-            )}
           </div>
 
           {/* Start Time */}

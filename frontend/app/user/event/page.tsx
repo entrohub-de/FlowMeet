@@ -173,14 +173,7 @@ export default function EventPage() {
               <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
                 <CalendarCheck className="w-6 h-6 text-muted-foreground" />
               </div>
-              <p className="text-sm text-muted-foreground mb-3">{t('user.noSignedUpEvents')}</p>
-              <a
-                href="#discover"
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors"
-              >
-                <Search className="w-3.5 h-3.5" />
-                {t('user.goDiscover')}
-              </a>
+              <p className="text-sm text-muted-foreground">{t('user.noSignedUpEvents')}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

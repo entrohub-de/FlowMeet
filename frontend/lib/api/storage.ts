@@ -17,7 +17,7 @@ export async function uploadEventCover(file: File, eventId: string): Promise<str
   if (error) throw error;
 
   const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
-  return data.publicUrl;
+  return `${data.publicUrl}?t=${Date.now()}`;
 }
 
 /**

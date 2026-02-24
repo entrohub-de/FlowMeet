@@ -4,10 +4,9 @@ import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from '@/lib/i18n/context';
 import { updateEvent } from '@/lib/api/events';
-import { uploadEventCover } from '@/lib/api/storage';
 import { supabase } from '@/lib/supabase/client';
 import type { Event, Venue } from '@/types/domain';
-import { X, ImagePlus, Trash2 } from 'lucide-react';
+import { X } from 'lucide-react';
 
 function toLocalDatetime(dateStr: string): string {
   const date = new Date(dateStr);
@@ -53,10 +52,6 @@ export default function EditEventDialog({
   const { t } = useTranslation();
   const [venues, setVenues] = useState<Venue[]>([]);
   const [loading, setLoading] = useState(false);
-  const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [coverPreview, setCoverPreview] = useState<string | null>(
-    event.cover_image || null
-  );
   const [formData, setFormData] = useState(() => {
     const diffMs = new Date(event.end_time).getTime() - new Date(event.start_time).getTime();
     return {
@@ -92,20 +87,6 @@ export default function EditEventDialog({
 
     setLoading(true);
     try {
-      let coverUrl = event.cover_image;
-
-      // Upload new cover image if selected
-      if (coverFile) {
-        try {
-          coverUrl = await uploadEventCover(coverFile, event.event_id);
-        } catch {
-          toast.error(t('host.events.coverUploadFailed'));
-        }
-      } else if (!coverPreview && event.cover_image) {
-        // Cover was removed
-        coverUrl = null;
-      }
-
       const endTime = computeEndTime(formData.start_time, formData.duration);
       const updated = await updateEvent(event.event_id, {
         name: formData.name,
@@ -113,7 +94,6 @@ export default function EditEventDialog({
         start_time: formData.start_time,
         end_time: endTime,
         venue_id: formData.venue_id || null,
-        cover_image: coverUrl,
       });
 
       toast.success(t('host.events.updateSuccess'));
@@ -176,51 +156,6 @@ export default function EditEventDialog({
               rows={4}
               className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
             />
-          </div>
-
-          {/* Cover Image */}
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              {t('host.events.coverImage')}
-            </label>
-            {coverPreview ? (
-              <div className="relative rounded-lg overflow-hidden border border-border">
-                <img
-                  src={coverPreview}
-                  alt=""
-                  className="w-full h-40 object-cover"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCoverFile(null);
-                    setCoverPreview(null);
-                  }}
-                  className="absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-lg hover:bg-black/70 transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ) : (
-              <label className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors">
-                <ImagePlus className="w-8 h-8 text-muted-foreground mb-2" />
-                <span className="text-sm text-muted-foreground">
-                  {t('host.events.uploadCover')}
-                </span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      setCoverFile(file);
-                      setCoverPreview(URL.createObjectURL(file));
-                    }
-                  }}
-                />
-              </label>
-            )}
           </div>
 
           {/* Start Time */}
