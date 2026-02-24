@@ -22,7 +22,7 @@
       "eventManagement": "Event Management",
       "eventLive": "Event Live",
       "eventLiveCheckin": "Check-in",
-      "eventLiveFlow": "Flow Control",
+      "eventLiveFlow": "Match Control",
       "venueManagement": "Venue Management",
       "workflowSettings": "Workflow Settings"
     },

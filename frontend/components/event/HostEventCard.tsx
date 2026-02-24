@@ -131,10 +131,6 @@ export default function HostEventCard({ event, onUpdate }: HostEventCardProps) {
               <Users className="w-3.5 h-3.5 text-primary" />
               {t('host.events.signupCount', { count: stats.total })}
             </span>
-            <span className="flex items-center gap-1">
-              <UserCheck className="w-3.5 h-3.5 text-green-600" />
-              {t('host.events.checkedInCount', { count: stats.checkedIn })}
-            </span>
           </div>
           <div className="flex items-center gap-1.5">
             {/* Status action buttons */}
