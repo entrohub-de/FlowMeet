@@ -87,17 +87,14 @@ export default function EventCard({ event, locale, t, initialSignedUp, onSignupC
   return (
     <div
       className={cn(
-        'bg-card border border-border rounded-2xl overflow-hidden transition-all duration-300',
-        variant === 'signed-up' && 'border-l-[3px] border-l-primary',
+        'bg-card rounded-2xl overflow-hidden transition-all duration-300 shadow-sm',
         fadingOut && 'opacity-0 scale-95 pointer-events-none',
       )}
     >
       {/* Cover Image */}
-      {event.cover_image ? (
+      {event.cover_image && (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={event.cover_image} alt={event.name} className="w-full h-32 object-cover" />
-      ) : (
-        <div className="h-1 bg-gradient-to-r from-primary via-primary/60 to-accent/40" />
       )}
 
       <div className="p-4 space-y-3">
