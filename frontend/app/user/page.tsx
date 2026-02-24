@@ -201,45 +201,6 @@ export default function UserHomePage() {
           )}
         </section>
 
-        {/* 5. My Connections */}
-        <section>
-          <div className="flex items-center justify-between mb-3 px-1">
-            <h2 className="text-base font-semibold text-foreground">
-              {t('dashboard.myConnections')}
-            </h2>
-            <Link href="/user/connections" className="text-xs text-primary hover:underline">
-              {t('dashboard.viewAll')}
-            </Link>
-          </div>
-
-          {connections.length === 0 ? (
-            <div className="bg-card border border-border rounded-xl p-6 text-center">
-              <Users className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">
-                {t('dashboard.noConnections')}
-              </p>
-            </div>
-          ) : (
-            <Link
-              href="/user/connections"
-              className="flex items-center gap-3 bg-card border border-border rounded-xl p-4 hover:shadow-sm transition-shadow"
-            >
-              <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-secondary flex items-center justify-center">
-                <Users className="w-4 h-4 text-muted-foreground" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-foreground">
-                  {t('dashboard.connectionCount', { count: connections.length })}
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                  {connections.slice(0, 3).map(c => c.nickname || '?').join(', ')}
-                  {connections.length > 3 && ` +${connections.length - 3}`}
-                </p>
-              </div>
-              <ArrowRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-            </Link>
-          )}
-        </section>
       </div>
     </div>
   );

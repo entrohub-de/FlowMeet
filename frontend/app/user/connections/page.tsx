@@ -107,11 +107,6 @@ export default function ConnectionsPage() {
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-2xl space-y-8">
-      <div>
-        <h1 className="text-xl font-bold text-foreground">{t('connections.title')}</h1>
-        <p className="text-sm text-muted-foreground mt-1">{t('connections.description')}</p>
-      </div>
-
       {/* Received connection requests */}
       {receivedRequests.length > 0 && (
         <section className="space-y-3">
