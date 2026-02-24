@@ -559,22 +559,15 @@ export default function FlowControlPage() {
     <div className="min-h-[calc(100vh-60px)] p-4 bg-muted/30">
       <div className="max-w-6xl mx-auto">
         <div className="mb-4">
-          <div className="flex items-center gap-2 mb-3">
-            {/* ── Online Stats Badge ── */}
-            <span className="px-3 py-1 text-sm font-medium bg-primary/10 text-primary rounded-full whitespace-nowrap">
-              {t('host.flowControl.onlineStats', { count: autoMatchingStats.totalPresent })}
-            </span>
-          </div>
-
           {/* ── Event Selector Dropdown ── */}
           {events.length > 1 && (
-            <div ref={eventDropdownRef} className="relative inline-block mb-1">
+            <div ref={eventDropdownRef} className="relative mb-1">
               <button
                 type="button"
                 onClick={() => setShowEventDropdown((v) => !v)}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border bg-background text-sm font-medium text-foreground hover:bg-muted transition-colors"
+                className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-border bg-background text-sm font-medium text-foreground hover:bg-muted transition-colors"
               >
-                <span className="truncate max-w-[240px]">
+                <span className="truncate">
                   {selectedEvent?.name ?? t('host.flowControl.selectEvent')}
                 </span>
                 <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${showEventDropdown ? 'rotate-180' : ''}`} />

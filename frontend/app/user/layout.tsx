@@ -35,6 +35,10 @@ export default function UserLayout({
       href: '/user/my-events',
     },
     {
+      label: t('nav.user.rating'),
+      href: '/user/rating',
+    },
+    {
       label: t('nav.user.onlineConnect'),
       children: [
         { label: t('nav.user.connections'), href: '/user/connections' },
