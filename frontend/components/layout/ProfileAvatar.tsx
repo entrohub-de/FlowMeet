@@ -70,14 +70,6 @@ export default function ProfileAvatar() {
           >
             {t('profile.title')}
           </button>
-          {!isHostArea && !isAdminArea && (
-            <button
-              onClick={() => { setOpen(false); router.push('/user/expectations'); }}
-              className="w-full px-button h-button text-sm text-muted-foreground hover:bg-secondary transition-colors cursor-pointer rounded-button text-left"
-            >
-              {t('nav.user.expectations')}
-            </button>
-          )}
           {canSwitchView && (isHostArea || isAdminArea) && (
             <button
               onClick={() => { setOpen(false); router.push('/user'); }}
