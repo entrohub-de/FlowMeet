@@ -20,10 +20,17 @@ export interface GroupAssignmentPayload {
   timestamp: string;
 }
 
+export interface PartnerLeftPayload {
+  userId: string;
+  matchId: string;
+  timestamp: string;
+}
+
 export interface MatchingQueueCallbacks {
   onPresenceSync: (readyUsers: MatchingPresenceState[], allUsers: MatchingPresenceState[]) => void;
   onMatchAssigned?: (payload: MatchAssignmentPayload) => void;
   onGroupAssigned?: (payload: GroupAssignmentPayload) => void;
+  onPartnerLeft?: (payload: PartnerLeftPayload) => void;
 }
 
 const MATCHING_CHANNEL = (eventId: string) =>
@@ -61,6 +68,9 @@ export function joinMatchingQueue(
     })
     .on('broadcast', { event: 'group_assigned' }, ({ payload }) => {
       callbacks.onGroupAssigned?.(payload as GroupAssignmentPayload);
+    })
+    .on('broadcast', { event: 'partner_left' }, ({ payload }) => {
+      callbacks.onPartnerLeft?.(payload as PartnerLeftPayload);
     })
     .subscribe(async (status) => {
       if (status === 'SUBSCRIBED') {
@@ -198,6 +208,21 @@ export function broadcastGroupAssignments(
       });
       setTimeout(() => supabase.removeChannel(channel), 500);
     }
+  });
+}
+
+/**
+ * Broadcast partner_left event so the other user resets to ready.
+ */
+export function broadcastPartnerLeft(
+  channel: RealtimeChannel,
+  userId: string,
+  matchId: string
+): void {
+  channel.send({
+    type: 'broadcast',
+    event: 'partner_left',
+    payload: { userId, matchId, timestamp: new Date().toISOString() },
   });
 }
 

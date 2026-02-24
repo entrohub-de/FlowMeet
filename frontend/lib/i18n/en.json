@@ -149,7 +149,10 @@
     "cancelReady": "Cancel",
     "matchFound": "Match Found!",
     "anonymous": "Anonymous",
-    "finishRound": "Finish This Round",
+    "chatting": "Chatting",
+    "finishRound": "Finish Chat",
+    "leave": "Leave",
+    "leftHint": "You have left the matching",
     "matchingClosed": "Matching not open"
   },
   "flowMatching": {

@@ -149,7 +149,10 @@
     "cancelReady": "取消等待",
     "matchFound": "匹配成功！",
     "anonymous": "匿名用户",
-    "finishRound": "完成本轮对话",
+    "chatting": "对话中",
+    "finishRound": "完成对话",
+    "leave": "离开",
+    "leftHint": "你已离开匹配",
     "matchingClosed": "匹配未开放"
   },
   "flowMatching": {

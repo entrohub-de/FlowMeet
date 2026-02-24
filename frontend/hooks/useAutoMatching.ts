@@ -54,17 +54,31 @@ export function useAutoMatching(eventId: string, enabled: boolean) {
       const { data: { session } } = await supabase.auth.getSession();
       const hostId = session?.user?.id ?? '';
 
+      // 排除已有活跃匹配的用户（participant_status = 'matched'）
+      const { data: matchedStates } = await supabase
+        .from('session_participant_states')
+        .select('user_id')
+        .eq('event_id', eventId)
+        .eq('participant_status', 'matched');
+
+      const matchedUserIds = new Set(matchedStates?.map(s => s.user_id) ?? []);
+      const filteredReadyIds = readyIds.filter(id => !matchedUserIds.has(id));
+      if (filteredReadyIds.length < MIN_READY_FOR_MATCH) {
+        isMatchingRef.current = false;
+        return;
+      }
+
       // 创建 active module 记录
       const activeModule = await createActiveModule(
         eventId,
         'auto-matching',
         '1v1',
-        readyIds.length,
+        filteredReadyIds.length,
         hostId
       );
 
       // 生成配对（复用现有算法，自动排除历史对）
-      const { pairs, unpairedUserId } = await generatePairs(eventId, readyIds);
+      const { pairs, unpairedUserId } = await generatePairs(eventId, filteredReadyIds);
 
       if (pairs.length === 0) {
         isMatchingRef.current = false;
@@ -101,7 +115,7 @@ export function useAutoMatching(eventId: string, enabled: boolean) {
       // 记录审计日志
       roundCountRef.current += 1;
       logHostAction(eventId, 'auto_match_triggered', {
-        readyCount: readyIds.length,
+        readyCount: filteredReadyIds.length,
         pairedCount: persisted.length * 2,
         avgScore: roundAvgScore,
         round: roundCountRef.current,
