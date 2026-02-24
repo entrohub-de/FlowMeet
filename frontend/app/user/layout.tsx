@@ -18,32 +18,11 @@ export default function UserLayout({
   useFlowRedirect();
 
   const navItems = [
-    {
-      label: t('nav.user.eventSignup'),
-      children: [
-        { label: t('nav.user.signup'), href: '/user/event' },
-      ]
-    },
-    {
-      label: t('nav.user.eventLive'),
-      children: [
-        { label: t('nav.user.flow'), href: '/user/flow' },
-      ]
-    },
-    {
-      label: t('nav.user.myEvents'),
-      href: '/user/my-events',
-    },
-    {
-      label: t('nav.user.rating'),
-      href: '/user/rating',
-    },
-    {
-      label: t('nav.user.onlineConnect'),
-      children: [
-        { label: t('nav.user.connections'), href: '/user/connections' },
-      ]
-    },
+    { label: t('nav.user.signup'), href: '/user/event' },
+    { label: t('nav.user.flow'), href: '/user/flow' },
+    { label: t('nav.user.myEvents'), href: '/user/my-events' },
+    { label: t('nav.user.rating'), href: '/user/rating' },
+    { label: t('nav.user.connections'), href: '/user/connections' },
   ];
 
   return (

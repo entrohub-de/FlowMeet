@@ -48,7 +48,7 @@
       "flow": "Chat Match",
       "onlineConnect": "Online Connect",
       "connections": "My Connections",
-      "myEvents": "My Events"
+      "myEvents": "Create Event"
     }
   },
   "userEvents": {
