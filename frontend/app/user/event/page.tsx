@@ -215,7 +215,6 @@ export default function EventPage() {
                 <h2 className="text-base font-semibold text-foreground">
                   {t('user.discoverEvents')}
                 </h2>
-                <p className="text-xs text-muted-foreground">{t('user.discoverEventsSubtitle')}</p>
               </div>
             </div>
 
