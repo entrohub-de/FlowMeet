@@ -45,7 +45,6 @@ function formatEventTime(startStr: string, endStr: string, locale: string): stri
 
 export default function UserFlowPage() {
   const { t, locale } = useTranslation();
-  const [showAllSteps, setShowAllSteps] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string>('');
   // Leave/pause state
   const [isOnLeave, setIsOnLeave] = useState(false);
@@ -360,47 +359,6 @@ export default function UserFlowPage() {
               );
             })}
 
-            {/* Collapsible section for other steps */}
-            {flowState.steps.some(s => s.status !== 'active' && s.status !== 'paused') && (
-              <div className="mt-4">
-                <button
-                  onClick={() => setShowAllSteps(prev => !prev)}
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 text-sm text-muted-foreground hover:text-foreground bg-card border border-border rounded-xl shadow-sm transition-colors"
-                >
-                  {showAllSteps ? (
-                    <>
-                      {t('userFlow.hideSteps')}
-                      <ChevronUp className="w-4 h-4" />
-                    </>
-                  ) : (
-                    <>
-                      {t('userFlow.viewAllSteps')}
-                      <ChevronDown className="w-4 h-4" />
-                    </>
-                  )}
-                </button>
-
-                {showAllSteps && (
-                  <div className="mt-3 space-y-3">
-                    {flowState.steps.map((step, index) => {
-                      if (step.status === 'active' || step.status === 'paused') return null;
-                      return (
-                        <FlowStepCardReadOnly
-                          key={step.id}
-                          index={index}
-                          title={step.title}
-                          duration={step.duration}
-                          status={step.status}
-                          remainingSeconds={step.remainingSeconds}
-                          formatTime={formatTime}
-                          pairingMode={step.pairingMode}
-                        />
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
           </>
         )}
       </div>

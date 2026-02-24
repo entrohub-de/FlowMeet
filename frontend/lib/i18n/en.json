@@ -119,8 +119,6 @@
     "noActiveFlowHint": "The host has not started the event flow yet",
     "templateName": "Flow Template",
     "flowCompleted": "All steps completed",
-    "viewAllSteps": "View all steps",
-    "hideSteps": "Hide steps",
     "notCheckedIn": "You haven't checked in yet",
     "notCheckedInHint": "Please check in first to join the event flow and matching",
     "goCheckin": "Check In",

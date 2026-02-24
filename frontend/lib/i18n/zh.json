@@ -119,8 +119,6 @@
     "noActiveFlowHint": "主办方尚未启动流程",
     "templateName": "流程模板",
     "flowCompleted": "流程已全部完成",
-    "viewAllSteps": "查看全部流程",
-    "hideSteps": "收起流程",
     "notCheckedIn": "你还没有签到",
     "notCheckedInHint": "请先完成签到，才能参与活动流程和匹配",
     "goCheckin": "去签到",
