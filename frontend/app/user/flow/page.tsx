@@ -139,14 +139,6 @@ export default function UserFlowPage() {
     return (
       <div className="min-h-[calc(100vh-60px)] p-4 bg-muted/30">
         <div className="max-w-4xl mx-auto">
-          <div className="mb-6">
-            <div className="flex items-center gap-3 mb-2">
-              <ListChecks className="w-6 h-6 text-primary" />
-              <h1 className="text-xl font-bold text-foreground">
-                {t('userFlow.title')}
-              </h1>
-            </div>
-          </div>
           <div className="space-y-3">
             <FlowStepSkeleton />
             <FlowStepSkeleton />
@@ -177,10 +169,6 @@ export default function UserFlowPage() {
         {/* Header with status + leave button */}
         <div className="mb-5">
           <div className="flex items-center gap-2.5 mb-1">
-            <ListChecks className="w-6 h-6 text-primary" />
-            <h1 className="text-xl font-bold text-foreground">
-              {t('userFlow.title')}
-            </h1>
             <div className="ml-auto flex items-center gap-2">
               {isOnLeave ? (
                 <button
@@ -200,7 +188,6 @@ export default function UserFlowPage() {
               )}
             </div>
           </div>
-          <p className="text-sm text-muted-foreground">{t('userFlow.description')}</p>
         </div>
 
         {/* Current event info */}
