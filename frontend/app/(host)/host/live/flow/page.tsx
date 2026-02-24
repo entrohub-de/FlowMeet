@@ -27,7 +27,6 @@ import { useHostFlowMatching } from '@/hooks/useHostFlowMatching';
 import { useHostFlowGroupMatching } from '@/hooks/useHostFlowGroupMatching';
 import { useAutoMatching } from '@/hooks/useAutoMatching';
 import { logHostAction } from '@/lib/api/host-actions';
-import ActionHistoryPanel from '@/components/workflow/flow-control/ActionHistoryPanel';
 import { FlowStepSkeleton } from '@/components/ui/skeleton';
 import type { ActiveFlowPermissions } from '@/types/domain';
 
@@ -60,7 +59,6 @@ export default function FlowControlPage() {
   const [flowSteps, setFlowSteps] = useState<FlowStep[]>([]);
 
   // Action history panel toggle
-  const [showHistory, setShowHistory] = useState(false);
 
   // Global pause state (Workstream D)
   const [isGloballyPaused, setIsGloballyPaused] = useState(false);
@@ -579,18 +577,6 @@ export default function FlowControlPage() {
             <span className="px-3 py-1 text-sm font-medium bg-primary/10 text-primary rounded-full whitespace-nowrap">
               {t('host.flowControl.onlineStats', { count: autoMatchingStats.totalPresent })}
             </span>
-            {/* ── Audit: History Toggle ── */}
-            <button
-              type="button"
-              onClick={() => setShowHistory((v) => !v)}
-              className={`ml-auto px-3 py-1.5 rounded-button text-sm border transition-colors ${
-                showHistory
-                  ? 'bg-primary text-white border-primary'
-                  : 'bg-background text-muted-foreground border-border hover:bg-muted'
-              }`}
-            >
-              {t('hostActions.historyToggle')}
-            </button>
           </div>
 
           {/* ── Event Selector Dropdown ── */}
@@ -693,10 +679,6 @@ export default function FlowControlPage() {
           </div>
         )}
 
-        {/* ── Audit: Action History Panel ── */}
-        {showHistory && selectedEventId && (
-          <ActionHistoryPanel eventId={selectedEventId} />
-        )}
 
         {/* ── Permission Panel ── */}
         {selectedEventId && (
