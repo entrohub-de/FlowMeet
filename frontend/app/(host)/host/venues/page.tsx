@@ -189,15 +189,13 @@ export default function HostVenuesPage() {
     <div className="min-h-[calc(100vh-60px)] p-4">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex justify-end">
-          <button
-            onClick={openCreateVenue}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            {t('venue.createVenue')}
-          </button>
-        </div>
+        <button
+          onClick={openCreateVenue}
+          className="w-full px-4 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+        >
+          <Plus className="w-4 h-4" />
+          {t('venue.createVenue')}
+        </button>
 
         {/* Venue list */}
         {venues.length === 0 ? (
