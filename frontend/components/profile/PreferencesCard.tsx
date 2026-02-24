@@ -2,7 +2,7 @@
 
 import { useTranslation } from '@/lib/i18n/context';
 import { cn } from '@/lib/utils';
-import { Heart, Globe, Briefcase, Rocket, Pencil, Check } from 'lucide-react';
+import { Pencil, Check } from 'lucide-react';
 import {
   LANGUAGE_OPTIONS,
   INTEREST_OPTIONS,
@@ -48,8 +48,7 @@ export default function PreferencesCard({
   return (
     <div className="bg-card/80 backdrop-blur-sm border border-border rounded-2xl p-5 shadow-sm">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide flex items-center gap-2">
-          <Heart className="w-4 h-4 text-primary" />
+        <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">
           {t('profile.preferences')}
         </h2>
         <button
@@ -80,8 +79,7 @@ export default function PreferencesCard({
         <div className="space-y-3">
           {(isEditing || selectedLanguages.length > 0) && (
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                <Globe className="w-3.5 h-3.5" />
+              <label className="text-xs font-medium text-muted-foreground">
                 {t('profile.languages')}
               </label>
               <ChipGroup options={LANGUAGE_OPTIONS} selected={selectedLanguages} i18nPrefix="languages" onChange={(v) => onLanguagesChange(v as string[])} editing={isEditing} />
@@ -90,8 +88,7 @@ export default function PreferencesCard({
 
           {(isEditing || selectedInterests.length > 0) && (
             <div className={cn('space-y-1.5', isEditing && 'border-t border-border pt-3')}>
-              <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                <Heart className="w-3.5 h-3.5" />
+              <label className="text-xs font-medium text-muted-foreground">
                 {t('profile.interests')}
               </label>
               <ChipGroup options={INTEREST_OPTIONS} selected={selectedInterests} i18nPrefix="interests" onChange={(v) => onInterestsChange(v as string[])} editing={isEditing} />
@@ -100,8 +97,7 @@ export default function PreferencesCard({
 
           {(isEditing || selectedIndustries.length > 0) && (
             <div className={cn('space-y-1.5', isEditing && 'border-t border-border pt-3')}>
-              <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                <Briefcase className="w-3.5 h-3.5" />
+              <label className="text-xs font-medium text-muted-foreground">
                 {t('profile.professionalBackground')}
               </label>
               <ChipGroup options={PROFESSIONAL_BACKGROUND_OPTIONS} selected={selectedIndustries} i18nPrefix="professionalBackground" onChange={(v) => onIndustriesChange(v as string[])} editing={isEditing} />
@@ -110,8 +106,7 @@ export default function PreferencesCard({
 
           {(isEditing || !!selectedStartupStage) && (
             <div className={cn('space-y-1.5', isEditing && 'border-t border-border pt-3')}>
-              <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                <Rocket className="w-3.5 h-3.5" />
+              <label className="text-xs font-medium text-muted-foreground">
                 {t('profile.startupStage')}
               </label>
               <ChipGroup options={STARTUP_STAGE_OPTIONS} selected={selectedStartupStage} i18nPrefix="startupStages" onChange={(v) => onStartupStageChange(v as string)} editing={isEditing} multi={false} />

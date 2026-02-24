@@ -11,7 +11,7 @@ import EventCard from '@/components/event/EventCard';
 import PastEventCard from '@/components/event/PastEventCard';
 // Phase 1: ad banner hidden (A+C model simplification)
 // import AdBanner from '@/components/ads/AdBanner';
-import { CalendarCheck, Search, History, ChevronDown, ChevronUp } from 'lucide-react';
+import { CalendarCheck, History, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function EventPage() {
   const { t, locale } = useTranslation();
@@ -153,19 +153,14 @@ export default function EventPage() {
         {/* My Upcoming Events */}
         <section className="space-y-3">
           <div className="flex items-center gap-3 px-1">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-              <CalendarCheck className="w-4 h-4 text-primary" />
-            </div>
-            <div>
-              <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
-                {t('user.myEvents')}
-                {myUpcoming.length > 0 && (
-                  <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                    {myUpcoming.length}
-                  </span>
-                )}
-              </h2>
-            </div>
+            <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+              {t('user.myEvents')}
+              {myUpcoming.length > 0 && (
+                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                  {myUpcoming.length}
+                </span>
+              )}
+            </h2>
           </div>
 
           {myUpcoming.length === 0 ? (
@@ -201,14 +196,9 @@ export default function EventPage() {
         {discoverEvents.length > 0 && (
           <section id="discover" className="space-y-3">
             <div className="flex items-center gap-3 px-1">
-              <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
-                <Search className="w-4 h-4 text-muted-foreground" />
-              </div>
-              <div>
-                <h2 className="text-base font-semibold text-foreground">
-                  {t('user.discoverEvents')}
-                </h2>
-              </div>
+              <h2 className="text-base font-semibold text-foreground">
+                {t('user.discoverEvents')}
+              </h2>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

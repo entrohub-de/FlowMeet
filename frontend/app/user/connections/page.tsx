@@ -269,8 +269,7 @@ export default function ConnectionsPage() {
 
       {/* Existing connections */}
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-          <Users className="w-4 h-4 text-green-500" />
+        <h2 className="text-sm font-semibold text-foreground">
           {t('connections.myConnections')}
         </h2>
 

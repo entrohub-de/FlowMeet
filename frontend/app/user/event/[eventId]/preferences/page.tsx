@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Save, SkipForward, Globe, Heart, Briefcase, Rocket, Target } from 'lucide-react';
+import { ArrowLeft, Save, SkipForward, Target } from 'lucide-react';
 import { useAuth } from '@/features/auth/useAuth';
 import { useTranslation } from '@/lib/i18n/context';
 import { getMatchPreference, saveMatchPreference } from '@/lib/api/matching';
@@ -262,32 +262,28 @@ export default function EventPreferencesPage() {
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground flex items-center gap-1">
-                    <Globe className="w-3.5 h-3.5" />
+                  <label className="text-sm font-medium text-foreground">
                     {t('profile.languages')}
                   </label>
                   {renderChipGroup(LANGUAGE_OPTIONS, selectedLanguages, 'languages', setSelectedLanguages)}
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground flex items-center gap-1">
-                    <Heart className="w-3.5 h-3.5" />
+                  <label className="text-sm font-medium text-foreground">
                     {t('profile.interests')}
                   </label>
                   {renderChipGroup(INTEREST_OPTIONS, selectedInterests, 'interests', setSelectedInterests)}
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground flex items-center gap-1">
-                    <Briefcase className="w-3.5 h-3.5" />
+                  <label className="text-sm font-medium text-foreground">
                     {t('profile.professionalBackground')}
                   </label>
                   {renderChipGroup(PROFESSIONAL_BACKGROUND_OPTIONS, selectedIndustries, 'professionalBackground', setSelectedIndustries)}
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground flex items-center gap-1">
-                    <Rocket className="w-3.5 h-3.5" />
+                  <label className="text-sm font-medium text-foreground">
                     {t('profile.startupStage')}
                   </label>
                   {renderSingleChipGroup(STARTUP_STAGE_OPTIONS, selectedStartupStage, 'startupStages', setSelectedStartupStage)}

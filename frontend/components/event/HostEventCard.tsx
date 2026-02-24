@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import type { Event, EventStatus } from '@/types/domain';
-import { Calendar, MapPin, Settings, Trash2, AlertTriangle, X, Users, UserCheck, ChevronDown, Archive, RotateCcw, Ban } from 'lucide-react';
+import { Calendar, MapPin, Settings, Trash2, AlertTriangle, X, ChevronDown, Archive, RotateCcw, Ban } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDateRange } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n/context';
@@ -128,7 +128,6 @@ export default function HostEventCard({ event, onUpdate }: HostEventCardProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
-              <Users className="w-3.5 h-3.5 text-primary" />
               {t('host.events.signupCount', { count: stats.total })}
             </span>
           </div>
