@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supabase/client';
 import { requireUserId, getCurrentUserId } from './auth-utils';
 import type { Event, Signup } from '@/types/domain';
 
-const MAX_USER_EVENT_PARTICIPANTS = 5;
+const MAX_USER_EVENT_PARTICIPANTS = 20;
 
 export interface CreateUserEventInput {
   name: string;
