@@ -167,7 +167,7 @@ function CreateSmallEventDialog({
               {t('userEvents.maxParticipants')}
             </label>
             <div className="flex gap-2">
-              {[2, 3, 4, 5].map((n) => (
+              {[5, 10, 15, 20].map((n) => (
                 <button
                   key={n}
                   type="button"
@@ -182,7 +182,6 @@ function CreateSmallEventDialog({
                 </button>
               ))}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">{t('userEvents.maxParticipantsHint')}</p>
           </div>
 
           {/* Actions */}
@@ -532,13 +531,6 @@ export default function MyEventsPage() {
             <p className="text-sm font-medium text-foreground">{t('userEvents.empty')}</p>
             <p className="text-xs text-muted-foreground mt-1">{t('userEvents.emptyHint')}</p>
           </div>
-          <button
-            onClick={() => setShowCreate(true)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            {t('userEvents.createFirst')}
-          </button>
         </div>
       ) : (
         <>

@@ -623,13 +623,9 @@ export default function FlowControlPage() {
 
         {/* <TemplateSelectionPanel modal hidden - auto-applies first template */ }
 
+        {flowSteps.filter(step => step.pairingMode === '1v1' || step.pairingMode === 'group').length > 0 && (
         <div className="bg-card border border-border rounded-xl shadow-sm">
           <div className="p-4">
-            {flowSteps.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-border p-6 text-center text-muted-foreground">
-                {t('host.flowControl.emptyFlow')}
-              </div>
-            ) : (
               <div className="space-y-2">
                 {flowSteps.filter(step => step.pairingMode === '1v1' || step.pairingMode === 'group').map((step, index) => (
                   <div
@@ -663,9 +659,9 @@ export default function FlowControlPage() {
                   </div>
                 ))}
               </div>
-            )}
           </div>
         </div>
+        )}
       </div>
     </div>
   );

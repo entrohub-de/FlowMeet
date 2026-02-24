@@ -63,14 +63,7 @@ export default function HostEventPage() {
       <div className="max-w-full sm:max-w-full lg:max-w-7xl lg:mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-semibold text-foreground mb-2">
-              {t('host.events.title')}
-            </h1>
-            <p className="text-sm sm:text-base text-muted-foreground">
-              {t('host.events.description')}
-            </p>
-          </div>
+          <div></div>
           <button
             onClick={() => setShowCreateDialog(true)}
             className="flex items-center gap-2 px-button h-button rounded-button bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium whitespace-nowrap"
