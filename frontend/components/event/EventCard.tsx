@@ -91,98 +91,113 @@ export default function EventCard({ event, locale, t, initialSignedUp, onSignupC
         fadingOut && 'opacity-0 scale-95 pointer-events-none',
       )}
     >
-      {/* Cover Image */}
-      {event.cover_image && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={event.cover_image} alt={event.name} className="w-full h-32 object-cover" />
-      )}
-
-      <div className="p-4 space-y-3">
-        {/* Title row */}
-        <button
-          type="button"
-          onClick={() => hasDescription && setExpanded(!expanded)}
-          className={cn(
-            'w-full text-left space-y-1',
-            hasDescription && 'cursor-pointer'
-          )}
-        >
-          <div className="flex items-start justify-between gap-2">
-            <h3 className="text-base font-semibold text-foreground leading-tight">
-              {event.name}
-            </h3>
-            {hasDescription && (
-              <ChevronDown
-                className={cn(
-                  'w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5 transition-transform duration-200',
-                  expanded && 'rotate-180'
-                )}
-              />
-            )}
+      <div className="flex">
+        {/* Left: Cover image or date block */}
+        {event.cover_image ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={event.cover_image} alt={event.name} className="w-28 min-h-full object-cover flex-shrink-0" />
+        ) : (
+          <div className="w-20 flex-shrink-0 bg-primary/5 flex flex-col items-center justify-center p-3">
+            <span className="text-xs font-medium text-primary uppercase">
+              {new Date(event.start_time).toLocaleDateString(locale, { month: 'short' })}
+            </span>
+            <span className="text-2xl font-bold text-foreground leading-tight">
+              {new Date(event.start_time).getDate()}
+            </span>
+            <span className="text-[10px] text-muted-foreground">
+              {new Date(event.start_time).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
+            </span>
           </div>
-        </button>
+        )}
 
-        {/* Description */}
-        {hasDescription && (
-          <div
+        {/* Right: Content */}
+        <div className="flex-1 p-4 space-y-2 min-w-0">
+          {/* Title row */}
+          <button
+            type="button"
+            onClick={() => hasDescription && setExpanded(!expanded)}
             className={cn(
-              'overflow-hidden transition-all duration-200',
-              expanded ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0'
+              'w-full text-left',
+              hasDescription && 'cursor-pointer'
             )}
           >
-            <p className="text-xs text-muted-foreground line-clamp-3 pb-1">
-              {event.description}
-            </p>
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="text-base font-semibold text-foreground leading-tight">
+                {event.name}
+              </h3>
+              {hasDescription && (
+                <ChevronDown
+                  className={cn(
+                    'w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5 transition-transform duration-200',
+                    expanded && 'rotate-180'
+                  )}
+                />
+              )}
+            </div>
+          </button>
+
+          {/* Description */}
+          {hasDescription && (
+            <div
+              className={cn(
+                'overflow-hidden transition-all duration-200',
+                expanded ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0'
+              )}
+            >
+              <p className="text-xs text-muted-foreground line-clamp-3 pb-1">
+                {event.description}
+              </p>
+            </div>
+          )}
+
+          {/* Details: time + location */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5 shrink-0 text-primary" />
+              {formatDateRange(event.start_time, event.end_time, locale)}
+            </span>
+            <span className="flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5 shrink-0 text-primary" />
+              {location}
+            </span>
           </div>
-        )}
 
-        {/* Details: time + location */}
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <Calendar className="w-3.5 h-3.5 shrink-0 text-primary" />
-            {formatDateRange(event.start_time, event.end_time, locale)}
-          </span>
-          <span className="flex items-center gap-1">
-            <MapPin className="w-3.5 h-3.5 shrink-0 text-primary" />
-            {location}
-          </span>
-        </div>
+          {/* Host info */}
+          {hostProfile && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              {hostProfile.avatar_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={hostProfile.avatar_url} alt="" className="w-5 h-5 rounded-full object-cover" />
+              ) : (
+                <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
+                  <User className="w-3 h-3 text-primary" />
+                </div>
+              )}
+              <span>{t('user.hostedBy', { name: hostProfile.nickname || t('user.unknownHost') })}</span>
+            </div>
+          )}
 
-        {/* Host info */}
-        {hostProfile && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            {hostProfile.avatar_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={hostProfile.avatar_url} alt="" className="w-5 h-5 rounded-full object-cover" />
-            ) : (
-              <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
-                <User className="w-3 h-3 text-primary" />
-              </div>
-            )}
-            <span>{t('user.hostedBy', { name: hostProfile.nickname || t('user.unknownHost') })}</span>
-          </div>
-        )}
-
-        {/* Action area */}
-        <EventCardActions
-          loading={loading}
-          signedUp={signedUp}
-          signingUp={signingUp}
-          userId={userId}
-          onSignup={handleSignup}
-          t={t}
-        />
-
-        {/* Preferences Modal */}
-        {showPreferencesModal && userId && (
-          <PreferencesModal
-            eventId={event.event_id}
+          {/* Action area */}
+          <EventCardActions
+            loading={loading}
+            signedUp={signedUp}
+            signingUp={signingUp}
             userId={userId}
+            onSignup={handleSignup}
             t={t}
-            onClose={() => setShowPreferencesModal(false)}
           />
-        )}
+        </div>
       </div>
+
+      {/* Preferences Modal */}
+      {showPreferencesModal && userId && (
+        <PreferencesModal
+          eventId={event.event_id}
+          userId={userId}
+          t={t}
+          onClose={() => setShowPreferencesModal(false)}
+        />
+      )}
     </div>
   );
 }
