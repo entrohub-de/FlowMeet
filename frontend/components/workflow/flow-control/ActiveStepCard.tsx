@@ -52,9 +52,6 @@ export default function ActiveStepCard({
   if (isIntermission) {
     return (
       <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
-        <div className="text-xs text-muted-foreground mb-1">
-          {t('host.flowControl.currentStep')}
-        </div>
         <div className="flex items-center gap-2 text-lg font-bold text-muted-foreground">
           <Coffee className="w-4 h-4" />
           {t('userFlow.intermission')}
@@ -87,9 +84,6 @@ export default function ActiveStepCard({
   if (isWaitingToBegin) {
     return (
       <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
-        <div className="text-xs text-muted-foreground mb-1">
-          {t('host.flowControl.currentStep')}
-        </div>
         <div className="flex items-center gap-2 text-lg font-bold text-muted-foreground">
           <Clock className="w-4 h-4" />
           {t('userFlow.waitingToBegin')}

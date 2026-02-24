@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ListChecks, PauseCircle, ChevronDown, ChevronUp, LogOut, Calendar, MapPin, Users } from 'lucide-react';
+import { ListChecks, PauseCircle, ChevronDown, ChevronUp, Calendar, MapPin, Users } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 import { useActiveFlow } from '@/hooks/useActiveFlow';
 import { useFlowMatching } from '@/hooks/useFlowMatching';
@@ -17,16 +17,6 @@ import FlowStepCardReadOnly from '@/components/workflow/flow-control/FlowStepCar
 import MatchingStepCard from '@/components/workflow/flow-control/MatchingStepCard';
 import GroupMatchingStepCard from '@/components/workflow/flow-control/GroupMatchingStepCard';
 import { FlowStepSkeleton } from '@/components/ui/skeleton';
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogAction,
-  AlertDialogCancel,
-} from '@/components/ui/alert-dialog';
 
 
 function formatEventTime(startStr: string, endStr: string, locale: string): string {
@@ -46,9 +36,6 @@ function formatEventTime(startStr: string, endStr: string, locale: string): stri
 export default function UserFlowPage() {
   const { t, locale } = useTranslation();
   const [currentUserId, setCurrentUserId] = useState<string>('');
-  // Leave/pause state
-  const [isOnLeave, setIsOnLeave] = useState(false);
-  const [showLeaveDialog, setShowLeaveDialog] = useState(false);
 
   const {
     loading,
@@ -93,33 +80,6 @@ export default function UserFlowPage() {
     });
   }, []);
 
-  const handleLeave = async () => {
-    setShowLeaveDialog(false);
-    if (!selectedEventId || !currentUserId) return;
-    try {
-      await upsertParticipantState(selectedEventId, currentUserId, {
-        participant_status: 'waiting',
-        is_online: false,
-      });
-      setIsOnLeave(true);
-      toast.success(t('userFlow.onLeave'));
-    } catch {
-      toast.error(t('common.error'));
-    }
-  };
-
-  const handleRejoin = async () => {
-    if (!selectedEventId || !currentUserId) return;
-    try {
-      await upsertParticipantState(selectedEventId, currentUserId, {
-        is_online: true,
-      });
-      setIsOnLeave(false);
-      toast.success(t('userFlow.rejoin'));
-    } catch {
-      toast.error(t('common.error'));
-    }
-  };
 
   const handleFinishRound = useCallback(async () => {
     if (!currentUserId || !selectedEventId) return;
@@ -165,29 +125,6 @@ export default function UserFlowPage() {
       )}
 
       <div className="max-w-4xl mx-auto relative">
-        {/* Header with status + leave button */}
-        <div className="mb-5">
-          <div className="flex items-center gap-2.5 mb-1">
-            <div className="ml-auto flex items-center gap-2">
-              {isOnLeave ? (
-                <button
-                  onClick={handleRejoin}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-primary text-white text-xs font-medium hover:opacity-90 transition-opacity touch-feedback"
-                >
-                  {t('userFlow.rejoin')}
-                </button>
-              ) : (
-                <button
-                  onClick={() => setShowLeaveDialog(true)}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border border-border text-muted-foreground text-xs font-medium hover:bg-muted transition-colors"
-                >
-                  <LogOut className="w-3 h-3" />
-                  {t('userFlow.leaveActivity')}
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
 
         {/* Current event info */}
         {currentEvent && (
@@ -213,19 +150,6 @@ export default function UserFlowPage() {
           </div>
         )}
 
-        {/* On-leave banner */}
-        {isOnLeave && (
-          <div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-muted/50 mb-4">
-            <PauseCircle className="w-5 h-5 text-muted-foreground shrink-0" />
-            <span className="text-sm text-muted-foreground flex-1">{t('userFlow.onLeaveHint')}</span>
-            <button
-              onClick={handleRejoin}
-              className="px-3 py-1.5 rounded-full bg-primary text-white text-xs font-medium hover:opacity-90 transition-opacity touch-feedback shrink-0"
-            >
-              {t('userFlow.rejoin')}
-            </button>
-          </div>
-        )}
 
         {/* Permission-driven 1v1 matching entry */}
         {matching1v1Enabled && (
@@ -291,24 +215,6 @@ export default function UserFlowPage() {
           </div>
         ) : (
           <>
-            {flowState.templateName && (
-              <div className="mb-3 text-sm text-muted-foreground">
-                {t('userFlow.templateName')}: {flowState.templateName}
-              </div>
-            )}
-
-            <div className="mb-4">
-              <ActiveStepCard
-                title={activeStep?.title}
-                remainingSeconds={activeStep?.remainingSeconds}
-                status={activeStep?.status as 'active' | 'paused' | undefined}
-                formatTime={formatTime}
-                completedCount={completedCount}
-                totalCount={totalCount}
-                nextStepTitle={nextPendingStep?.title}
-                flowCompleted={flowState.flowStatus === 'completed'}
-              />
-            </div>
 
             {/* Active steps */}
             {flowState.steps.map((step, index) => {
@@ -345,39 +251,13 @@ export default function UserFlowPage() {
                 );
               }
 
-              return (
-                <FlowStepCardReadOnly
-                  key={step.id}
-                  index={index}
-                  title={step.title}
-                  duration={step.duration}
-                  status={step.status}
-                  remainingSeconds={step.remainingSeconds}
-                  formatTime={formatTime}
-                  pairingMode={step.pairingMode}
-                />
-              );
+              return null;
             })}
 
           </>
         )}
       </div>
 
-      {/* Leave confirmation dialog */}
-      <AlertDialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('userFlow.leaveConfirmTitle')}</AlertDialogTitle>
-            <AlertDialogDescription>{t('userFlow.leaveConfirmDesc')}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('userFlow.leaveCancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleLeave}>
-              {t('userFlow.leaveConfirm')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
