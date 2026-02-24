@@ -269,10 +269,6 @@ export default function ConnectionsPage() {
 
       {/* Existing connections */}
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-foreground">
-          {t('connections.myConnections')}
-        </h2>
-
         {connections.length === 0 ? (
           <div className="bg-muted/30 border border-dashed border-border rounded-xl p-8 text-center">
             <Users className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />

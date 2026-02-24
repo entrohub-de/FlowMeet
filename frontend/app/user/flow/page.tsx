@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ListChecks, PauseCircle, ChevronDown, ChevronUp, Calendar, MapPin, Users } from 'lucide-react';
+import { PauseCircle, Users } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 import { useActiveFlow } from '@/hooks/useActiveFlow';
 import { useFlowMatching } from '@/hooks/useFlowMatching';
@@ -17,27 +17,13 @@ import GroupMatchingStepCard from '@/components/workflow/flow-control/GroupMatch
 import { FlowStepSkeleton } from '@/components/ui/skeleton';
 
 
-function formatEventTime(startStr: string, endStr: string, locale: string): string {
-  const loc = locale === 'zh' ? 'zh-CN' : 'en-US';
-  const start = new Date(startStr);
-  const end = new Date(endStr);
-  const dateOpts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
-  const timeOpts: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit' };
-  const sameDay = start.toDateString() === end.toDateString();
-  const datePart = start.toLocaleDateString(loc, dateOpts);
-  const startTime = start.toLocaleTimeString(loc, timeOpts);
-  const endTime = end.toLocaleTimeString(loc, timeOpts);
-  if (sameDay) return `${datePart}  ${startTime} - ${endTime}`;
-  return `${datePart} ${startTime} - ${end.toLocaleDateString(loc, dateOpts)} ${endTime}`;
-}
 
 export default function UserFlowPage() {
-  const { t, locale } = useTranslation();
+  const { t } = useTranslation();
   const [currentUserId, setCurrentUserId] = useState<string>('');
 
   const {
     loading,
-    events: allEvents,
     selectedEventId,
     flowState,
     activeStep,
@@ -53,12 +39,6 @@ export default function UserFlowPage() {
     selectedEventId,
     '1v1',
     matching1v1Enabled
-  );
-
-  // Current event info
-  const currentEvent = useMemo(
-    () => allEvents.find((e) => e.event_id === selectedEventId) ?? null,
-    [allEvents, selectedEventId]
   );
 
   const completedCount = useMemo(
@@ -124,29 +104,6 @@ export default function UserFlowPage() {
 
       <div className="max-w-4xl mx-auto relative">
 
-        {/* Current event info */}
-        {currentEvent && (
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border mb-4">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-              <ListChecks className="w-5 h-5 text-primary" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h2 className="text-sm font-semibold text-foreground truncate">{currentEvent.name}</h2>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground mt-0.5">
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-3 h-3" />
-                  {formatEventTime(currentEvent.start_time, currentEvent.end_time, locale)}
-                </span>
-                {currentEvent.venue?.name && (
-                  <span className="flex items-center gap-1">
-                    <MapPin className="w-3 h-3" />
-                    {currentEvent.venue.name}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
 
 
         {/* Permission-driven 1v1 matching entry */}
@@ -206,7 +163,7 @@ export default function UserFlowPage() {
         {!flowState ? (
           <div className="rounded-xl border border-dashed border-border p-10 text-center">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
-              <ListChecks className="w-8 h-8 text-primary/40" />
+              <Users className="w-8 h-8 text-primary/40" />
             </div>
             <p className="text-muted-foreground font-medium">{t('userFlow.noActiveFlow')}</p>
             <p className="text-sm text-muted-foreground mt-1">{t('userFlow.waitingHint')}</p>
