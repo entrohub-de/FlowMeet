@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { stripe } from '@/lib/stripe/server';
+import { getStripe } from '@/lib/stripe/server';
 import { createServerClient } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 去 Stripe 查询 session 状态
-    const session = await stripe.checkout.sessions.retrieve(signup.stripe_checkout_session_id);
+    const session = await getStripe().checkout.sessions.retrieve(signup.stripe_checkout_session_id);
 
     if (session.payment_status === 'paid') {
       // 支付已完成，立即激活 signup
