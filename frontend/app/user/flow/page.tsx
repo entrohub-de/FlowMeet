@@ -138,7 +138,7 @@ export default function UserFlowPage() {
                 </p>
                 <button
                   onClick={cancelReady}
-                  className="text-xs text-muted-foreground underline"
+                  className="mt-2 px-4 py-1.5 rounded-full text-sm font-medium text-muted-foreground border border-border hover:bg-muted transition-colors"
                 >
                   {t('userFlow.cancelReady')}
                 </button>
@@ -159,7 +159,6 @@ export default function UserFlowPage() {
                       {(matchingState.partner.profile?.nickname ?? '?')[0]}
                     </div>
                   )}
-                  <p className="text-lg font-semibold">{t('userFlow.chatting')}</p>
                   <p className="text-sm text-muted-foreground">
                     {matchingState.partner.profile?.nickname || t('userFlow.anonymous')}
                   </p>
