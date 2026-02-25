@@ -4,9 +4,6 @@ nul
 #Ignore vscode AI rules
 .github\instructions\codacy.instructions.md
 
-#superbase connection
-supabase link --project-ref bmaccwxsrhanffljyslg
-
 # Environment variables
 .env
 .env.local
@@ -23,3 +20,6 @@ mcp-server/.env
 mcp-server/node_modules/
 mcp-server/dist/
 .mcp.json
+
+# Supabase snippets
+supabase/snippets/
