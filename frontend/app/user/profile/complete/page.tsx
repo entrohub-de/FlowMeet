@@ -240,7 +240,7 @@ export default function ProfileCompletePage() {
             <button
               onClick={() => setStep(2)}
               disabled={!canGoNext}
-              className="w-full h-12 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full h-12 bg-primary text-primary-foreground rounded-full font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {t('profileCompletion.next')}
               <ArrowRight className="w-4 h-4" />
@@ -283,7 +283,7 @@ export default function ProfileCompletePage() {
             <button
               onClick={handleComplete}
               disabled={saving}
-              className="w-full h-12 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full h-12 bg-primary text-primary-foreground rounded-full font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {saving ? t('profile.saving') : t('profileCompletion.complete')}
               <Check className="w-4 h-4" />

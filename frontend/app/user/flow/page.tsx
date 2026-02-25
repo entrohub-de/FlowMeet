@@ -78,7 +78,7 @@ export default function UserFlowPage() {
             {matchingState.phase === 'ready' && (
               <button
                 onClick={goReady}
-                className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity touch-feedback"
+                className="w-full py-3 rounded-full bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity touch-feedback"
               >
                 {t('userFlow.joinMatching')}
               </button>
@@ -123,7 +123,7 @@ export default function UserFlowPage() {
                 </div>
                 <button
                   onClick={finishChat}
-                  className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity touch-feedback"
+                  className="w-full py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity touch-feedback"
                 >
                   {t('userFlow.finishRound')}
                 </button>
@@ -135,7 +135,7 @@ export default function UserFlowPage() {
                 <p className="text-sm text-muted-foreground">{t('userFlow.leftHint')}</p>
                 <button
                   onClick={rejoin}
-                  className="px-6 py-2 rounded-xl border border-primary text-primary text-sm font-medium hover:bg-primary/5 transition-colors"
+                  className="px-6 py-2 rounded-full border border-primary text-primary text-sm font-medium hover:bg-primary/5 transition-colors"
                 >
                   {t('userFlow.rejoin')}
                 </button>
