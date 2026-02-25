@@ -10,6 +10,7 @@ import { broadcastPermissionChange } from '@/lib/realtime/flow-broadcast';
 import PermissionPanel from '@/components/workflow/flow-control/PermissionPanel';
 import { useAutoMatching } from '@/hooks/useAutoMatching';
 import { logHostAction } from '@/lib/api/host-actions';
+import { generateGroups, persistGroups } from '@/lib/api/auto-grouping';
 import type { ActiveFlowPermissions } from '@/types/domain';
 
 export default function FlowControlPage() {
@@ -22,7 +23,9 @@ export default function FlowControlPage() {
   const [permissions, setPermissions] = useState<ActiveFlowPermissions>({
     matching_1v1_enabled: false,
     matching_group_enabled: false,
+    matching_mixed_group_enabled: false,
   });
+  const [mixedGroupGenerating, setMixedGroupGenerating] = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -56,7 +59,7 @@ export default function FlowControlPage() {
         if (activeFlow?.permissions) {
           setPermissions(activeFlow.permissions);
         } else {
-          setPermissions({ matching_1v1_enabled: false, matching_group_enabled: false });
+          setPermissions({ matching_1v1_enabled: false, matching_group_enabled: false, matching_mixed_group_enabled: false });
         }
         restoredRef.current = selectedEventId;
       } catch (error) {
@@ -69,13 +72,16 @@ export default function FlowControlPage() {
   }, [selectedEventId]);
 
   // Auto-matching engine (permission model)
+  // observePresence: subscribe to presence channel even if 1v1 is off (for mixed group to read online users)
+  const needsPresence = permissions.matching_group_enabled || permissions.matching_mixed_group_enabled;
   const { stats: autoMatchingStats, error: autoMatchingError, triggerManualRound } = useAutoMatching(
     selectedEventId,
-    permissions.matching_1v1_enabled
+    permissions.matching_1v1_enabled,
+    needsPresence
   );
 
   // Permission toggle handler
-  const handleTogglePermission = useCallback(async (key: 'matching_1v1_enabled' | 'matching_group_enabled') => {
+  const handleTogglePermission = useCallback(async (key: 'matching_1v1_enabled' | 'matching_group_enabled' | 'matching_mixed_group_enabled') => {
     if (!selectedEventId) return;
     const newPermissions = { ...permissions, [key]: !permissions[key] };
     setPermissions(newPermissions);
@@ -93,9 +99,38 @@ export default function FlowControlPage() {
   const handleEventChange = useCallback((eventId: string) => {
     if (eventId === selectedEventId) return;
     setSelectedEventId(eventId);
-    setPermissions({ matching_1v1_enabled: false, matching_group_enabled: false });
+    setPermissions({ matching_1v1_enabled: false, matching_group_enabled: false, matching_mixed_group_enabled: false });
     restoredRef.current = null;
   }, [selectedEventId]);
+
+  // Auto-generate mixed groups when permission is toggled on and online users are available
+  const mixedGroupTriggeredRef = useRef(false);
+  useEffect(() => {
+    if (!permissions.matching_mixed_group_enabled || !selectedEventId) {
+      mixedGroupTriggeredRef.current = false;
+      return;
+    }
+    if (mixedGroupTriggeredRef.current) return;
+    const userIds = autoMatchingStats.presentUserIds;
+    if (userIds.length < 2) return;
+
+    mixedGroupTriggeredRef.current = true;
+    setMixedGroupGenerating(true);
+
+    (async () => {
+      try {
+        const { groups } = await generateGroups(selectedEventId, userIds, 5);
+        if (groups.length > 0) {
+          await persistGroups(groups, selectedEventId, 'mixed-group');
+          logHostAction(selectedEventId, 'mixed_groups_generated', { groupCount: groups.length, totalUsers: userIds.length });
+        }
+      } catch (error) {
+        console.error('Failed to generate mixed groups:', error);
+      } finally {
+        setMixedGroupGenerating(false);
+      }
+    })();
+  }, [permissions.matching_mixed_group_enabled, selectedEventId, autoMatchingStats.presentUserIds]);
 
   // Event dropdown state
   const [showEventDropdown, setShowEventDropdown] = useState(false);
@@ -172,6 +207,7 @@ export default function FlowControlPage() {
             autoMatchingStats={autoMatchingStats}
             autoMatchingError={autoMatchingError}
             onTriggerManualRound={triggerManualRound}
+            mixedGroupGenerating={mixedGroupGenerating}
             onlineCount={autoMatchingStats.totalPresent}
             conversationCount={autoMatchingStats.totalPaired}
             idleCount={Math.max(0, autoMatchingStats.totalPresent - autoMatchingStats.totalPaired)}

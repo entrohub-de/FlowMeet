@@ -1,16 +1,17 @@
 'use client';
 
-import { Users, UserCheck, Zap, ZapOff, AlertCircle } from 'lucide-react';
+import { Users, UserCheck, Shuffle, Zap, ZapOff, AlertCircle } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 import type { AutoMatchingStats } from '@/hooks/useAutoMatching';
 import type { ActiveFlowPermissions } from '@/types/domain';
 
 interface PermissionPanelProps {
   permissions: ActiveFlowPermissions;
-  onTogglePermission: (key: 'matching_1v1_enabled' | 'matching_group_enabled') => void;
+  onTogglePermission: (key: 'matching_1v1_enabled' | 'matching_group_enabled' | 'matching_mixed_group_enabled') => void;
   autoMatchingStats: AutoMatchingStats;
   autoMatchingError: string | null;
   onTriggerManualRound: () => void;
+  mixedGroupGenerating?: boolean;
   onlineCount: number;
   conversationCount: number;
   idleCount: number;
@@ -22,6 +23,7 @@ export default function PermissionPanel({
   autoMatchingStats,
   autoMatchingError,
   onTriggerManualRound,
+  mixedGroupGenerating,
   onlineCount,
   conversationCount,
   idleCount,
@@ -65,7 +67,7 @@ export default function PermissionPanel({
           </button>
         </div>
 
-        {/* 小组讨论开关 */}
+        {/* 分行业讨论开关 */}
         <div className="flex items-center justify-between p-3 rounded-xl bg-muted/50">
           <div className="flex items-center gap-3">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
@@ -93,6 +95,44 @@ export default function PermissionPanel({
             }`} />
           </button>
         </div>
+
+        {/* 小组讨论开关（混合分组） */}
+        <div className="flex items-center justify-between p-3 rounded-xl bg-muted/50">
+          <div className="flex items-center gap-3">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+              permissions.matching_mixed_group_enabled ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
+            }`}>
+              <Shuffle className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="text-sm font-medium">{t('hostFlow.matchingMixedGroup') || '小组讨论'}</p>
+              <p className="text-xs text-muted-foreground">
+                {permissions.matching_mixed_group_enabled
+                  ? (t('hostFlow.mixedGroupActive') || '混合分组已开放')
+                  : (t('hostFlow.mixedGroupInactive') || '混合分组未开放')}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => onTogglePermission('matching_mixed_group_enabled')}
+            className={`relative w-12 h-6 rounded-full transition-colors ${
+              permissions.matching_mixed_group_enabled ? 'bg-primary' : 'bg-muted-foreground/30'
+            }`}
+          >
+            <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
+              permissions.matching_mixed_group_enabled ? 'translate-x-6' : 'translate-x-0'
+            }`} />
+          </button>
+        </div>
+
+        {/* 混合分组状态 */}
+        {permissions.matching_mixed_group_enabled && mixedGroupGenerating && (
+          <div className="pl-11">
+            <p className="text-xs text-muted-foreground animate-pulse">
+              {t('common.loading') || '分组中...'}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* 实时看板 */}

@@ -258,6 +258,7 @@ export type FlowStepStatus = 'pending' | 'active' | 'paused' | 'completed';
 export interface ActiveFlowPermissions {
   matching_1v1_enabled: boolean;
   matching_group_enabled: boolean;
+  matching_mixed_group_enabled: boolean;
   group_size?: number;
 }
 
@@ -311,7 +312,8 @@ export type HostActionType =
   | 'manual_pair' | 'manual_unpair' | 'manual_regroup'
   | 'global_pause' | 'global_resume'
   | 'time_adjusted'
-  | 'permission_enabled' | 'permission_disabled' | 'auto_match_triggered';
+  | 'permission_enabled' | 'permission_disabled' | 'auto_match_triggered'
+  | 'mixed_groups_generated';
 
 export interface HostAction {
   action_id: string;

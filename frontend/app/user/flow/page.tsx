@@ -1,13 +1,18 @@
 'use client';
 
+import { useState, useEffect, useCallback } from 'react';
 import { PauseCircle, Users, Code, Briefcase } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
+import { useAuth } from '@/features/auth/useAuth';
 import { useActiveFlow } from '@/hooks/useActiveFlow';
 import { useFlowMatching } from '@/hooks/useFlowMatching';
 import { useGroupIdentity, type IdentityType } from '@/hooks/useGroupIdentity';
+import { usePresenceTracker } from '@/hooks/usePresenceTracker';
+import { getUserGroup, getGroupMembers } from '@/lib/api/groups';
 
 export default function UserFlowPage() {
   const { t } = useTranslation();
+  const { user } = useAuth();
 
   const {
     loading,
@@ -20,6 +25,7 @@ export default function UserFlowPage() {
   const permissions = flowState?.permissions ?? null;
   const matching1v1Enabled = permissions?.matching_1v1_enabled ?? false;
   const groupEnabled = permissions?.matching_group_enabled ?? false;
+  const mixedGroupEnabled = permissions?.matching_mixed_group_enabled ?? false;
 
   const { state: matchingState, goReady, cancelReady, finishChat, rejoin } = useFlowMatching(
     selectedEventId,
@@ -32,7 +38,44 @@ export default function UserFlowPage() {
     groupEnabled
   );
 
-  const anyFeatureEnabled = matching1v1Enabled || groupEnabled;
+  // Join Presence channel when non-1v1 features are enabled (so host can see online users)
+  // Skip if 1v1 is already enabled — useFlowMatching handles presence in that case
+  usePresenceTracker(
+    selectedEventId,
+    groupEnabled || mixedGroupEnabled,
+    matching1v1Enabled
+  );
+
+  // Mixed group state
+  const [myGroup, setMyGroup] = useState<{ name: string; members: Array<{ user_id: string; profile?: { nickname: string | null } }> } | null>(null);
+  const [groupLoading, setGroupLoading] = useState(false);
+
+  const loadMyGroup = useCallback(async () => {
+    if (!selectedEventId || !user?.id || !mixedGroupEnabled) {
+      setMyGroup(null);
+      return;
+    }
+    setGroupLoading(true);
+    try {
+      const group = await getUserGroup(selectedEventId, user.id);
+      if (group) {
+        const members = await getGroupMembers(group.group_id);
+        setMyGroup({ name: group.name, members });
+      } else {
+        setMyGroup(null);
+      }
+    } catch {
+      setMyGroup(null);
+    } finally {
+      setGroupLoading(false);
+    }
+  }, [selectedEventId, user?.id, mixedGroupEnabled]);
+
+  useEffect(() => {
+    loadMyGroup();
+  }, [loadMyGroup]);
+
+  const anyFeatureEnabled = matching1v1Enabled || groupEnabled || mixedGroupEnabled;
 
   if (loading) {
     return (
@@ -139,6 +182,51 @@ export default function UserFlowPage() {
                 >
                   {t('userFlow.rejoin')}
                 </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── 小组讨论（混合分组） ── */}
+        {mixedGroupEnabled && (
+          <div className="bg-card rounded-2xl border border-border p-5 space-y-4">
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-sm">{t('userFlow.mixedGroupTitle')}</h3>
+            </div>
+
+            {groupLoading && (
+              <div className="animate-pulse h-20 bg-muted rounded-xl" />
+            )}
+
+            {!groupLoading && myGroup && (
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-primary">{myGroup.name}</p>
+                <div className="space-y-2">
+                  {myGroup.members.map((member) => (
+                    <div
+                      key={member.user_id}
+                      className="flex items-center gap-3 p-2 bg-muted/30 rounded-lg"
+                    >
+                      <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
+                        <span className="text-sm font-semibold text-primary">
+                          {member.profile?.nickname?.[0] || '?'}
+                        </span>
+                      </div>
+                      <p className="text-sm font-medium text-foreground truncate">
+                        {member.profile?.nickname || t('userFlow.anonymous')}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {!groupLoading && !myGroup && (
+              <div className="text-center py-4">
+                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
+                  <Users className="w-6 h-6 text-primary/40" />
+                </div>
+                <p className="text-sm text-muted-foreground">{t('userFlow.waitingForGroup')}</p>
               </div>
             )}
           </div>

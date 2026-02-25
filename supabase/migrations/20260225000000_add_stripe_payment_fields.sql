@@ -9,9 +9,16 @@ ALTER TABLE evt_signups
   ADD COLUMN IF NOT EXISTS stripe_checkout_session_id TEXT DEFAULT NULL,
   ADD COLUMN IF NOT EXISTS stripe_payment_intent_id TEXT DEFAULT NULL;
 
-ALTER TABLE evt_signups
-  ADD CONSTRAINT evt_signups_payment_status_check
-  CHECK (payment_status IN ('pending', 'paid', 'refunded') OR payment_status IS NULL);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'evt_signups_payment_status_check'
+  ) THEN
+    ALTER TABLE evt_signups
+      ADD CONSTRAINT evt_signups_payment_status_check
+      CHECK (payment_status IN ('pending', 'paid', 'refunded') OR payment_status IS NULL);
+  END IF;
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_evt_signups_stripe_session
   ON evt_signups(stripe_checkout_session_id);

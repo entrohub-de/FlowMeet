@@ -15,6 +15,7 @@ export default function ProfileAvatar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [nickname, setNickname] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -30,13 +31,16 @@ export default function ProfileAvatar() {
 
   useEffect(() => {
     if (!user?.id) return;
-    getProfile(user.id).then((p) => setAvatarUrl(p?.avatar_url ?? null)).catch(() => {});
+    getProfile(user.id).then((p) => {
+      setAvatarUrl(p?.avatar_url ?? null);
+      setNickname(p?.nickname ?? null);
+    }).catch(() => {});
     getUserRole(user.id).then(setUserRole).catch(() => {});
-  }, [user?.id]);
+  }, [user?.id, pathname]);
 
   if (!user) return null;
 
-  const initial = (user.email?.[0] ?? '?').toUpperCase();
+  const initial = (nickname || user.email?.[0] || '?').slice(0, 1).toUpperCase();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();

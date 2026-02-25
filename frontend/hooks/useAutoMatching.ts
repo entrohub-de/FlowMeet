@@ -23,9 +23,10 @@ export interface AutoMatchingStats {
   totalPresent: number;
   isRunning: boolean;
   connected: boolean;
+  presentUserIds: string[];
 }
 
-export function useAutoMatching(eventId: string, enabled: boolean) {
+export function useAutoMatching(eventId: string, enabled: boolean, observePresence: boolean = false) {
   const [stats, setStats] = useState<AutoMatchingStats>({
     totalRounds: 0,
     totalPaired: 0,
@@ -35,15 +36,20 @@ export function useAutoMatching(eventId: string, enabled: boolean) {
     totalPresent: 0,
     isRunning: false,
     connected: false,
+    presentUserIds: [],
   });
   const [error, setError] = useState<string | null>(null);
 
   const channelRef = useRef<RealtimeChannel | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const readyUserIdsRef = useRef<string[]>([]);
+  const presentUserIdsRef = useRef<string[]>([]);
   const isMatchingRef = useRef(false);
   const allScoresRef = useRef<number[]>([]);  // 所有轮次的 scores 用于计算全场 avgScore
   const roundCountRef = useRef(0);
+
+  // Whether to subscribe to presence channel (either for 1v1 matching or just observation)
+  const shouldObserve = enabled || observePresence;
 
   // 单轮匹配执行
   const executeMatchRound = useCallback(async () => {
@@ -147,7 +153,7 @@ export function useAutoMatching(eventId: string, enabled: boolean) {
 
   // 启动/停止自动匹配引擎
   useEffect(() => {
-    if (!enabled || !eventId) {
+    if (!shouldObserve || !eventId) {
       // 停止
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -157,7 +163,7 @@ export function useAutoMatching(eventId: string, enabled: boolean) {
         channelRef.current.unsubscribe();
         channelRef.current = null;
       }
-      setStats(prev => ({ ...prev, isRunning: false }));
+      setStats(prev => ({ ...prev, isRunning: false, connected: false, presentUserIds: [] }));
       return;
     }
 
@@ -165,11 +171,14 @@ export function useAutoMatching(eventId: string, enabled: boolean) {
     const channel = observeMatchingQueue(eventId, {
       onPresenceSync: (readyUsers: MatchingPresenceState[], allUsers: MatchingPresenceState[]) => {
         readyUserIdsRef.current = readyUsers.map(u => u.userId);
+        const allIds = allUsers.map(u => u.userId);
+        presentUserIdsRef.current = allIds;
         setStats(prev => ({
           ...prev,
           connected: true,
           readyCount: readyUsers.length,
           totalPresent: allUsers.length,
+          presentUserIds: allIds,
         }));
       },
     });
@@ -181,23 +190,25 @@ export function useAutoMatching(eventId: string, enabled: boolean) {
       setStats(prev => ({ ...prev, connected: s === 'joined' }));
     }, 3000);
 
-    // 启动定时器
-    const interval = setInterval(() => {
-      executeMatchRound();
-    }, AUTO_MATCH_INTERVAL_MS);
-    intervalRef.current = interval;
+    // 只在 1v1 匹配 enabled 时启动定时器
+    if (enabled) {
+      const interval = setInterval(() => {
+        executeMatchRound();
+      }, AUTO_MATCH_INTERVAL_MS);
+      intervalRef.current = interval;
+    }
 
-    setStats(prev => ({ ...prev, isRunning: true }));
+    setStats(prev => ({ ...prev, isRunning: enabled }));
 
     return () => {
       clearInterval(statePoller);
-      clearInterval(interval);
+      if (intervalRef.current) clearInterval(intervalRef.current);
       intervalRef.current = null;
       channel.unsubscribe();
       channelRef.current = null;
-      setStats(prev => ({ ...prev, isRunning: false, connected: false }));
+      setStats(prev => ({ ...prev, isRunning: false, connected: false, presentUserIds: [] }));
     };
-  }, [enabled, eventId, executeMatchRound]);
+  }, [shouldObserve, enabled, eventId, executeMatchRound]);
 
   // 手动触发一轮（主持人可以随时点）
   const triggerManualRound = useCallback(() => {
