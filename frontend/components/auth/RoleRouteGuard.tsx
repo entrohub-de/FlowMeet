@@ -30,7 +30,7 @@ export default function RoleRouteGuard({ area, children }: RoleRouteGuardProps) 
     if (loading) return;
 
     if (!user) {
-      routerRef.current.replace('/login');
+      routerRef.current.replace('/');
       return;
     }
 

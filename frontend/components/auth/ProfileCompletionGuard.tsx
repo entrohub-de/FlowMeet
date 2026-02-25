@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { isProfileComplete } from '@/lib/api/profile';
@@ -14,13 +14,22 @@ const EXEMPT_PATHS = ['/user/profile/complete'];
 export default function ProfileCompletionGuard({ children }: ProfileCompletionGuardProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [isComplete, setIsComplete] = useState(false);
+  const [status, setStatus] = useState<'checking' | 'complete' | 'exempt'>('checking');
+  const checkedRef = useRef(false);
 
   useEffect(() => {
-    if (EXEMPT_PATHS.some((p) => pathname.startsWith(p))) {
-      setIsComplete(true);
+    const isExempt = EXEMPT_PATHS.some((p) => pathname.startsWith(p));
+
+    if (isExempt) {
+      setStatus('exempt');
       return;
     }
+
+    // If profile was already verified complete, skip re-check
+    if (checkedRef.current && status === 'complete') return;
+
+    // Reset to checking when navigating away from exempt path
+    setStatus('checking');
 
     let cancelled = false;
 
@@ -35,7 +44,8 @@ export default function ProfileCompletionGuard({ children }: ProfileCompletionGu
       if (!complete) {
         router.replace('/user/profile/complete');
       } else {
-        setIsComplete(true);
+        checkedRef.current = true;
+        setStatus('complete');
       }
     };
 
@@ -43,7 +53,7 @@ export default function ProfileCompletionGuard({ children }: ProfileCompletionGu
     return () => { cancelled = true; };
   }, [pathname, router]);
 
-  if (!isComplete) return null;
+  if (status === 'checking') return null;
 
   return <>{children}</>;
 }
