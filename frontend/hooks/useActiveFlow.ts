@@ -109,8 +109,8 @@ export function useActiveFlow() {
         const activeFlow = await getActiveFlow(selectedEventId);
         if (cancelled) return;
 
-        if (activeFlow && activeFlow.steps && (activeFlow.steps as ActiveFlowStep[]).length > 0) {
-          const dbSteps = activeFlow.steps as ActiveFlowStep[];
+        if (activeFlow) {
+          const dbSteps = (activeFlow.steps as ActiveFlowStep[]) || [];
           const steps: FlowStep[] = dbSteps.map((step) => {
             if (
               step.status === 'active' &&

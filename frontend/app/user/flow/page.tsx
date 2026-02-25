@@ -1,6 +1,6 @@
 'use client';
 
-import { PauseCircle, Users, LogOut, MessageCircle, Code, Briefcase } from 'lucide-react';
+import { PauseCircle, Users, MessageCircle, Code, Briefcase } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 import { useActiveFlow } from '@/hooks/useActiveFlow';
 import { useFlowMatching } from '@/hooks/useFlowMatching';
@@ -73,20 +73,9 @@ export default function UserFlowPage() {
         {/* ── 1v1 匹配 ── */}
         {matching1v1Enabled && (
           <div className="bg-card rounded-2xl border border-primary/20 p-5 space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-primary" />
-                <h3 className="font-semibold">{t('userFlow.matchingOpen')}</h3>
-              </div>
-              {matchingState.phase !== 'left' && (
-                <button
-                  onClick={leave}
-                  className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground"
-                  title={t('userFlow.leave')}
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
-              )}
+            <div className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-primary" />
+              <h3 className="font-semibold">{t('userFlow.matchingOpen')}</h3>
             </div>
 
             {matchingState.phase === 'ready' && (
