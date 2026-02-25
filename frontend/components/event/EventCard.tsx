@@ -8,7 +8,6 @@ import { formatDateRange, cn, isEventFree } from '@/lib/utils';
 import { signupForEvent, cancelSignup, getUserSignupStatus, createCheckoutSession } from '@/lib/api/signup';
 
 import { supabase } from '@/lib/supabase/client';
-import PreferencesModal from './PreferencesModal';
 import EventCardActions from './EventCardActions';
 
 
@@ -28,7 +27,6 @@ export default function EventCard({ event, locale, t, initialSignedUp, onSignupC
   const [signedUp, setSignedUp] = useState(initialSignedUp ?? false);
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(initialSignedUp === undefined);
-  const [showPreferencesModal, setShowPreferencesModal] = useState(false);
 
   const [expanded, setExpanded] = useState(false);
 
@@ -82,7 +80,6 @@ export default function EventCard({ event, locale, t, initialSignedUp, onSignupC
           setSignedUp(true);
           onSignupChange?.(event.event_id, true);
           toast.success(t('ux.toast.signupSuccess', { name: event.name }));
-          setShowPreferencesModal(true);
           setSigningUp(false);
           return;
         }
@@ -98,8 +95,10 @@ export default function EventCard({ event, locale, t, initialSignedUp, onSignupC
   return (
     <div
       className={cn(
-        'bg-card rounded-2xl overflow-hidden transition-all duration-300 shadow-sm',
-        fadingOut && 'opacity-0 scale-95 pointer-events-none',
+        'bg-card rounded-2xl overflow-hidden shadow-sm transition-all',
+        fadingOut
+          ? 'opacity-0 scale-[0.96] -translate-y-1 pointer-events-none duration-700 ease-out'
+          : 'opacity-100 scale-100 translate-y-0 duration-300',
       )}
     >
       <div className="flex">
@@ -187,16 +186,6 @@ export default function EventCard({ event, locale, t, initialSignedUp, onSignupC
           />
         </div>
       </div>
-
-      {/* Preferences Modal */}
-      {showPreferencesModal && userId && (
-        <PreferencesModal
-          eventId={event.event_id}
-          userId={userId}
-          t={t}
-          onClose={() => setShowPreferencesModal(false)}
-        />
-      )}
     </div>
   );
 }

@@ -31,15 +31,9 @@ export async function getUserExpectation(
     .eq('event_id', eventId)
     .eq('user_id', userId)
     .eq('status', 'active')
-    .single();
+    .maybeSingle();
 
-  if (error) {
-    if (error.code === 'PGRST116') {
-      // No rows returned
-      return null;
-    }
-    throw error;
-  }
+  if (error) throw error;
   return data;
 }
 

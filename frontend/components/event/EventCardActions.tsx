@@ -1,8 +1,9 @@
 'use client';
 
+import { useRef } from 'react';
 import { CheckCircle2, X } from 'lucide-react';
 import SwipeToSignup from './SwipeToSignup';
-import { formatPrice, isEventFree } from '@/lib/utils';
+import { formatPrice, isEventFree, cn } from '@/lib/utils';
 
 interface EventCardActionsProps {
   loading: boolean;
@@ -16,6 +17,10 @@ interface EventCardActionsProps {
 }
 
 export default function EventCardActions({ loading, signedUp, signingUp, userId, onSignup, priceCents, currency, t }: EventCardActionsProps) {
+  // Track if this card transitioned from unsigned → signed (discover card signup)
+  // vs. mounted already signed (my-events card) — only animate in the former case
+  const wasUnsigned = useRef(!signedUp);
+
   if (loading) {
     return (
       <div className="pt-2 border-t border-border">
@@ -28,7 +33,10 @@ export default function EventCardActions({ loading, signedUp, signingUp, userId,
 
   if (signedUp) {
     return (
-      <div className="pt-2 border-t border-border">
+      <div className={cn(
+        "pt-2 border-t border-border",
+        wasUnsigned.current && "animate-slide-up-fade-slow"
+      )}>
         <div className="flex items-center gap-2">
           <span className="px-3 py-1.5 rounded-full bg-green-100 text-green-700 border border-green-200 font-medium text-sm inline-flex items-center">
             <CheckCircle2 className="w-3.5 h-3.5 mr-1" />

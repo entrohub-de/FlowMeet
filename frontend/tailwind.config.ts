@@ -112,6 +112,7 @@ const config: Config = {
         'matching-pulse': 'matching-pulse 2s ease-in-out infinite',
         'match-celebrate': 'match-celebrate 0.4s ease-out',
         'slide-up-fade': 'slide-up-fade 0.4s ease-out',
+        'slide-up-fade-slow': 'slide-up-fade 0.7s ease-out',
         'breathing': 'breathing 2s ease-in-out infinite',
       },
       keyframes: {

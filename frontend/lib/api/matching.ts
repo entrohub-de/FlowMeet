@@ -22,7 +22,7 @@ export async function getMatchPreference(
     .select('preference_id, event_id, user_id, preferred_topics, availability, notes, networking_intent, created_at, updated_at')
     .eq('event_id', eventId)
     .eq('user_id', userId)
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error('Error fetching match preference:', error);

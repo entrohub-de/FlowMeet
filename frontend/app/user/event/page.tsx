@@ -89,20 +89,22 @@ export default function EventPage() {
 
   const handleSignupChange = useCallback((eventId: string, signedUp: boolean) => {
     if (signedUp) {
-      // Step 1: Mark as fading out (still in "discover" for 2s)
-      setFadingOutIds(prev => new Set(prev).add(eventId));
+      // Phase 1: Let user enjoy the success state (confetti, green check) for 800ms
+      // Phase 2: Start fade-out animation
+      setTimeout(() => {
+        setFadingOutIds(prev => new Set(prev).add(eventId));
+      }, 800);
 
-      // Step 2: After delay, move to "my events"
+      // Phase 3: After fade completes, move to "my events"
       setTimeout(() => {
         setSignupSet(prev => { const next = new Set(prev); next.add(eventId); return next; });
         setFadingOutIds(prev => { const next = new Set(prev); next.delete(eventId); return next; });
         setJustSignedUpIds(prev => new Set(prev).add(eventId));
 
-        // Clear the "just signed up" highlight after animation
         setTimeout(() => {
           setJustSignedUpIds(prev => { const next = new Set(prev); next.delete(eventId); return next; });
         }, 600);
-      }, 1800);
+      }, 800 + 700);
     } else {
       setSignupSet(prev => { const next = new Set(prev); next.delete(eventId); return next; });
     }
