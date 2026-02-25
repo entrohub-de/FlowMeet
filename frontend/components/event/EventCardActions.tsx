@@ -61,6 +61,7 @@ export default function EventCardActions({ loading, signedUp, signingUp, userId,
         label={label}
         disabled={signingUp || !userId}
         onSwipeComplete={onSignup}
+        completedLabel={!isFree ? t('user.redirectingToPayment') : undefined}
       />
     </div>
   );

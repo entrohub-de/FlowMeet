@@ -235,6 +235,7 @@
     "locationTbd": "待定",
     "signupBtn": "立即报名",
     "swipeToSignup": "滑动报名 →",
+    "redirectingToPayment": "跳转支付中...",
     "signedUp": "已报名",
     "cancelSignup": "取消报名",
     "checkinQRCode": "扫描二维码签到",

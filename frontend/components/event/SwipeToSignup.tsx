@@ -8,12 +8,13 @@ interface SwipeToSignupProps {
   label: string;
   onSwipeComplete: () => Promise<void> | void;
   disabled?: boolean;
+  completedLabel?: string;
 }
 
 const THUMB_SIZE = 64;
 const COMPLETE_THRESHOLD = 0.85;
 
-export default function SwipeToSignup({ label, onSwipeComplete, disabled }: SwipeToSignupProps) {
+export default function SwipeToSignup({ label, onSwipeComplete, disabled, completedLabel }: SwipeToSignupProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [offsetX, setOffsetX] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -47,7 +48,7 @@ export default function SwipeToSignup({ label, onSwipeComplete, disabled }: Swip
     if (completedRef.current) return;
     completedRef.current = true;
     setCompleted(true);
-    fireConfetti();
+    if (!completedLabel) fireConfetti();
     await onSwipeComplete();
   }, [onSwipeComplete, fireConfetti]);
 
@@ -131,7 +132,7 @@ export default function SwipeToSignup({ label, onSwipeComplete, disabled }: Swip
       ref={trackRef}
       className={`relative w-full h-button rounded-xl overflow-hidden select-none ${
         disabled ? 'opacity-50 cursor-not-allowed' : ''
-      } ${completed ? 'bg-green-500' : 'bg-primary/15'}`}
+      } ${completed ? (completedLabel ? 'bg-primary/20' : 'bg-green-500') : 'bg-primary/15'}`}
       style={{ touchAction: 'pan-y' }}
     >
       {/* Filled track */}
@@ -147,9 +148,12 @@ export default function SwipeToSignup({ label, onSwipeComplete, disabled }: Swip
         className={`absolute inset-0 flex items-center justify-center text-sm font-medium transition-opacity ${
           completed ? 'text-white' : 'text-primary'
         }`}
-        style={{ opacity: completed ? 1 : Math.max(0, 1 - progress * 1.5) }}
+        style={{
+          opacity: completed ? 1 : Math.max(0, 1 - progress * 1.5),
+          paddingLeft: completed ? 0 : THUMB_SIZE,
+        }}
       >
-        {completed ? '🎉' : label}
+        {completed ? (completedLabel || '🎉') : label}
       </div>
 
       {/* Draggable thumb */}
