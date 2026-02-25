@@ -106,10 +106,10 @@ export default function HostVenuesPage() {
     <div className="min-h-[calc(100vh-60px)] p-4">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex justify-end">
+        <div>
           <button
             onClick={openCreateVenue}
-            className="flex items-center gap-2 px-button h-button rounded-button bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium whitespace-nowrap"
+            className="flex items-center justify-center gap-2 w-full px-button h-button rounded-button bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium"
           >
             <Plus className="w-5 h-5" />
             {t('venue.createVenue')}
