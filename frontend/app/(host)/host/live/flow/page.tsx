@@ -27,15 +27,28 @@ export default function FlowControlPage() {
   });
   const [mixedGroupGenerating, setMixedGroupGenerating] = useState(false);
 
+  const STORAGE_KEY = 'flowmeet_host_selected_event';
+  const EXPIRY_MS = 3 * 60 * 60 * 1000; // 3 hours
+
   useEffect(() => {
     const init = async () => {
       try {
         const eventsData = await getEvents();
         const activeEvents = eventsData.filter((e) => e.status === 'active');
         setEvents(activeEvents);
-        if (activeEvents.length > 0) {
-          setSelectedEventId(activeEvents[0].event_id);
-        }
+
+        // Restore from localStorage if within 3 hours
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (stored) {
+            const { eventId, timestamp } = JSON.parse(stored);
+            if (Date.now() - timestamp < EXPIRY_MS && activeEvents.some((e) => e.event_id === eventId)) {
+              setSelectedEventId(eventId);
+              return;
+            }
+            localStorage.removeItem(STORAGE_KEY);
+          }
+        } catch { /* ignore parse errors */ }
       } catch (error) {
         console.error('Failed to load events:', error);
       } finally {
@@ -101,6 +114,9 @@ export default function FlowControlPage() {
     setSelectedEventId(eventId);
     setPermissions({ matching_1v1_enabled: false, matching_group_enabled: false, matching_mixed_group_enabled: false });
     restoredRef.current = null;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ eventId, timestamp: Date.now() }));
+    } catch { /* quota exceeded etc */ }
   }, [selectedEventId]);
 
   // Auto-generate mixed groups when permission is toggled on and online users are available

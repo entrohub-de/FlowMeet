@@ -1,9 +1,12 @@
 import { supabase } from '../supabase/client';
 import type { Group } from '@/types/domain';
 
+type IdentityType = 'engineering' | 'non_engineering';
+
 interface GroupMember {
   user_id: string;
   joined_at: string;
+  identity?: IdentityType;
   profile?: {
     user_id: string;
     nickname: string;
@@ -56,17 +59,21 @@ export async function getGroupMembers(groupId: string): Promise<GroupMember[]> {
 
   const userIds = members.map((m) => m.user_id);
 
-  const { data: profiles } = await supabase
-    .from('usr_profiles')
-    .select('*')
-    .in('user_id', userIds);
+  const [{ data: profiles }, { data: preferences }] = await Promise.all([
+    supabase.from('usr_profiles').select('*').in('user_id', userIds),
+    supabase.from('usr_preferences').select('user_id, industry_background').in('user_id', userIds),
+  ]);
 
   const profileMap = new Map(profiles?.map((p) => [p.user_id, p]) || []);
+  const prefsMap = new Map(preferences?.map((p) => [p.user_id, p.industry_background]) || []);
 
-  return members.map((member) => ({
-    ...member,
-    profile: profileMap.get(member.user_id),
-  }));
+  return members.map((member) => {
+    const bg = prefsMap.get(member.user_id) as string | null;
+    const identity: IdentityType | undefined = bg
+      ? (bg.includes('engineer') ? 'engineering' : 'non_engineering')
+      : undefined;
+    return { ...member, profile: profileMap.get(member.user_id), identity };
+  });
 }
 
 /**

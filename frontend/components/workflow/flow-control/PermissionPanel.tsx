@@ -1,6 +1,6 @@
 'use client';
 
-import { Users, UserCheck, Shuffle, Zap, ZapOff, AlertCircle } from 'lucide-react';
+import { Users, UserCheck, Shuffle, AlertCircle } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 import type { AutoMatchingStats } from '@/hooks/useAutoMatching';
 import type { ActiveFlowPermissions } from '@/types/domain';
@@ -164,53 +164,11 @@ export default function PermissionPanel({
           </div>
         </div>
 
-        {/* 自动匹配引擎状态 */}
-        {permissions.matching_1v1_enabled && (
-          <div className="p-3 rounded-xl bg-primary/5 border border-primary/10 space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                {autoMatchingStats.isRunning ? (
-                  <Zap className="w-4 h-4 text-primary animate-pulse" />
-                ) : (
-                  <ZapOff className="w-4 h-4 text-muted-foreground" />
-                )}
-                <span className="text-sm font-medium">
-                  {t('hostFlow.autoMatchEngine') || '自动匹配引擎'}
-                </span>
-              </div>
-              <button
-                onClick={onTriggerManualRound}
-                className="text-xs px-2 py-1 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-              >
-                {t('hostFlow.triggerNow') || '立即匹配'}
-              </button>
-            </div>
-
-            <div className="grid grid-cols-4 gap-2 text-center">
-              <div>
-                <p className="text-lg font-semibold">{autoMatchingStats.readyCount}</p>
-                <p className="text-[10px] text-muted-foreground">{t('hostFlow.readyCount') || '等待中'}</p>
-              </div>
-              <div>
-                <p className="text-lg font-semibold">{autoMatchingStats.totalRounds}</p>
-                <p className="text-[10px] text-muted-foreground">{t('hostFlow.totalRounds') || '总轮次'}</p>
-              </div>
-              <div>
-                <p className="text-lg font-semibold">{autoMatchingStats.totalPaired}</p>
-                <p className="text-[10px] text-muted-foreground">{t('hostFlow.totalPaired') || '总配对'}</p>
-              </div>
-              <div>
-                <p className="text-lg font-semibold">{autoMatchingStats.avgScore}</p>
-                <p className="text-[10px] text-muted-foreground">{t('hostFlow.avgScore') || '平均分'}</p>
-              </div>
-            </div>
-
-            {autoMatchingError && (
-              <div className="flex items-center gap-2 text-destructive text-xs">
-                <AlertCircle className="w-3 h-3" />
-                <span>{autoMatchingError}</span>
-              </div>
-            )}
+        {/* 匹配错误提示 */}
+        {permissions.matching_1v1_enabled && autoMatchingError && (
+          <div className="flex items-center gap-2 text-destructive text-xs p-3 rounded-xl bg-destructive/5 border border-destructive/10">
+            <AlertCircle className="w-3 h-3" />
+            <span>{autoMatchingError}</span>
           </div>
         )}
       </div>

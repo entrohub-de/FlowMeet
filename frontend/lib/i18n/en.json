@@ -143,6 +143,7 @@
     "rejoin": "Rejoin",
     "waitingHint": "Waiting to start",
     "mixedGroupTitle": "Group Discussion",
+    "memberCount": "members",
     "waitingForGroup": "Waiting for host to assign groups...",
     "matchingOpen": "1v1 Matching is Open",
     "joinMatching": "Join Matching",
