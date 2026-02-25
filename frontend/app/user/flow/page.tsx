@@ -272,70 +272,64 @@ function IdentitySection({
   state: ReturnType<typeof import('@/hooks/useGroupIdentity').useGroupIdentity>['state'];
   onSelect: (id: IdentityType) => void;
 }) {
-  const cards: { type: IdentityType; label: string; icon: typeof Code; count: number }[] = [
-    { type: 'engineering', label: t('groupIdentity.engineering'), icon: Code, count: state.engineeringCount },
-    { type: 'non_engineering', label: t('groupIdentity.nonEngineering'), icon: Briefcase, count: state.nonEngineeringCount },
+  const selected = state.myIdentity;
+  const selectedColors = selected ? IDENTITY_COLORS[selected] : null;
+
+  const cards: { type: IdentityType; label: string; icon: typeof Code }[] = [
+    { type: 'engineering', label: t('groupIdentity.engineering'), icon: Code },
+    { type: 'non_engineering', label: t('groupIdentity.nonEngineering'), icon: Briefcase },
   ];
 
+  // After selection: show a large color beacon
+  if (selected && selectedColors) {
+    const Icon = selected === 'engineering' ? Code : Briefcase;
+    const label = selected === 'engineering'
+      ? t('groupIdentity.engineering')
+      : t('groupIdentity.nonEngineering');
+
+    return (
+      <div
+        className={`rounded-2xl border-2 ${selectedColors.border} ${selectedColors.bg} p-8 text-center space-y-4 transition-all duration-500`}
+      >
+        <div className={`w-20 h-20 mx-auto rounded-full ${selectedColors.bg} flex items-center justify-center`}>
+          <Icon className={`w-10 h-10 ${selectedColors.text}`} />
+        </div>
+        <p className={`text-xl font-bold ${selectedColors.text}`}>{label}</p>
+        <button
+          onClick={() => onSelect(selected === 'engineering' ? 'non_engineering' : 'engineering')}
+          className="mt-2 px-5 py-2 rounded-full text-sm font-medium text-foreground border border-border bg-white shadow-sm hover:shadow-md transition-all"
+        >
+          {t('groupIdentity.switchIdentity')}
+        </button>
+      </div>
+    );
+  }
+
+  // Before selection: show choice cards
   return (
     <div className="bg-card rounded-2xl border border-border p-5 space-y-4">
-      <h3 className="font-semibold text-sm">{t('groupIdentity.title')}</h3>
+      <div className="space-y-1">
+        <h3 className="font-semibold">{t('groupIdentity.title')}</h3>
+        <p className="text-xs text-muted-foreground">{t('groupIdentity.subtitle')}</p>
+      </div>
 
-      {/* 身份选择卡片 */}
       <div className="grid grid-cols-2 gap-3">
-        {cards.map(({ type, label, icon: Icon, count }) => {
-          const selected = state.myIdentity === type;
+        {cards.map(({ type, label, icon: Icon }) => {
           const colors = IDENTITY_COLORS[type];
           return (
             <button
               key={type}
               onClick={() => onSelect(type)}
-              className={`relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all touch-feedback ${
-                selected
-                  ? `${colors.bg} ${colors.border} shadow-sm`
-                  : 'border-border bg-muted/30 opacity-60 hover:opacity-80'
-              }`}
+              className="flex flex-col items-center gap-3 p-5 rounded-xl border-2 border-border hover:border-current transition-all touch-feedback hover:shadow-sm"
             >
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                selected ? colors.bg : 'bg-muted'
-              }`}>
-                <Icon className={`w-5 h-5 ${selected ? colors.text : 'text-muted-foreground'}`} />
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${colors.bg}`}>
+                <Icon className={`w-6 h-6 ${colors.text}`} />
               </div>
-              <span className={`text-sm font-medium ${selected ? colors.text : 'text-muted-foreground'}`}>
-                {label}
-              </span>
-              <span className={`text-xs ${selected ? colors.text : 'text-muted-foreground'}`}>
-                {count}
-              </span>
+              <span className={`text-sm font-semibold ${colors.text}`}>{label}</span>
             </button>
           );
         })}
       </div>
-
-      {/* 参与者列表 */}
-      {state.participants.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-xs text-muted-foreground font-medium">
-            {t('groupIdentity.participants')} ({state.totalCount})
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {state.participants.map((p) => {
-              const colors = p.identity ? IDENTITY_COLORS[p.identity] : null;
-              return (
-                <span
-                  key={p.userId}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted/50 text-xs"
-                >
-                  <span className={`w-2 h-2 rounded-full shrink-0 ${colors?.dot ?? 'bg-gray-300'}`} />
-                  <span className="truncate max-w-[80px]">
-                    {p.nickname || '?'}
-                  </span>
-                </span>
-              );
-            })}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

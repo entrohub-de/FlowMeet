@@ -158,10 +158,12 @@
     "matchingClosed": "Matching not open"
   },
   "groupIdentity": {
-    "title": "Choose Your Identity",
+    "title": "What's your role?",
+    "subtitle": "Your phone will light up in your color — find others with the same color",
     "engineering": "Engineering",
     "nonEngineering": "Non-Engineering",
-    "participants": "Online Participants",
+    "selectedHint": "Hold up your phone and find your color match!",
+    "switchIdentity": "Switch role",
     "you": "You"
   },
   "flowMatching": {

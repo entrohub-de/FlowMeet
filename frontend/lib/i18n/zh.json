@@ -158,10 +158,12 @@
     "matchingClosed": "匹配未开放"
   },
   "groupIdentity": {
-    "title": "选择你的身份",
+    "title": "你的身份是？",
+    "subtitle": "选择后，手机会亮起对应颜色，找到同色的人就是你的同伴",
     "engineering": "工程类",
     "nonEngineering": "非工程类",
-    "participants": "在线参与者",
+    "selectedHint": "举起手机，找到同色的伙伴吧",
+    "switchIdentity": "切换身份",
     "you": "你"
   },
   "flowMatching": {
