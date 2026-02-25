@@ -21,7 +21,7 @@ export default function UserFlowPage() {
   const matching1v1Enabled = permissions?.matching_1v1_enabled ?? false;
   const groupEnabled = permissions?.matching_group_enabled ?? false;
 
-  const { state: matchingState, goReady, cancelReady, finishChat, leave, rejoin } = useFlowMatching(
+  const { state: matchingState, goReady, cancelReady, finishChat, rejoin } = useFlowMatching(
     selectedEventId,
     '1v1',
     matching1v1Enabled
@@ -74,7 +74,12 @@ export default function UserFlowPage() {
         {matching1v1Enabled && (
           <div className="bg-card rounded-2xl border border-primary/20 p-5 space-y-4">
             <div className="flex items-center gap-2">
-              <Users className="w-5 h-5 text-primary" />
+              <span className="relative flex h-2.5 w-2.5">
+                {matchingState.connected && (
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                )}
+                <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${matchingState.connected ? 'bg-green-500' : 'bg-gray-300'}`} />
+              </span>
               <h3 className="font-semibold">{t('userFlow.matchingOpen')}</h3>
             </div>
 

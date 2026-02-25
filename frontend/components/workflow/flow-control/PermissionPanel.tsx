@@ -97,9 +97,17 @@ export default function PermissionPanel({
 
       {/* 实时看板 */}
       <div className="bg-card rounded-2xl border border-border p-4 space-y-3">
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-          {t('hostFlow.liveStats') || '实时看板'}
-        </h3>
+        <div className="flex items-center gap-2">
+          <span className="relative flex h-2.5 w-2.5">
+            {autoMatchingStats.connected && (
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+            )}
+            <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${autoMatchingStats.connected ? 'bg-green-500' : 'bg-gray-300'}`} />
+          </span>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            {t('hostFlow.liveStats') || '实时看板'}
+          </h3>
+        </div>
 
         <div className="grid grid-cols-3 gap-3">
           <div className="text-center p-3 rounded-xl bg-muted/50">

@@ -32,6 +32,7 @@ export interface FlowMatchingState {
   totalPresent: number;
   partner: MatchPartner | null;
   isUnpaired: boolean;
+  connected: boolean;
 }
 
 export function useFlowMatching(
@@ -44,6 +45,7 @@ export function useFlowMatching(
   const [totalPresent, setTotalPresent] = useState(0);
   const [partner, setPartnerState] = useState<MatchPartner | null>(null);
   const [isUnpaired, setIsUnpaired] = useState(false);
+  const [connected, setConnected] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
 
   const channelRef = useRef<RealtimeChannel | null>(null);
@@ -134,6 +136,7 @@ export function useFlowMatching(
       readyUsers: MatchingPresenceState[],
       allUsers: MatchingPresenceState[]
     ) => {
+      setConnected(true);
       setReadyCount(readyUsers.length);
       setTotalPresent(allUsers.length);
 
@@ -212,9 +215,31 @@ export function useFlowMatching(
     });
     channelRef.current = channel;
 
+    // Poll channel state to detect disconnects and auto-reconnect
+    let reconnecting = false;
+    const statePoller = setInterval(async () => {
+      const s = channel.state;
+      const isJoined = s === 'joined';
+      setConnected(isJoined);
+
+      // Auto-reconnect: if disconnected and not already reconnecting
+      if (!isJoined && !reconnecting && !matchedRef.current) {
+        reconnecting = true;
+        try {
+          channel.unsubscribe();
+          channelRef.current = null;
+          setJoinTrigger(n => n + 1);
+        } finally {
+          reconnecting = false;
+        }
+      }
+    }, 3000);
+
     return () => {
+      clearInterval(statePoller);
       channel.unsubscribe();
       channelRef.current = null;
+      setConnected(false);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pairingMode, enabled, userId, eventId, joinTrigger, setPartner]);
@@ -299,6 +324,7 @@ export function useFlowMatching(
     totalPresent,
     partner,
     isUnpaired,
+    connected,
   };
 
   return { state, goReady, cancelReady, finishChat, leave, rejoin };

@@ -22,6 +22,7 @@ export interface AutoMatchingStats {
   readyCount: number;
   totalPresent: number;
   isRunning: boolean;
+  connected: boolean;
 }
 
 export function useAutoMatching(eventId: string, enabled: boolean) {
@@ -33,6 +34,7 @@ export function useAutoMatching(eventId: string, enabled: boolean) {
     readyCount: 0,
     totalPresent: 0,
     isRunning: false,
+    connected: false,
   });
   const [error, setError] = useState<string | null>(null);
 
@@ -165,12 +167,19 @@ export function useAutoMatching(eventId: string, enabled: boolean) {
         readyUserIdsRef.current = readyUsers.map(u => u.userId);
         setStats(prev => ({
           ...prev,
+          connected: true,
           readyCount: readyUsers.length,
           totalPresent: allUsers.length,
         }));
       },
     });
     channelRef.current = channel;
+
+    // Poll channel state to detect disconnects
+    const statePoller = setInterval(() => {
+      const s = channel.state;
+      setStats(prev => ({ ...prev, connected: s === 'joined' }));
+    }, 3000);
 
     // 启动定时器
     const interval = setInterval(() => {
@@ -181,11 +190,12 @@ export function useAutoMatching(eventId: string, enabled: boolean) {
     setStats(prev => ({ ...prev, isRunning: true }));
 
     return () => {
+      clearInterval(statePoller);
       clearInterval(interval);
       intervalRef.current = null;
       channel.unsubscribe();
       channelRef.current = null;
-      setStats(prev => ({ ...prev, isRunning: false }));
+      setStats(prev => ({ ...prev, isRunning: false, connected: false }));
     };
   }, [enabled, eventId, executeMatchRound]);
 
