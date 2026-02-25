@@ -21,6 +21,7 @@ export default function ProfilePage() {
   const { t } = useTranslation();
 
   const [nickname, setNickname] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [gender, setGender] = useState('');
   const [ageGroup, setAgeGroup] = useState('');
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
@@ -42,6 +43,7 @@ export default function ProfilePage() {
       ]);
       if (profile) {
         setNickname(profile.nickname ?? '');
+        setAvatarUrl(profile.avatar_url ?? null);
         setGender(profile.gender ?? '');
         setAgeGroup(profile.age_group ?? '');
       }
@@ -123,7 +125,9 @@ export default function ProfilePage() {
 
       <div className="max-w-lg mx-auto space-y-4 relative z-10">
         <ProfileHeaderCard
+          userId={user?.id}
           nickname={nickname}
+          avatarUrl={avatarUrl}
           gender={gender}
           ageGroup={ageGroup}
           email={user?.email}
@@ -134,6 +138,7 @@ export default function ProfilePage() {
           onNicknameChange={setNickname}
           onGenderChange={setGender}
           onAgeGroupChange={setAgeGroup}
+          onAvatarChange={setAvatarUrl}
         />
 
         <PreferencesCard

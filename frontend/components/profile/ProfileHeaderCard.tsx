@@ -3,6 +3,7 @@
 import { useTranslation } from '@/lib/i18n/context';
 import { cn } from '@/lib/utils';
 import { Pencil, Check, Mail } from 'lucide-react';
+import AvatarUpload from '@/components/profile/AvatarUpload';
 
 const GENDER_OPTIONS = ['male', 'female', 'other'] as const;
 const AGE_GROUP_OPTIONS = ['18-24', '25-34', '35-44', '45+'] as const;
@@ -16,7 +17,9 @@ const chipClass = (selected: boolean) =>
   );
 
 interface ProfileHeaderCardProps {
+  userId?: string;
   nickname: string;
+  avatarUrl?: string | null;
   gender: string;
   ageGroup: string;
   email: string | undefined;
@@ -27,10 +30,13 @@ interface ProfileHeaderCardProps {
   onNicknameChange: (v: string) => void;
   onGenderChange: (v: string) => void;
   onAgeGroupChange: (v: string) => void;
+  onAvatarChange?: (url: string) => void;
 }
 
 export default function ProfileHeaderCard({
+  userId,
   nickname,
+  avatarUrl,
   gender,
   ageGroup,
   email,
@@ -41,13 +47,25 @@ export default function ProfileHeaderCard({
   onNicknameChange,
   onGenderChange,
   onAgeGroupChange,
+  onAvatarChange,
 }: ProfileHeaderCardProps) {
   const { t } = useTranslation();
 
   return (
     <div className="bg-card/80 backdrop-blur-sm border border-border rounded-2xl p-5 shadow-sm">
-      {/* Top row: info + edit button */}
+      {/* Top row: avatar + info + edit button */}
       <div className="flex items-start gap-4">
+        {/* Avatar */}
+        {userId && (
+          <AvatarUpload
+            userId={userId}
+            avatarUrl={avatarUrl ?? null}
+            nickname={nickname}
+            size="sm"
+            onAvatarChange={onAvatarChange}
+          />
+        )}
+
         {/* Info */}
         <div className="flex-1 min-w-0">
           <h1 className="text-lg font-bold text-foreground truncate">

@@ -8,6 +8,7 @@ import { useTranslation } from '@/lib/i18n/context';
 import { upsertProfile, upsertPreferences, getProfile, getPreferences } from '@/lib/api/profile';
 import { cn } from '@/lib/utils';
 import { parsePreferenceString } from '@/lib/preference-options';
+import AvatarUpload from '@/components/profile/AvatarUpload';
 
 type IdentityType = 'engineering' | 'non_engineering';
 
@@ -25,6 +26,7 @@ export default function ProfileCompletePage() {
   const [loading, setLoading] = useState(true);
 
   const [nickname, setNickname] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [identity, setIdentity] = useState<IdentityType | null>(null);
 
   useEffect(() => {
@@ -37,6 +39,7 @@ export default function ProfileCompletePage() {
         ]);
         if (profile) {
           setNickname(profile.nickname ?? '');
+          setAvatarUrl(profile.avatar_url ?? null);
         }
         if (prefs) {
           const existing = parsePreferenceString(prefs.industry_background);
@@ -118,6 +121,19 @@ export default function ProfileCompletePage() {
         </p>
 
         <div className="bg-card/80 border border-border rounded-2xl shadow-lg backdrop-blur-sm p-6 space-y-6">
+          {/* 头像 */}
+          {user?.id && (
+            <div className="flex justify-center">
+              <AvatarUpload
+                userId={user.id}
+                avatarUrl={avatarUrl}
+                nickname={nickname}
+                size="lg"
+                onAvatarChange={setAvatarUrl}
+              />
+            </div>
+          )}
+
           {/* 昵称 */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground" htmlFor="nickname">

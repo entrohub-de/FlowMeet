@@ -1,6 +1,6 @@
 'use client';
 
-import { PauseCircle, Users, MessageCircle, Code, Briefcase } from 'lucide-react';
+import { PauseCircle, Users, Code, Briefcase } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 import { useActiveFlow } from '@/hooks/useActiveFlow';
 import { useFlowMatching } from '@/hooks/useFlowMatching';
@@ -73,15 +73,7 @@ export default function UserFlowPage() {
         {/* ── 1v1 匹配 ── */}
         {matching1v1Enabled && (
           <div className="bg-card rounded-2xl border border-primary/20 p-5 space-y-4">
-            <div className="flex items-center gap-2">
-              <span className="relative flex h-2.5 w-2.5">
-                {matchingState.connected && (
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                )}
-                <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${matchingState.connected ? 'bg-green-500' : 'bg-gray-300'}`} />
-              </span>
-              <h3 className="font-semibold">{t('userFlow.matchingOpen')}</h3>
-            </div>
+            <h3 className="font-semibold">{t('userFlow.matchingOpen')}</h3>
 
             {matchingState.phase === 'ready' && (
               <button
@@ -113,9 +105,17 @@ export default function UserFlowPage() {
             {matchingState.phase === 'chatting' && matchingState.partner && (
               <div className="space-y-4">
                 <div className="text-center space-y-1">
-                  <div className="w-12 h-12 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
-                    <MessageCircle className="w-6 h-6 text-primary" />
-                  </div>
+                  {matchingState.partner.profile?.avatar_url ? (
+                    <img
+                      src={matchingState.partner.profile.avatar_url}
+                      alt=""
+                      className="w-16 h-16 mx-auto rounded-full object-cover border-2 border-primary/20"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center text-xl font-bold text-primary">
+                      {(matchingState.partner.profile?.nickname ?? '?')[0]}
+                    </div>
+                  )}
                   <p className="text-lg font-semibold">{t('userFlow.chatting')}</p>
                   <p className="text-sm text-muted-foreground">
                     {matchingState.partner.profile?.nickname || t('userFlow.anonymous')}
