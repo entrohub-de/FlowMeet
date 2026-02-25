@@ -135,7 +135,7 @@ export default function ProfileCompletePage() {
   ];
 
   return (
-    <div className="relative min-h-[calc(100vh-60px)] flex items-center justify-center p-4 bg-muted/30 overflow-hidden">
+    <div className="relative min-h-[calc(100vh-60px)] flex items-start justify-center pt-6 sm:pt-12 p-4 bg-muted/30 overflow-hidden">
       <div className="pointer-events-none absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full bg-primary/[0.12] blur-[120px]" />
       <div className="pointer-events-none absolute -bottom-32 -left-32 w-[400px] h-[400px] rounded-full bg-accent/[0.08] blur-[100px]" />
 
