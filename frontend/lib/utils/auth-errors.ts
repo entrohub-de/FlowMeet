@@ -5,6 +5,8 @@ const AUTH_ERROR_MAP: Record<string, { zh: string; en: string }> = {
   'Password should be at least 6 characters': { zh: '密码至少需要 6 个字符', en: 'Password must be at least 6 characters' },
   'Email rate limit exceeded': { zh: '操作过于频繁，请稍后再试', en: 'Too many requests, please try again later' },
   'Signup requires a valid password': { zh: '请输入有效密码', en: 'Please enter a valid password' },
+  'Error sending confirmation email': { zh: '发送验证邮件失败，请稍后重试', en: 'Failed to send confirmation email, please try again later' },
+  'error sending confirmation email': { zh: '发送验证邮件失败，请稍后重试', en: 'Failed to send confirmation email, please try again later' },
 };
 
 export function localizeAuthError(message: string, locale: string): string {

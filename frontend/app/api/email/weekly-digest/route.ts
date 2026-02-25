@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Resend } from 'resend';
 import { createServerClient } from '@/lib/supabase/server';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+export const dynamic = 'force-dynamic';
+
+async function getResend() {
+  const { Resend } = await import('resend');
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 const emailContent = {
   zh: {
@@ -147,6 +151,7 @@ export async function GET(request: NextRequest) {
     ) => {
       try {
         const t = emailContent[locale];
+        const resend = await getResend();
         const result = await resend.emails.send({
           from: 'Entrohub <noreply@updates.entrohub.io>',
           to: toEmail,
