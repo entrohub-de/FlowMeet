@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
+import { supabase } from '@/lib/supabase/client';
 import zh from './zh.json';
 import en from './en.json';
 
@@ -41,6 +42,11 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   const setLocale = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale);
     localStorage.setItem('locale', newLocale);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        supabase.from('usr_profiles').update({ preferred_locale: newLocale }).eq('user_id', session.user.id).then(() => {});
+      }
+    });
   }, []);
 
   const t = useCallback(

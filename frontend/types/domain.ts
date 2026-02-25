@@ -104,6 +104,7 @@ export interface Profile {
   gender: string | null;
   age_group: string | null;
   avatar_url?: string | null;
+  preferred_locale?: string | null;
 }
 
 export interface Preferences {
