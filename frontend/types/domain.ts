@@ -399,6 +399,9 @@ export interface Connection {
   requested_by: string;
   user1_note: string | null;
   user2_note: string | null;
+  user1_interested: boolean;
+  user2_interested: boolean;
+  mutual_interest_notified_at: string | null;
   connected_at: string | null;
   created_at: string;
   updated_at: string;

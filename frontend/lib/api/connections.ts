@@ -18,6 +18,8 @@ export interface Connection {
   connected_at: string;
   status: 'pending' | 'accepted' | 'declined';
   direction: 'sent' | 'received' | null;
+  interested: boolean;
+  mutual_interest: boolean;
 }
 
 /**
@@ -65,8 +67,10 @@ export async function getUserConnections(userId: string): Promise<Connection[]> 
 
   return (rows as ConnectionEntity[]).map((r) => {
     const partnerId = r.user1_id === userId ? r.user2_id : r.user1_id;
+    const isUser1 = r.user1_id === userId;
     const profile = profileMap.get(partnerId);
-    const myNote = r.user1_id === userId ? r.user1_note : r.user2_note;
+    const myNote = isUser1 ? r.user1_note : r.user2_note;
+    const myInterested = isUser1 ? r.user1_interested : r.user2_interested;
     return {
       user_id: partnerId,
       nickname: profile?.nickname ?? null,
@@ -80,6 +84,8 @@ export async function getUserConnections(userId: string): Promise<Connection[]> 
       connected_at: r.connected_at ?? r.created_at,
       status: r.status,
       direction: null,
+      interested: myInterested,
+      mutual_interest: r.user1_interested && r.user2_interested,
     };
   });
 }
@@ -120,6 +126,7 @@ export async function getPendingConnections(userId: string): Promise<Connection[
 
   return (rows as ConnectionEntity[]).map((r) => {
     const partnerId = r.user1_id === userId ? r.user2_id : r.user1_id;
+    const isUser1 = r.user1_id === userId;
     const profile = profileMap.get(partnerId);
     return {
       user_id: partnerId,
@@ -134,6 +141,8 @@ export async function getPendingConnections(userId: string): Promise<Connection[
       connected_at: r.created_at,
       status: r.status,
       direction: r.requested_by === userId ? 'sent' : 'received',
+      interested: isUser1 ? r.user1_interested : r.user2_interested,
+      mutual_interest: r.user1_interested && r.user2_interested,
     };
   });
 }
@@ -268,8 +277,9 @@ export async function getConnectionsByEvent(
 
   return (rows as ConnectionEntity[]).map((r) => {
     const partnerId = r.user1_id === userId ? r.user2_id : r.user1_id;
+    const isUser1 = r.user1_id === userId;
     const profile = profileMap.get(partnerId);
-    const myNote = r.user1_id === userId ? r.user1_note : r.user2_note;
+    const myNote = isUser1 ? r.user1_note : r.user2_note;
     return {
       user_id: partnerId,
       nickname: profile?.nickname ?? null,
@@ -283,6 +293,8 @@ export async function getConnectionsByEvent(
       connected_at: r.connected_at ?? r.created_at,
       status: r.status,
       direction: null,
+      interested: isUser1 ? r.user1_interested : r.user2_interested,
+      mutual_interest: r.user1_interested && r.user2_interested,
     };
   });
 }
@@ -325,4 +337,35 @@ export async function getConnectionStats(userId: string): Promise<{
   }
 
   return { total: rows.length, byEvent };
+}
+
+/**
+ * 标记/取消对某个连接的"感兴趣"
+ */
+export async function toggleInterest(
+  connectionId: string,
+  interested: boolean
+): Promise<boolean> {
+  const userId = await getCurrentUserId();
+  if (!userId) return false;
+
+  const { data: conn } = await supabase
+    .from('usr_connections')
+    .select('user1_id, user2_id')
+    .eq('connection_id', connectionId)
+    .single();
+
+  if (!conn) return false;
+
+  const field = conn.user1_id === userId ? 'user1_interested' : 'user2_interested';
+  const { error } = await supabase
+    .from('usr_connections')
+    .update({ [field]: interested })
+    .eq('connection_id', connectionId);
+
+  if (error) {
+    console.error('Failed to toggle interest:', error);
+    return false;
+  }
+  return true;
 }

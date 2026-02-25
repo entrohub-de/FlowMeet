@@ -8,6 +8,7 @@ import {
   getPendingConnections,
   createConnectionRequest,
   respondToConnection,
+  toggleInterest,
   type Connection,
 } from '@/lib/api/connections';
 import {
@@ -17,7 +18,7 @@ import {
 import { getMatchLevel } from '@/lib/api/matching-algorithm';
 import {
   Users, CalendarDays, User, Sparkles, UserPlus, Check, X,
-  Send, Clock, Loader2,
+  Send, Clock, Loader2, Heart,
 } from 'lucide-react';
 
 export default function ConnectionsPage() {
@@ -28,6 +29,7 @@ export default function ConnectionsPage() {
   const [loading, setLoading] = useState(true);
   const [sendingTo, setSendingTo] = useState<string | null>(null);
   const [respondingTo, setRespondingTo] = useState<string | null>(null);
+  const [togglingInterest, setTogglingInterest] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -71,6 +73,8 @@ export default function ConnectionsPage() {
           connected_at: new Date().toISOString(),
           status: 'pending',
           direction: 'sent',
+          interested: false,
+          mutual_interest: false,
         },
         ...prev,
       ]);
@@ -91,6 +95,22 @@ export default function ConnectionsPage() {
       }
     }
     setRespondingTo(null);
+  };
+
+  const handleToggleInterest = async (conn: Connection) => {
+    setTogglingInterest(conn.connection_id);
+    const newValue = !conn.interested;
+    const ok = await toggleInterest(conn.connection_id, newValue);
+    if (ok) {
+      setConnections((prev) =>
+        prev.map((c) =>
+          c.connection_id === conn.connection_id
+            ? { ...c, interested: newValue }
+            : c
+        )
+      );
+    }
+    setTogglingInterest(null);
   };
 
   if (loading) {
@@ -124,9 +144,13 @@ export default function ConnectionsPage() {
               className="bg-card border border-primary/20 rounded-xl p-4 space-y-3"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <User className="w-5 h-5 text-primary" />
-                </div>
+                {req.avatar_url ? (
+                  <img src={req.avatar_url} alt={req.nickname || ''} className="w-10 h-10 rounded-full object-cover shrink-0" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <User className="w-5 h-5 text-primary" />
+                  </div>
+                )}
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-foreground truncate">
                     {req.nickname || t('user.anonymous')}
@@ -246,9 +270,13 @@ export default function ConnectionsPage() {
               className="bg-card border border-dashed border-border rounded-xl p-4"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center shrink-0">
-                  <User className="w-5 h-5 text-muted-foreground" />
-                </div>
+                {req.avatar_url ? (
+                  <img src={req.avatar_url} alt={req.nickname || ''} className="w-10 h-10 rounded-full object-cover shrink-0" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center shrink-0">
+                    <User className="w-5 h-5 text-muted-foreground" />
+                  </div>
+                )}
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-foreground truncate">
                     {req.nickname || t('user.anonymous')}
@@ -277,28 +305,71 @@ export default function ConnectionsPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">
-              {t('connections.totalCount', { count: connections.length })}
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                {t('connections.totalCount', { count: connections.length })}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {t('connections.interestHint')}
+              </p>
+            </div>
 
             {connections.map((conn) => (
               <div
                 key={conn.user_id}
-                className="bg-card border border-border rounded-xl p-4 space-y-2"
+                className={`bg-card border rounded-xl p-4 space-y-2 ${
+                  conn.mutual_interest
+                    ? 'border-pink-400/50 bg-pink-50/30 dark:bg-pink-950/10'
+                    : 'border-border'
+                }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <User className="w-5 h-5 text-primary" />
-                  </div>
+                  {conn.avatar_url ? (
+                    <img
+                      src={conn.avatar_url}
+                      alt={conn.nickname || ''}
+                      className="w-10 h-10 rounded-full object-cover shrink-0"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <User className="w-5 h-5 text-primary" />
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-foreground truncate">
-                      {conn.nickname || t('user.anonymous')}
-                    </h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-foreground truncate">
+                        {conn.nickname || t('user.anonymous')}
+                      </h3>
+                      {conn.mutual_interest && (
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-pink-600 dark:text-pink-400 bg-pink-100 dark:bg-pink-900/30 px-2 py-0.5 rounded-full">
+                          <Heart className="w-3 h-3 fill-current" />
+                          {t('connections.mutualInterest')}
+                        </span>
+                      )}
+                    </div>
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
                       <CalendarDays className="w-3 h-3" />
                       <span>{conn.event_name}</span>
                     </div>
                   </div>
+
+                  <button
+                    onClick={() => handleToggleInterest(conn)}
+                    disabled={togglingInterest === conn.connection_id}
+                    className={`shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 touch-feedback ${
+                      conn.interested
+                        ? 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400 hover:bg-pink-200 dark:hover:bg-pink-900/50'
+                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                    }`}
+                    title={conn.interested ? t('connections.notInterested') : t('connections.interested')}
+                  >
+                    {togglingInterest === conn.connection_id ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Heart className={`w-4 h-4 ${conn.interested ? 'fill-current' : ''}`} />
+                    )}
+                    {conn.interested ? t('connections.interested') : t('connections.notInterested')}
+                  </button>
                 </div>
 
                 <div className="text-xs text-muted-foreground">

@@ -1162,7 +1162,11 @@
     "pending": "等待回复",
     "accept": "接受",
     "decline": "婉拒",
-    "myConnections": "我的连接"
+    "myConnections": "我的连接",
+    "interested": "感兴趣",
+    "notInterested": "取消感兴趣",
+    "mutualInterest": "互相感兴趣",
+    "interestHint": "双方都标记感兴趣后，系统会通过邮件通知你们"
   },
   "preferenceOptions": {
     "languages": {

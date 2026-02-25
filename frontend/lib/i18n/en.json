@@ -1162,7 +1162,11 @@
     "pending": "Pending",
     "accept": "Accept",
     "decline": "Decline",
-    "myConnections": "My Connections"
+    "myConnections": "My Connections",
+    "interested": "Interested",
+    "notInterested": "Not Interested",
+    "mutualInterest": "Mutual Interest",
+    "interestHint": "When both sides show interest, you'll be notified by email"
   },
   "preferenceOptions": {
     "languages": {
