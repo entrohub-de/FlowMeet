@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from '@/lib/i18n/context';
 import Link from 'next/link';
-import { CalendarDays, ArrowRight, Play, Inbox, Search, Clock } from 'lucide-react';
+import { CalendarDays, ArrowRight, Play, Inbox, Clock } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { getProfile } from '@/lib/api/profile';
 import { getUserSignedUpEvents } from '@/lib/api/signup';
@@ -145,28 +145,18 @@ export default function UserHomePage() {
 
         {/* 4. My Upcoming Events */}
         <section>
-          <div className="flex items-center justify-between mb-3 px-1">
+          <div className="mb-3 px-1">
             <h2 className="text-base font-semibold text-foreground">
               {t('dashboard.myUpcoming')}
             </h2>
-            <Link href="/user/event" className="text-xs text-primary hover:underline">
-              {t('dashboard.viewAll')}
-            </Link>
           </div>
 
           {upcomingEvents.length === 0 ? (
             <div className="bg-card border border-border rounded-xl p-6 text-center">
               <CalendarDays className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground mb-3">
+              <p className="text-sm text-muted-foreground">
                 {t('dashboard.noUpcomingEvents')}
               </p>
-              <Link
-                href="/user/event"
-                className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
-              >
-                <Search className="w-3.5 h-3.5" />
-                {t('dashboard.goDiscover')}
-              </Link>
             </div>
           ) : (
             <div className="space-y-2">
