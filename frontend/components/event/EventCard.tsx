@@ -4,9 +4,8 @@ import { useState, useEffect } from 'react';
 import type { Event, Profile } from '@/types/domain';
 import { Calendar, MapPin, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
-import { formatDateRange } from '@/lib/utils';
-import { cn } from '@/lib/utils';
-import { signupForEvent, cancelSignup, getUserSignupStatus } from '@/lib/api/signup';
+import { formatDateRange, cn, isEventFree } from '@/lib/utils';
+import { signupForEvent, cancelSignup, getUserSignupStatus, createCheckoutSession } from '@/lib/api/signup';
 
 import { supabase } from '@/lib/supabase/client';
 import PreferencesModal from './PreferencesModal';
@@ -67,14 +66,26 @@ export default function EventCard({ event, locale, t, initialSignedUp, onSignupC
         toast.success(t('ux.toast.signupCancelled', { name: event.name }));
       }
     } else {
-      const success = await signupForEvent(event.event_id, userId);
-      if (success) {
-        setSignedUp(true);
-        onSignupChange?.(event.event_id, true);
-        toast.success(t('ux.toast.signupSuccess', { name: event.name }));
-        setShowPreferencesModal(true);
-        setSigningUp(false);
-        return;
+      if (!isEventFree(event)) {
+        // Paid event: redirect to Stripe Checkout
+        const url = await createCheckoutSession(event.event_id, userId);
+        if (url) {
+          window.location.href = url;
+          return;
+        } else {
+          toast.error(t('ux.toast.paymentFailed'));
+        }
+      } else {
+        // Free event: direct signup
+        const success = await signupForEvent(event.event_id, userId);
+        if (success) {
+          setSignedUp(true);
+          onSignupChange?.(event.event_id, true);
+          toast.success(t('ux.toast.signupSuccess', { name: event.name }));
+          setShowPreferencesModal(true);
+          setSigningUp(false);
+          return;
+        }
       }
     }
 
@@ -170,6 +181,8 @@ export default function EventCard({ event, locale, t, initialSignedUp, onSignupC
             signingUp={signingUp}
             userId={userId}
             onSignup={handleSignup}
+            priceCents={event.price_cents}
+            currency={event.currency}
             t={t}
           />
         </div>

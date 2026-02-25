@@ -23,6 +23,17 @@ export function formatDateTime(date: string | Date): string {
   return d.toLocaleString('zh-CN');
 }
 
+export function formatPrice(cents: number, currency: string): string {
+  return new Intl.NumberFormat(undefined, {
+    style: 'currency',
+    currency: currency.toUpperCase(),
+  }).format(cents / 100);
+}
+
+export function isEventFree(event: { price_cents?: number | null }): boolean {
+  return !event.price_cents || event.price_cents <= 0;
+}
+
 export function formatDateRange(startStr: string, endStr: string, locale: string): string {
   const start = new Date(startStr);
   const end = new Date(endStr);

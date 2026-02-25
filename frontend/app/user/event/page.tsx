@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from '@/lib/i18n/context';
 import { getEvents } from '@/lib/api/events';
-import { getUserSignups } from '@/lib/api/signup';
+import { getUserSignups, verifyPayment } from '@/lib/api/signup';
 import { getProfile } from '@/lib/api/profile';
 import { supabase } from '@/lib/supabase/client';
 import type { Event, Profile } from '@/types/domain';
@@ -12,9 +12,12 @@ import PastEventCard from '@/components/event/PastEventCard';
 // Phase 1: ad banner hidden (A+C model simplification)
 // import AdBanner from '@/components/ads/AdBanner';
 import { CalendarCheck, History, ChevronDown, ChevronUp } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { toast } from 'sonner';
 
 export default function EventPage() {
   const { t, locale } = useTranslation();
+  const searchParams = useSearchParams();
   const [events, setEvents] = useState<Event[]>([]);
   const [signupSet, setSignupSet] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -60,6 +63,29 @@ export default function EventPage() {
     }
     load();
   }, []);
+
+  // Handle payment result from Stripe redirect
+  useEffect(() => {
+    const payment = searchParams.get('payment');
+    const paidEventId = searchParams.get('event');
+
+    if (payment === 'success') {
+      toast.success(t('ux.toast.paymentSuccess'));
+
+      // Verify payment and activate signup
+      if (paidEventId) {
+        supabase.auth.getSession().then(async ({ data: { session } }) => {
+          if (!session?.user?.id) return;
+          const verified = await verifyPayment(paidEventId, session.user.id);
+          if (verified) {
+            setSignupSet(prev => { const next = new Set(prev); next.add(paidEventId); return next; });
+          }
+        });
+      }
+    } else if (payment === 'cancelled') {
+      toast.info(t('ux.toast.paymentCancelled'));
+    }
+  }, [searchParams, t]);
 
   const handleSignupChange = useCallback((eventId: string, signedUp: boolean) => {
     if (signedUp) {

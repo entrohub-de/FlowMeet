@@ -1,9 +1,10 @@
 'use client';
 
-import { PauseCircle, Users, LogOut, MessageCircle } from 'lucide-react';
+import { PauseCircle, Users, LogOut, MessageCircle, Code, Briefcase } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/context';
 import { useActiveFlow } from '@/hooks/useActiveFlow';
 import { useFlowMatching } from '@/hooks/useFlowMatching';
+import { useGroupIdentity, type IdentityType } from '@/hooks/useGroupIdentity';
 
 export default function UserFlowPage() {
   const { t } = useTranslation();
@@ -18,12 +19,20 @@ export default function UserFlowPage() {
 
   const permissions = flowState?.permissions ?? null;
   const matching1v1Enabled = permissions?.matching_1v1_enabled ?? false;
+  const groupEnabled = permissions?.matching_group_enabled ?? false;
 
   const { state: matchingState, goReady, cancelReady, finishChat, leave, rejoin } = useFlowMatching(
     selectedEventId,
     '1v1',
     matching1v1Enabled
   );
+
+  const { state: identityState, setIdentity } = useGroupIdentity(
+    selectedEventId,
+    groupEnabled
+  );
+
+  const anyFeatureEnabled = matching1v1Enabled || groupEnabled;
 
   if (loading) {
     return (
@@ -51,8 +60,18 @@ export default function UserFlowPage() {
         </div>
       )}
 
-      <div className="max-w-4xl mx-auto relative">
-        {matching1v1Enabled ? (
+      <div className="max-w-4xl mx-auto relative space-y-4">
+        {/* ── 小组讨论：身份颜色卡片 ── */}
+        {groupEnabled && (
+          <IdentitySection
+            t={t}
+            state={identityState}
+            onSelect={setIdentity}
+          />
+        )}
+
+        {/* ── 1v1 匹配 ── */}
+        {matching1v1Enabled && (
           <div className="bg-card rounded-2xl border border-primary/20 p-5 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -70,7 +89,6 @@ export default function UserFlowPage() {
               )}
             </div>
 
-            {/* 准备 */}
             {matchingState.phase === 'ready' && (
               <button
                 onClick={goReady}
@@ -80,7 +98,6 @@ export default function UserFlowPage() {
               </button>
             )}
 
-            {/* 匹配中 */}
             {matchingState.phase === 'matching' && (
               <div className="text-center space-y-2">
                 <div className="animate-pulse text-primary">
@@ -99,7 +116,6 @@ export default function UserFlowPage() {
               </div>
             )}
 
-            {/* 对话中 */}
             {matchingState.phase === 'chatting' && matchingState.partner && (
               <div className="space-y-4">
                 <div className="text-center space-y-1">
@@ -120,7 +136,6 @@ export default function UserFlowPage() {
               </div>
             )}
 
-            {/* 已离开 */}
             {matchingState.phase === 'left' && (
               <div className="text-center space-y-3">
                 <p className="text-sm text-muted-foreground">{t('userFlow.leftHint')}</p>
@@ -133,7 +148,10 @@ export default function UserFlowPage() {
               </div>
             )}
           </div>
-        ) : (
+        )}
+
+        {/* ── 无功能开放 ── */}
+        {!anyFeatureEnabled && (
           <div className="rounded-xl border border-dashed border-border p-10 text-center">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
               <Users className="w-8 h-8 text-primary/40" />
@@ -143,6 +161,100 @@ export default function UserFlowPage() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// ── 身份选择区块 ──
+
+const IDENTITY_COLORS: Record<IdentityType, { bg: string; border: string; text: string; dot: string }> = {
+  engineering: {
+    bg: 'bg-blue-500/10',
+    border: 'border-blue-500',
+    text: 'text-blue-600 dark:text-blue-400',
+    dot: 'bg-blue-500',
+  },
+  non_engineering: {
+    bg: 'bg-emerald-500/10',
+    border: 'border-emerald-500',
+    text: 'text-emerald-600 dark:text-emerald-400',
+    dot: 'bg-emerald-500',
+  },
+};
+
+function IdentitySection({
+  t,
+  state,
+  onSelect,
+}: {
+  t: (key: string) => string;
+  state: ReturnType<typeof import('@/hooks/useGroupIdentity').useGroupIdentity>['state'];
+  onSelect: (id: IdentityType) => void;
+}) {
+  const cards: { type: IdentityType; label: string; icon: typeof Code; count: number }[] = [
+    { type: 'engineering', label: t('groupIdentity.engineering'), icon: Code, count: state.engineeringCount },
+    { type: 'non_engineering', label: t('groupIdentity.nonEngineering'), icon: Briefcase, count: state.nonEngineeringCount },
+  ];
+
+  return (
+    <div className="bg-card rounded-2xl border border-border p-5 space-y-4">
+      <h3 className="font-semibold text-sm">{t('groupIdentity.title')}</h3>
+
+      {/* 身份选择卡片 */}
+      <div className="grid grid-cols-2 gap-3">
+        {cards.map(({ type, label, icon: Icon, count }) => {
+          const selected = state.myIdentity === type;
+          const colors = IDENTITY_COLORS[type];
+          return (
+            <button
+              key={type}
+              onClick={() => onSelect(type)}
+              className={`relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all touch-feedback ${
+                selected
+                  ? `${colors.bg} ${colors.border} shadow-sm`
+                  : 'border-border bg-muted/30 opacity-60 hover:opacity-80'
+              }`}
+            >
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                selected ? colors.bg : 'bg-muted'
+              }`}>
+                <Icon className={`w-5 h-5 ${selected ? colors.text : 'text-muted-foreground'}`} />
+              </div>
+              <span className={`text-sm font-medium ${selected ? colors.text : 'text-muted-foreground'}`}>
+                {label}
+              </span>
+              <span className={`text-xs ${selected ? colors.text : 'text-muted-foreground'}`}>
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* 参与者列表 */}
+      {state.participants.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs text-muted-foreground font-medium">
+            {t('groupIdentity.participants')} ({state.totalCount})
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {state.participants.map((p) => {
+              const colors = p.identity ? IDENTITY_COLORS[p.identity] : null;
+              return (
+                <span
+                  key={p.userId}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted/50 text-xs"
+                >
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${colors?.dot ?? 'bg-gray-300'}`} />
+                  <span className="truncate max-w-[80px]">
+                    {p.nickname || '?'}
+                  </span>
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

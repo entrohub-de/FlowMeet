@@ -2,6 +2,7 @@
 
 import { CheckCircle2, X } from 'lucide-react';
 import SwipeToSignup from './SwipeToSignup';
+import { formatPrice, isEventFree } from '@/lib/utils';
 
 interface EventCardActionsProps {
   loading: boolean;
@@ -9,10 +10,12 @@ interface EventCardActionsProps {
   signingUp: boolean;
   userId: string | null;
   onSignup: () => void;
+  priceCents?: number | null;
+  currency?: string;
   t: (key: string, params?: Record<string, string | number>) => string;
 }
 
-export default function EventCardActions({ loading, signedUp, signingUp, userId, onSignup, t }: EventCardActionsProps) {
+export default function EventCardActions({ loading, signedUp, signingUp, userId, onSignup, priceCents, currency, t }: EventCardActionsProps) {
   if (loading) {
     return (
       <div className="pt-2 border-t border-border">
@@ -43,10 +46,19 @@ export default function EventCardActions({ loading, signedUp, signingUp, userId,
     );
   }
 
+  const isFree = isEventFree({ price_cents: priceCents });
+  const priceLabel = !isFree && priceCents && currency
+    ? formatPrice(priceCents, currency)
+    : null;
+
+  const label = priceLabel
+    ? `${t('user.swipeToSignup')} · ${priceLabel}`
+    : t('user.swipeToSignup');
+
   return (
     <div className="pt-2 border-t border-border">
       <SwipeToSignup
-        label={t('user.swipeToSignup')}
+        label={label}
         disabled={signingUp || !userId}
         onSwipeComplete={onSignup}
       />

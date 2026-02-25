@@ -18,6 +18,8 @@ export interface Event {
   cover_image?: string | null;
   created_by?: string | null;
   max_participants?: number | null;
+  price_cents?: number | null;
+  currency?: string;
   venue?: Venue;
 }
 
@@ -292,11 +294,12 @@ export interface Signup {
   signup_id: string;
   event_id: string;
   user_id: string;
-  status: 'active' | 'cancelled';
+  status: 'active' | 'cancelled' | 'pending';
   created_at: string;
   checked_in: boolean;
   checked_in_at?: string;
   signup_timestamp?: string;
+  payment_status?: 'pending' | 'paid' | 'refunded' | null;
   profile?: Profile;
   expectation?: Expectation;
 }

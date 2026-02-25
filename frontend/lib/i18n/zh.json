@@ -155,6 +155,13 @@
     "leftHint": "你已离开匹配",
     "matchingClosed": "匹配未开放"
   },
+  "groupIdentity": {
+    "title": "选择你的身份",
+    "engineering": "工程类",
+    "nonEngineering": "非工程类",
+    "participants": "在线参与者",
+    "you": "你"
+  },
   "flowMatching": {
     "readyToMatch": "准备配对？",
     "readyButton": "我准备好了",
@@ -393,6 +400,9 @@
       "coverImage": "封面图片",
       "uploadCover": "点击上传封面图片",
       "coverUploadFailed": "封面图片上传失败",
+      "ticketPrice": "门票价格",
+      "pricePlaceholder": "留空表示免费",
+      "priceHint": "留空或填 0 表示免费活动",
       "create": "创建活动",
       "creating": "创建中...",
       "createFailed": "创建活动失败，请重试。",
@@ -998,7 +1008,10 @@
       "deleteEventFailed": "删除活动失败",
       "loginRequired": "请先登录",
       "signupSuccess": "已成功报名「{name}」！",
-      "signupCancelled": "已取消报名「{name}」"
+      "signupCancelled": "已取消报名「{name}」",
+      "paymentSuccess": "支付成功，报名已确认！",
+      "paymentCancelled": "支付已取消",
+      "paymentFailed": "支付创建失败，请重试"
     },
     "matching": {
       "readyCount": "已有 {count} 人准备好",

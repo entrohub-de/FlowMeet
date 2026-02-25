@@ -7,11 +7,7 @@
 export const LANGUAGE_OPTIONS = [
   'chinese',
   'english',
-  'japanese',
-  'korean',
   'german',
-  'french',
-  'spanish',
 ] as const;
 
 export const INTEREST_OPTIONS = [

@@ -155,6 +155,13 @@
     "leftHint": "You have left the matching",
     "matchingClosed": "Matching not open"
   },
+  "groupIdentity": {
+    "title": "Choose Your Identity",
+    "engineering": "Engineering",
+    "nonEngineering": "Non-Engineering",
+    "participants": "Online Participants",
+    "you": "You"
+  },
   "flowMatching": {
     "readyToMatch": "Ready to match?",
     "readyButton": "I'm Ready",
@@ -393,6 +400,9 @@
       "coverImage": "Cover Image",
       "uploadCover": "Click to upload a cover image",
       "coverUploadFailed": "Failed to upload cover image",
+      "ticketPrice": "Ticket Price",
+      "pricePlaceholder": "Leave empty for free",
+      "priceHint": "Leave empty or enter 0 for free events",
       "create": "Create Event",
       "creating": "Creating...",
       "createFailed": "Failed to create event. Please try again.",
@@ -998,7 +1008,10 @@
       "deleteEventFailed": "Failed to delete event",
       "loginRequired": "Please login first",
       "signupSuccess": "Signed up for \"{name}\"!",
-      "signupCancelled": "Cancelled signup for \"{name}\""
+      "signupCancelled": "Cancelled signup for \"{name}\"",
+      "paymentSuccess": "Payment successful, signup confirmed!",
+      "paymentCancelled": "Payment cancelled",
+      "paymentFailed": "Payment failed, please try again"
     },
     "matching": {
       "readyCount": "{count} people ready",

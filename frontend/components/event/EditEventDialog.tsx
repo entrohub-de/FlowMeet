@@ -60,6 +60,7 @@ export default function EditEventDialog({
       start_time: toLocalDatetime(event.start_time),
       duration: snapToNearestDuration(Math.round(diffMs / 60000)),
       venue_id: event.venue_id || '',
+      price: event.price_cents ? (event.price_cents / 100).toString() : '',
     };
   });
 
@@ -88,12 +89,15 @@ export default function EditEventDialog({
     setLoading(true);
     try {
       const endTime = computeEndTime(formData.start_time, formData.duration);
+      const priceCents = formData.price ? Math.round(parseFloat(formData.price) * 100) : null;
       const updated = await updateEvent(event.event_id, {
         name: formData.name,
         description: formData.description || null,
         start_time: formData.start_time,
         end_time: endTime,
         venue_id: formData.venue_id || null,
+        price_cents: priceCents,
+        currency: priceCents ? (event.currency || 'eur') : undefined,
       });
 
       toast.success(t('host.events.updateSuccess'));
@@ -215,6 +219,28 @@ export default function EditEventDialog({
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Price */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2">
+              {t('host.events.ticketPrice')}
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.price}
+                onChange={(e) =>
+                  setFormData({ ...formData, price: e.target.value })
+                }
+                placeholder={t('host.events.pricePlaceholder')}
+                className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary pr-12"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">EUR</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">{t('host.events.priceHint')}</p>
           </div>
 
           {/* Actions */}

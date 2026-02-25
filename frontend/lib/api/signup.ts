@@ -2,6 +2,48 @@ import { supabase } from '@/lib/supabase/client';
 import type { Event, Signup } from '@/types/domain';
 
 /**
+ * 创建 Stripe Checkout Session（付费活动报名）
+ * 返回 Stripe hosted checkout page URL
+ */
+export async function createCheckoutSession(eventId: string, userId: string): Promise<string | null> {
+  try {
+    const res = await fetch('/api/stripe/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ eventId, userId }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.url) {
+      console.error('Failed to create checkout session:', data.error);
+      return null;
+    }
+    return data.url;
+  } catch (error) {
+    console.error('Checkout session error:', error);
+    return null;
+  }
+}
+
+/**
+ * 验证 Stripe 支付状态并激活 signup
+ * 用于支付成功重定向后立即确认报名
+ */
+export async function verifyPayment(eventId: string, userId: string): Promise<boolean> {
+  try {
+    const res = await fetch('/api/stripe/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ eventId, userId }),
+    });
+    const data = await res.json();
+    return data.verified === true;
+  } catch (error) {
+    console.error('Verify payment error:', error);
+    return false;
+  }
+}
+
+/**
  * 报名参加活动
  * 如果用户之前取消过，则将状态改为 active
  */

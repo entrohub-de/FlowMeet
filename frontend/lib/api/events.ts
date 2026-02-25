@@ -50,7 +50,7 @@ export async function getEventByCode(eventCode: string): Promise<Event | null> {
  */
 export async function updateEvent(
   eventId: string,
-  updates: Partial<Pick<Event, 'name' | 'description' | 'start_time' | 'end_time' | 'venue_id' | 'cover_image' | 'status'>>
+  updates: Partial<Pick<Event, 'name' | 'description' | 'start_time' | 'end_time' | 'venue_id' | 'cover_image' | 'status' | 'price_cents' | 'currency'>>
 ): Promise<Event> {
   const { data, error } = await supabase
     .from('evt_events')
@@ -67,7 +67,7 @@ export async function updateEvent(
  * 创建活动（主持人使用，自动设置 created_by）
  */
 export async function createEvent(
-  event: Pick<Event, 'name' | 'description' | 'start_time' | 'end_time' | 'venue_id'> & { cover_image?: string | null }
+  event: Pick<Event, 'name' | 'description' | 'start_time' | 'end_time' | 'venue_id'> & { cover_image?: string | null; price_cents?: number | null; currency?: string }
 ): Promise<Event> {
   const { data: { session } } = await supabase.auth.getSession();
 
