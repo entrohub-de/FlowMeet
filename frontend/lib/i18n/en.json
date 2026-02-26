@@ -1170,7 +1170,10 @@
     "interested": "Interested",
     "notInterested": "Not Interested",
     "mutualInterest": "Mutual Interest",
-    "interestHint": "When both sides show interest, you'll be notified by email"
+    "interestHint": "When both sides show interest, you'll be notified by email",
+    "encounterHistory": "People You've Met",
+    "type1v1": "1v1 Match",
+    "typeGroup": "Group"
   },
   "preferenceOptions": {
     "languages": {

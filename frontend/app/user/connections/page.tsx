@@ -9,7 +9,9 @@ import {
   createConnectionRequest,
   respondToConnection,
   toggleInterest,
+  getEncounterHistory,
   type Connection,
+  type Encounter,
 } from '@/lib/api/connections';
 import {
   getAllRecommendations,
@@ -26,6 +28,7 @@ export default function ConnectionsPage() {
   const [connections, setConnections] = useState<Connection[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [pendingRequests, setPendingRequests] = useState<Connection[]>([]);
+  const [encounters, setEncounters] = useState<Encounter[]>([]);
   const [loading, setLoading] = useState(true);
   const [sendingTo, setSendingTo] = useState<string | null>(null);
   const [respondingTo, setRespondingTo] = useState<string | null>(null);
@@ -37,14 +40,16 @@ export default function ConnectionsPage() {
     const uid = session.user.id;
 
     try {
-      const [conns, recs, pending] = await Promise.all([
+      const [conns, recs, pending, enc] = await Promise.all([
         getUserConnections(uid),
         getAllRecommendations(uid),
         getPendingConnections(uid),
+        getEncounterHistory(uid),
       ]);
       setConnections(conns);
       setRecommendations(recs);
       setPendingRequests(pending);
+      setEncounters(enc);
     } catch {
       /* ignore */
     } finally {
@@ -292,6 +297,64 @@ export default function ConnectionsPage() {
               </div>
             </div>
           ))}
+        </section>
+      )}
+
+      {/* Encounter history */}
+      {encounters.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+            <Users className="w-4 h-4 text-primary" />
+            {t('connections.encounterHistory')}
+            <span className="text-xs font-normal text-muted-foreground ml-1">
+              ({encounters.length})
+            </span>
+          </h2>
+
+          {(() => {
+            const grouped = new Map<string, Encounter[]>();
+            for (const enc of encounters) {
+              const key = enc.eventName || enc.eventId;
+              if (!grouped.has(key)) grouped.set(key, []);
+              grouped.get(key)!.push(enc);
+            }
+            return Array.from(grouped.entries()).map(([eventName, encs]) => (
+              <div key={eventName} className="space-y-2">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <CalendarDays className="w-3 h-3" />
+                  <span className="font-medium">{eventName}</span>
+                </div>
+                <div className="grid gap-2">
+                  {encs.map((enc, idx) => (
+                    <div
+                      key={`${enc.eventId}-${enc.userId}-${enc.type}-${idx}`}
+                      className="flex items-center gap-3 p-3 bg-card border border-border rounded-xl"
+                    >
+                      {enc.avatar_url ? (
+                        <img src={enc.avatar_url} alt={enc.nickname || ''} className="w-9 h-9 rounded-full object-cover shrink-0" />
+                      ) : (
+                        <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                          <User className="w-4 h-4 text-primary" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">
+                          {enc.nickname || t('user.anonymous')}
+                        </p>
+                      </div>
+                      <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                        enc.type === '1v1'
+                          ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                          : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
+                      }`}>
+                        {enc.type === '1v1' ? t('connections.type1v1') : t('connections.typeGroup')}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ));
+          })()}
         </section>
       )}
 

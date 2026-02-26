@@ -1170,7 +1170,10 @@
     "interested": "感兴趣",
     "notInterested": "取消感兴趣",
     "mutualInterest": "互相感兴趣",
-    "interestHint": "双方都标记感兴趣后，系统会通过邮件通知你们"
+    "interestHint": "双方都标记感兴趣后，系统会通过邮件通知你们",
+    "encounterHistory": "活动中遇见的人",
+    "type1v1": "1v1 匹配",
+    "typeGroup": "小组讨论"
   },
   "preferenceOptions": {
     "languages": {

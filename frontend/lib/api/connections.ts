@@ -369,3 +369,128 @@ export async function toggleInterest(
   }
   return true;
 }
+
+/**
+ * 获取用户的历次活动遇见记录（1v1 匹配 + 小组讨论）
+ */
+export interface Encounter {
+  userId: string;
+  nickname: string | null;
+  avatar_url: string | null;
+  eventName: string;
+  eventId: string;
+  type: '1v1' | 'group';
+  date: string;
+}
+
+export async function getEncounterHistory(userId: string): Promise<Encounter[]> {
+  // 1. 1v1 matches
+  const { data: matches } = await supabase
+    .from('match_records')
+    .select('match_id, event_id, user1_id, user2_id, created_at')
+    .or(`user1_id.eq.${userId},user2_id.eq.${userId}`)
+    .order('created_at', { ascending: false });
+
+  // 2. Group co-members: find groups user belongs to, then find other members
+  const { data: myMemberships } = await supabase
+    .from('evt_group_members')
+    .select('group_id')
+    .eq('user_id', userId);
+
+  const groupIds = myMemberships?.map((m) => m.group_id) ?? [];
+
+  let groupCoMembers: Array<{ user_id: string; group_id: string }> = [];
+  if (groupIds.length > 0) {
+    const { data } = await supabase
+      .from('evt_group_members')
+      .select('user_id, group_id')
+      .in('group_id', groupIds)
+      .neq('user_id', userId);
+    groupCoMembers = data ?? [];
+  }
+
+  // Collect all partner IDs and event IDs
+  const partnerIds = new Set<string>();
+  const eventIds = new Set<string>();
+  const groupIdSet = new Set(groupIds);
+
+  for (const m of matches ?? []) {
+    const partnerId = m.user1_id === userId ? m.user2_id : m.user1_id;
+    partnerIds.add(partnerId);
+    eventIds.add(m.event_id);
+  }
+  for (const gm of groupCoMembers) {
+    partnerIds.add(gm.user_id);
+  }
+
+  // Get group → event mapping
+  let groupEventMap = new Map<string, string>();
+  if (groupIdSet.size > 0) {
+    const { data: groups } = await supabase
+      .from('evt_groups')
+      .select('group_id, event_id')
+      .in('group_id', Array.from(groupIdSet));
+    for (const g of groups ?? []) {
+      groupEventMap.set(g.group_id, g.event_id);
+      eventIds.add(g.event_id);
+    }
+  }
+
+  if (partnerIds.size === 0) return [];
+
+  // Batch fetch profiles and events
+  const [profilesRes, eventsRes] = await Promise.all([
+    supabase.from('usr_profiles').select('user_id, nickname, avatar_url').in('user_id', Array.from(partnerIds)),
+    eventIds.size > 0
+      ? supabase.from('evt_events').select('event_id, name').in('event_id', Array.from(eventIds))
+      : Promise.resolve({ data: [] }),
+  ]);
+
+  const profileMap = new Map(profilesRes.data?.map((p: { user_id: string; nickname: string | null; avatar_url: string | null }) => [p.user_id, p]) ?? []);
+  const eventMap = new Map(eventsRes.data?.map((e: { event_id: string; name: string }) => [e.event_id, e.name]) ?? []);
+
+  const encounters: Encounter[] = [];
+
+  // Add 1v1 matches
+  for (const m of matches ?? []) {
+    const partnerId = m.user1_id === userId ? m.user2_id : m.user1_id;
+    const profile = profileMap.get(partnerId);
+    encounters.push({
+      userId: partnerId,
+      nickname: profile?.nickname ?? null,
+      avatar_url: profile?.avatar_url ?? null,
+      eventName: eventMap.get(m.event_id) ?? '',
+      eventId: m.event_id,
+      type: '1v1',
+      date: m.created_at,
+    });
+  }
+
+  // Add group co-members (deduplicate by eventId+userId)
+  const seen = new Set(encounters.map((e) => `${e.eventId}:${e.userId}`));
+  for (const gm of groupCoMembers) {
+    const eventId = groupEventMap.get(gm.group_id) ?? '';
+    const key = `${eventId}:${gm.user_id}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const profile = profileMap.get(gm.user_id);
+    encounters.push({
+      userId: gm.user_id,
+      nickname: profile?.nickname ?? null,
+      avatar_url: profile?.avatar_url ?? null,
+      eventName: eventMap.get(eventId) ?? '',
+      eventId,
+      type: 'group',
+      date: '',
+    });
+  }
+
+  // Sort: 1v1 with date first, then group
+  encounters.sort((a, b) => {
+    if (a.date && b.date) return new Date(b.date).getTime() - new Date(a.date).getTime();
+    if (a.date) return -1;
+    return 1;
+  });
+
+  return encounters;
+}
