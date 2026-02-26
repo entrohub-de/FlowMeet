@@ -17,11 +17,13 @@ import {
   getAllRecommendations,
   type Recommendation,
 } from '@/lib/api/post-event-matching';
-import { getMatchLevel } from '@/lib/api/matching-algorithm';
-import {
-  Users, CalendarDays, User, Sparkles, UserPlus, Check, X,
-  Send, Clock, Loader2, Heart,
-} from 'lucide-react';
+import { Users, Sparkles, UserPlus, Clock, Loader2 } from 'lucide-react';
+import { UserAvatar } from '@/components/connections/UserAvatar';
+import { ConnectionCard } from '@/components/connections/ConnectionCard';
+import { ReceivedRequestCard } from '@/components/connections/ReceivedRequestCard';
+import { ConnectionRecommendationCard } from '@/components/connections/ConnectionRecommendationCard';
+import { EncounterHistory } from '@/components/connections/EncounterHistory';
+import { CalendarDays } from 'lucide-react';
 
 export default function ConnectionsPage() {
   const { t } = useTranslation();
@@ -129,6 +131,7 @@ export default function ConnectionsPage() {
 
   const receivedRequests = pendingRequests.filter((r) => r.direction === 'received');
   const sentRequests = pendingRequests.filter((r) => r.direction === 'sent');
+  const hasAnyData = connections.length > 0 || encounters.length > 0 || recommendations.length > 0 || pendingRequests.length > 0;
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-2xl space-y-8">
@@ -142,54 +145,13 @@ export default function ConnectionsPage() {
               {receivedRequests.length}
             </span>
           </h2>
-
           {receivedRequests.map((req) => (
-            <div
+            <ReceivedRequestCard
               key={req.connection_id}
-              className="bg-card border border-primary/20 rounded-xl p-4 space-y-3"
-            >
-              <div className="flex items-center gap-3">
-                {req.avatar_url ? (
-                  <img src={req.avatar_url} alt={req.nickname || ''} className="w-10 h-10 rounded-full object-cover shrink-0" />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <User className="w-5 h-5 text-primary" />
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-foreground truncate">
-                    {req.nickname || t('user.anonymous')}
-                  </h3>
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
-                    <CalendarDays className="w-3 h-3" />
-                    <span>{req.event_name}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleRespond(req, true)}
-                  disabled={respondingTo === req.connection_id}
-                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
-                >
-                  {respondingTo === req.connection_id ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Check className="w-4 h-4" />
-                  )}
-                  {t('connections.accept')}
-                </button>
-                <button
-                  onClick={() => handleRespond(req, false)}
-                  disabled={respondingTo === req.connection_id}
-                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-muted text-muted-foreground rounded-lg text-sm font-medium hover:bg-muted/80 transition-colors disabled:opacity-50"
-                >
-                  <X className="w-4 h-4" />
-                  {t('connections.decline')}
-                </button>
-              </div>
-            </div>
+              request={req}
+              responding={respondingTo === req.connection_id}
+              onRespond={handleRespond}
+            />
           ))}
         </section>
       )}
@@ -202,62 +164,14 @@ export default function ConnectionsPage() {
             {t('connections.recommendations')}
           </h2>
           <p className="text-xs text-muted-foreground">{t('connections.recommendationsHint')}</p>
-
-          {recommendations.map((rec) => {
-            const level = getMatchLevel(rec.score);
-            return (
-              <div
-                key={`${rec.eventId}-${rec.userId}`}
-                className="bg-card border border-border rounded-xl p-4 space-y-3"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <User className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-foreground truncate">
-                        {rec.nickname || t('user.anonymous')}
-                      </h3>
-                      <span className={`text-xs font-medium ${level.color}`}>
-                        {rec.score}{t('connections.matchScore')}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
-                      <CalendarDays className="w-3 h-3" />
-                      <span>{rec.eventName}</span>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => handleSendRequest(rec)}
-                    disabled={sendingTo === rec.userId}
-                    className="shrink-0 flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
-                  >
-                    {sendingTo === rec.userId ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Send className="w-4 h-4" />
-                    )}
-                    {t('connections.connect')}
-                  </button>
-                </div>
-
-                {rec.reasons.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5">
-                    {rec.reasons.map((reason, i) => (
-                      <span
-                        key={i}
-                        className="px-2 py-0.5 bg-muted rounded-full text-xs text-muted-foreground"
-                      >
-                        {reason}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+          {recommendations.map((rec) => (
+            <ConnectionRecommendationCard
+              key={`${rec.eventId}-${rec.userId}`}
+              recommendation={rec}
+              sending={sendingTo === rec.userId}
+              onSendRequest={handleSendRequest}
+            />
+          ))}
         </section>
       )}
 
@@ -268,20 +182,10 @@ export default function ConnectionsPage() {
             <Clock className="w-4 h-4 text-muted-foreground" />
             {t('connections.sentRequests')}
           </h2>
-
           {sentRequests.map((req) => (
-            <div
-              key={req.connection_id}
-              className="bg-card border border-dashed border-border rounded-xl p-4"
-            >
+            <div key={req.connection_id} className="bg-card border border-dashed border-border rounded-xl p-4">
               <div className="flex items-center gap-3">
-                {req.avatar_url ? (
-                  <img src={req.avatar_url} alt={req.nickname || ''} className="w-10 h-10 rounded-full object-cover shrink-0" />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center shrink-0">
-                    <User className="w-5 h-5 text-muted-foreground" />
-                  </div>
-                )}
+                <UserAvatar avatarUrl={req.avatar_url} name={req.nickname} variant="muted" />
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-foreground truncate">
                     {req.nickname || t('user.anonymous')}
@@ -301,72 +205,17 @@ export default function ConnectionsPage() {
       )}
 
       {/* Encounter history */}
-      {encounters.length > 0 && (
-        <section className="space-y-3">
-          <h2 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-            <Users className="w-4 h-4 text-primary" />
-            {t('connections.encounterHistory')}
-            <span className="text-xs font-normal text-muted-foreground ml-1">
-              ({encounters.length})
-            </span>
-          </h2>
-
-          {(() => {
-            const grouped = new Map<string, Encounter[]>();
-            for (const enc of encounters) {
-              const key = enc.eventName || enc.eventId;
-              if (!grouped.has(key)) grouped.set(key, []);
-              grouped.get(key)!.push(enc);
-            }
-            return Array.from(grouped.entries()).map(([eventName, encs]) => (
-              <div key={eventName} className="space-y-2">
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <CalendarDays className="w-3 h-3" />
-                  <span className="font-medium">{eventName}</span>
-                </div>
-                <div className="grid gap-2">
-                  {encs.map((enc, idx) => (
-                    <div
-                      key={`${enc.eventId}-${enc.userId}-${enc.type}-${idx}`}
-                      className="flex items-center gap-3 p-3 bg-card border border-border rounded-xl"
-                    >
-                      {enc.avatar_url ? (
-                        <img src={enc.avatar_url} alt={enc.nickname || ''} className="w-9 h-9 rounded-full object-cover shrink-0" />
-                      ) : (
-                        <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                          <User className="w-4 h-4 text-primary" />
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">
-                          {enc.nickname || t('user.anonymous')}
-                        </p>
-                      </div>
-                      <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
-                        enc.type === '1v1'
-                          ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
-                          : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
-                      }`}>
-                        {enc.type === '1v1' ? t('connections.type1v1') : t('connections.typeGroup')}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ));
-          })()}
-        </section>
-      )}
+      {encounters.length > 0 && <EncounterHistory encounters={encounters} />}
 
       {/* Existing connections */}
       <section className="space-y-3">
-        {connections.length === 0 ? (
+        {!hasAnyData ? (
           <div className="bg-muted/30 border border-dashed border-border rounded-xl p-8 text-center">
             <Users className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
             <p className="text-sm text-muted-foreground">{t('connections.empty')}</p>
             <p className="text-xs text-muted-foreground mt-1">{t('connections.emptyHint')}</p>
           </div>
-        ) : (
+        ) : connections.length > 0 ? (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
@@ -376,74 +225,16 @@ export default function ConnectionsPage() {
                 {t('connections.interestHint')}
               </p>
             </div>
-
             {connections.map((conn) => (
-              <div
+              <ConnectionCard
                 key={conn.user_id}
-                className={`bg-card border rounded-xl p-4 space-y-2 ${
-                  conn.mutual_interest
-                    ? 'border-pink-400/50 bg-pink-50/30 dark:bg-pink-950/10'
-                    : 'border-border'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  {conn.avatar_url ? (
-                    <img
-                      src={conn.avatar_url}
-                      alt={conn.nickname || ''}
-                      className="w-10 h-10 rounded-full object-cover shrink-0"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                      <User className="w-5 h-5 text-primary" />
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-foreground truncate">
-                        {conn.nickname || t('user.anonymous')}
-                      </h3>
-                      {conn.mutual_interest && (
-                        <span className="inline-flex items-center gap-1 text-xs font-medium text-pink-600 dark:text-pink-400 bg-pink-100 dark:bg-pink-900/30 px-2 py-0.5 rounded-full">
-                          <Heart className="w-3 h-3 fill-current" />
-                          {t('connections.mutualInterest')}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
-                      <CalendarDays className="w-3 h-3" />
-                      <span>{conn.event_name}</span>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => handleToggleInterest(conn)}
-                    disabled={togglingInterest === conn.connection_id}
-                    className={`shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 touch-feedback ${
-                      conn.interested
-                        ? 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400 hover:bg-pink-200 dark:hover:bg-pink-900/50'
-                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                    }`}
-                    title={conn.interested ? t('connections.notInterested') : t('connections.interested')}
-                  >
-                    {togglingInterest === conn.connection_id ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Heart className={`w-4 h-4 ${conn.interested ? 'fill-current' : ''}`} />
-                    )}
-                    {conn.interested ? t('connections.interested') : t('connections.notInterested')}
-                  </button>
-                </div>
-
-                <div className="text-xs text-muted-foreground">
-                  {t('connections.connectedAt', {
-                    time: new Date(conn.connected_at).toLocaleDateString(),
-                  })}
-                </div>
-              </div>
+                connection={conn}
+                togglingInterest={togglingInterest === conn.connection_id}
+                onToggleInterest={handleToggleInterest}
+              />
             ))}
           </div>
-        )}
+        ) : null}
       </section>
     </div>
   );
