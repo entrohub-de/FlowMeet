@@ -15,7 +15,8 @@
     "confirmDelete": "Confirm Delete",
     "save": "Save",
     "saving": "Saving...",
-    "saved": "Saved"
+    "saved": "Saved",
+    "close": "Close"
   },
   "nav": {
     "host": {
@@ -706,7 +707,9 @@
   },
   "events": {
     "browseEvents": "Browse Events",
-    "browseDescription": "Discover interesting events and learn more details. Sign in to register."
+    "browseDescription": "Discover interesting events and learn more details. Sign in to register.",
+    "notFound": "Event not found",
+    "backToEvents": "Back to Events"
   },
   "matching": {
     "yourMatches": "Your Matches",
@@ -1261,6 +1264,13 @@
     "whatsapp": "WhatsApp",
     "nativeShare": "More",
     "scanToShare": "Scan to Share"
+  },
+  "poster": {
+    "title": "Event Poster",
+    "scanToView": "Scan to view event details",
+    "download": "Download Poster",
+    "downloading": "Generating...",
+    "generatePoster": "Generate Poster"
   },
   "hostFlow": {
     "permissionControl": "Permission Control",

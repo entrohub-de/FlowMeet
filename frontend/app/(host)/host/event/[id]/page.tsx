@@ -6,7 +6,8 @@ import { useTranslation } from '@/lib/i18n/context';
 import { getEvents } from '@/lib/api/events';
 import { getEventSignups } from '@/lib/api/signup';
 import type { Event, Signup } from '@/types/domain';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Image } from 'lucide-react';
+import EventPoster from '@/components/event/EventPoster';
 import EventInfoCard from '@/components/event/detail/EventInfoCard';
 import StatsCard from '@/components/event/detail/StatsCard';
 import ParticipantsCard from '@/components/event/detail/ParticipantsCard';
@@ -23,6 +24,7 @@ export default function EventDetailPage() {
   const [signups, setSignups] = useState<Signup[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showPoster, setShowPoster] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -112,13 +114,29 @@ export default function EventDetailPage() {
           </button>
 
           <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              {event.name}
-            </h1>
-            {event.description && (
-              <p className="text-muted-foreground">{event.description}</p>
-            )}
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold text-foreground mb-2">
+                  {event.name}
+                </h1>
+                {event.description && (
+                  <p className="text-muted-foreground">{event.description}</p>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPoster(true)}
+                className="shrink-0 flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+              >
+                <Image className="w-4 h-4" />
+                {t('poster.generatePoster')}
+              </button>
+            </div>
           </div>
+
+          {showPoster && (
+            <EventPoster event={event} onClose={() => setShowPoster(false)} />
+          )}
         </div>
 
         {/* Event Info Summary */}

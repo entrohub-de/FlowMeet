@@ -15,7 +15,8 @@
     "confirmDelete": "确认删除",
     "save": "保存",
     "saving": "保存中...",
-    "saved": "已保存"
+    "saved": "已保存",
+    "close": "关闭"
   },
   "nav": {
     "host": {
@@ -706,7 +707,9 @@
   },
   "events": {
     "browseEvents": "活动浏览",
-    "browseDescription": "发现有趣的活动，了解更多详情。登录后可以报名参加。"
+    "browseDescription": "发现有趣的活动，了解更多详情。登录后可以报名参加。",
+    "notFound": "活动不存在",
+    "backToEvents": "返回活动列表"
   },
   "matching": {
     "yourMatches": "我的配对",
@@ -1261,6 +1264,13 @@
     "whatsapp": "WhatsApp",
     "nativeShare": "更多分享",
     "scanToShare": "扫码分享"
+  },
+  "poster": {
+    "title": "活动海报",
+    "scanToView": "扫码查看活动详情",
+    "download": "下载海报",
+    "downloading": "生成中...",
+    "generatePoster": "生成海报"
   },
   "hostFlow": {
     "permissionControl": "权限控制",

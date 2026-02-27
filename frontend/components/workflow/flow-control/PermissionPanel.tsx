@@ -22,7 +22,6 @@ export default function PermissionPanel({
   onTogglePermission,
   autoMatchingStats,
   autoMatchingError,
-  onTriggerManualRound,
   mixedGroupGenerating,
   onlineCount,
   conversationCount,

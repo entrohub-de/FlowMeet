@@ -8,6 +8,7 @@ import { formatDateRange } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n/context';
 import { deleteEvent, updateEventStatus } from '@/lib/api/events';
 import { getCheckinStats } from '@/lib/api/signup';
+import Link from 'next/link';
 import EditEventDialog from '@/components/event/EditEventDialog';
 
 interface HostEventCardProps {
@@ -104,9 +105,12 @@ export default function HostEventCard({ event, onUpdate }: HostEventCardProps) {
       <div className="p-4 space-y-3">
         {/* Title + Status */}
         <div className="flex items-center justify-between gap-2">
-          <h3 className="text-base font-semibold text-foreground truncate">
+          <Link
+            href={`/host/event/${event.event_id}`}
+            className="text-base font-semibold text-foreground truncate hover:text-primary transition-colors"
+          >
             {event.name}
-          </h3>
+          </Link>
           <span className={`px-2 py-0.5 text-xs font-medium rounded-full whitespace-nowrap ${statusColor}`}>
             {statusText}
           </span>

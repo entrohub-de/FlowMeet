@@ -424,7 +424,7 @@ export async function getEncounterHistory(userId: string): Promise<Encounter[]> 
   }
 
   // Get group → event mapping
-  let groupEventMap = new Map<string, string>();
+  const groupEventMap = new Map<string, string>();
   if (groupIdSet.size > 0) {
     const { data: groups } = await supabase
       .from('evt_groups')
