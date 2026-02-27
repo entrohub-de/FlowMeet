@@ -1137,16 +1137,6 @@
     "checkinFailed": "批量签到失败",
     "cleanupDone": "已清理：{matches} 个配对，{groups} 个小组"
   },
-  "globalPause": {
-    "paused": "主持人已暂停活动",
-    "pauseAll": "暂停全场",
-    "resumeAll": "恢复活动",
-    "endEvent": "结束活动",
-    "endEventConfirm": "确定结束活动吗？所有未完成的环节将被标记为已完成。",
-    "endEventConfirmButton": "确认结束",
-    "eventEnded": "活动已结束",
-    "eventEndedHint": "感谢参与，期待下次相见！"
-  },
   "feedback": {
     "rateConversation": "为这次对话评分",
     "skip": "跳过",

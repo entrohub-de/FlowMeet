@@ -1137,16 +1137,6 @@
     "checkinFailed": "Batch check-in failed",
     "cleanupDone": "Cleaned up: {matches} matches, {groups} groups"
   },
-  "globalPause": {
-    "paused": "Host has paused the event",
-    "pauseAll": "Pause All",
-    "resumeAll": "Resume",
-    "endEvent": "End Event",
-    "endEventConfirm": "Are you sure you want to end the event? All remaining steps will be marked as completed.",
-    "endEventConfirmButton": "Confirm End",
-    "eventEnded": "Event Ended",
-    "eventEndedHint": "Thanks for joining, see you next time!"
-  },
   "feedback": {
     "rateConversation": "Rate this conversation",
     "skip": "Skip",

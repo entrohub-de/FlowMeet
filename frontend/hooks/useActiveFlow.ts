@@ -55,10 +55,6 @@ export function useActiveFlow() {
   const [loading, setLoading] = useState(true);
   const [flowState, setFlowState] = useState<ActiveFlowState | null>(null);
 
-  // Global pause state (Workstream D)
-  const [isGloballyPaused, setIsGloballyPaused] = useState(false);
-  const [globalPauseMessage, setGlobalPauseMessage] = useState<string | null>(null);
-
   // Load events
   useEffect(() => {
     const load = async () => {
@@ -131,18 +127,8 @@ export function useActiveFlow() {
             permissions: activeFlow.permissions ?? null,
           });
 
-          // Restore global pause state from DB
-          if (activeFlow.is_globally_paused) {
-            setIsGloballyPaused(true);
-            setGlobalPauseMessage(activeFlow.global_pause_message ?? null);
-          } else {
-            setIsGloballyPaused(false);
-            setGlobalPauseMessage(null);
-          }
         } else {
           setFlowState(null);
-          setIsGloballyPaused(false);
-          setGlobalPauseMessage(null);
         }
       } catch (error) {
         console.error('Failed to fetch active flow:', error);
@@ -162,18 +148,6 @@ export function useActiveFlow() {
       },
       onFlowReset: () => {
         if (!cancelled) setFlowState(null);
-      },
-      onGlobalPause: (message) => {
-        if (!cancelled) {
-          setIsGloballyPaused(true);
-          setGlobalPauseMessage(message);
-        }
-      },
-      onGlobalResume: () => {
-        if (!cancelled) {
-          setIsGloballyPaused(false);
-          setGlobalPauseMessage(null);
-        }
       },
       onPermissionChanged: (permissions) => {
         if (!cancelled) {
@@ -251,7 +225,5 @@ export function useActiveFlow() {
     activeStep,
     totalDuration,
     formatTime,
-    isGloballyPaused,
-    globalPauseMessage,
   };
 }

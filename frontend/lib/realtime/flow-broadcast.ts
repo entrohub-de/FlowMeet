@@ -39,40 +39,6 @@ export function broadcastFlowUpdate(
 }
 
 /**
- * Host: 广播全局暂停
- */
-export function broadcastGlobalPause(eventId: string, message?: string) {
-  const channel = supabase.channel(CHANNEL_NAMES.flow(eventId));
-  channel.subscribe((status) => {
-    if (status === 'SUBSCRIBED') {
-      channel.send({
-        type: 'broadcast',
-        event: 'global_pause',
-        payload: { message: message ?? null, timestamp: new Date().toISOString() },
-      });
-      setTimeout(() => supabase.removeChannel(channel), 500);
-    }
-  });
-}
-
-/**
- * Host: 广播全局恢复
- */
-export function broadcastGlobalResume(eventId: string) {
-  const channel = supabase.channel(CHANNEL_NAMES.flow(eventId));
-  channel.subscribe((status) => {
-    if (status === 'SUBSCRIBED') {
-      channel.send({
-        type: 'broadcast',
-        event: 'global_resume',
-        payload: { timestamp: new Date().toISOString() },
-      });
-      setTimeout(() => supabase.removeChannel(channel), 500);
-    }
-  });
-}
-
-/**
  * Host: 广播权限变更
  */
 export function broadcastPermissionChange(
@@ -102,8 +68,6 @@ export function subscribeToFlow(
     onFlowApplied?: (payload: FlowBroadcastPayload) => void;
     onStepChanged?: (payload: FlowBroadcastPayload) => void;
     onFlowReset?: () => void;
-    onGlobalPause?: (message: string | null) => void;
-    onGlobalResume?: () => void;
     onPermissionChanged?: (permissions: ActiveFlowPermissions, changedKey: string) => void;
   }
 ) {
@@ -117,12 +81,6 @@ export function subscribeToFlow(
     })
     .on('broadcast', { event: 'flow_reset' }, () => {
       callbacks.onFlowReset?.();
-    })
-    .on('broadcast', { event: 'global_pause' }, ({ payload }) => {
-      callbacks.onGlobalPause?.((payload as { message: string | null }).message);
-    })
-    .on('broadcast', { event: 'global_resume' }, () => {
-      callbacks.onGlobalResume?.();
     })
     .on('broadcast', { event: 'permission_changed' }, ({ payload }) => {
       const p = payload as { permissions: ActiveFlowPermissions; changedKey: string };

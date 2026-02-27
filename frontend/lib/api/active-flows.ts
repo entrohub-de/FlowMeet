@@ -25,8 +25,6 @@ export async function upsertActiveFlow(
     started_at?: string | null;
     completed_at?: string | null;
     permissions?: ActiveFlowPermissions;
-    is_globally_paused?: boolean;
-    global_pause_message?: string | null;
   }
 ): Promise<void> {
   const { error } = await supabase

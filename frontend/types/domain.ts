@@ -237,8 +237,6 @@ export interface ActiveFlow {
   started_at: string | null;
   completed_at: string | null;
   permissions?: ActiveFlowPermissions;
-  is_globally_paused?: boolean;
-  global_pause_message?: string | null;
   created_at: string;
   updated_at: string;
 }
