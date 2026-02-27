@@ -1260,7 +1260,8 @@
     "scanToView": "Scan to view event details",
     "download": "Download Poster",
     "downloading": "Generating...",
-    "generatePoster": "Generate Poster"
+    "generatePoster": "Generate Poster",
+    "longPressToSave": "Long press image to save"
   },
   "hostFlow": {
     "permissionControl": "Permission Control",

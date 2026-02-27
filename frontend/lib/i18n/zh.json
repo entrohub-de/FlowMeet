@@ -1260,7 +1260,8 @@
     "scanToView": "扫码查看活动详情",
     "download": "下载海报",
     "downloading": "生成中...",
-    "generatePoster": "生成海报"
+    "generatePoster": "生成海报",
+    "longPressToSave": "长按图片保存到相册"
   },
   "hostFlow": {
     "permissionControl": "权限控制",
