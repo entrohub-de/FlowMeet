@@ -80,6 +80,12 @@ export default function EventCard({ event, locale, t, initialSignedUp, onSignupC
           setSignedUp(true);
           onSignupChange?.(event.event_id, true);
           toast.success(t('ux.toast.signupSuccess', { name: event.name }));
+          // Fire-and-forget: send confirmation email
+          fetch('/api/email/signup-confirmation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ eventId: event.event_id, userId }),
+          }).catch(() => {});
           setSigningUp(false);
           return;
         }

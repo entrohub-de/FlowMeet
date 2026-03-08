@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getStripe } from '@/lib/stripe/server';
 import { createServerClient } from '@/lib/supabase/server';
+import { sendSignupConfirmationEmail } from '@/lib/email/signup-confirmation';
 import type Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
@@ -37,6 +38,9 @@ export async function POST(request: NextRequest) {
         .eq('event_id', eventId)
         .eq('user_id', userId)
         .eq('payment_status', 'pending');
+
+      // Send confirmation email (fire-and-forget)
+      sendSignupConfirmationEmail(eventId, userId).catch(() => {});
     }
   }
 
