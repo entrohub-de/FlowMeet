@@ -140,7 +140,7 @@ frontend/
 
 - Plus Jakarta Sans（400, 500, 600, 700, 800）
 
-### 移动端优先
+### 移动端优先 
 
 - 触摸目标最小 44×44px（`.touch-target`）
 - 触摸反馈：`active:scale-95 transition-transform`（`.touch-feedback`）
